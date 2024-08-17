@@ -1,30 +1,12 @@
-import withPWA from 'next-pwa';
+import withPWAInit from "@ducanh2912/next-pwa";
 
-const nextConfig = withPWA({
-  dest: 'public', // This is where the service worker and other PWA assets will be stored
-  // Other PWA configurations
+const withPWA = withPWAInit({
+  dest: "public",
 });
 
-export default {
-  ...nextConfig,
-  async headers() {
-    return [
-      {
-        source: '/api/socket', // The route where the WebSocket API is available
-        headers: [
-          {
-            key: 'Connection',
-            value: 'upgrade', // Ensures proper handling of WebSocket connections
-          },
-          {
-            key: 'Upgrade',
-            value: 'websocket',
-          },
-        ],
-      },
-    ];
-  },
-};
+export default withPWA({
+  // Your Next.js config
+});
 
 
 

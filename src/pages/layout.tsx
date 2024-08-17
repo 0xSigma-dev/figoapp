@@ -7,7 +7,6 @@ import AppWalletProvider from "../components/AppWalletProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 
-
 export default function RootLayout({
   children,
 }: Readonly<{

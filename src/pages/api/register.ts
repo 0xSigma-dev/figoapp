@@ -42,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         // Define the new user document data
         const uniqueId = user.uid;
-        const referralLink = `http://localhost:3000?referralId=${uniqueId}`;
+        const referralLink = `https://app.figoapp.xyz?referralId=${uniqueId}`;
         const newUser: User = {
           id: uniqueId,
           displayName,
