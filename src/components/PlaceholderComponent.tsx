@@ -91,17 +91,18 @@ const PlaceholderComponent: React.FC<PlaceholderComponentProps> = ({ user, onClo
       animate={{ x: 0 }}
       exit={{ x: '-100%' }}
       transition={{ type: 'spring', stiffness: 300 }}
-      className="fixed top-0 left-0 h-full bg-black text-white p-4 z-40 shadow-lg overflow-y-auto"
+      className="fixed top-0 left-0 h-full bg-white dark:bg-black text-white p-4 z-40 shadow-lg overflow-y-auto"
       style={{ width: '70%', maxWidth: '800px' }} // Limit to 70% of screen width with a max-width
     >
       <button
-        className="absolute top-2 right-2 text-white hover:text-gray-300"
+        className="absolute top-2 right-2 text-black dark:text-white hover:text-gray-300"
         onClick={onClose}
       >
         &times;
       </button>
 
       <div className="flex flex-col items-center space-y-4">
+      {isReferralOpen && <ReferralComponent user={user} onClose={closeReferral} />}
         {selectedAvatar && (
           <Lottie
             animationData={selectedAvatar.animation}
@@ -109,7 +110,7 @@ const PlaceholderComponent: React.FC<PlaceholderComponentProps> = ({ user, onClo
             style={{ width: 240, height: 240 }}
           />
         )}
-        <p className="text-2xl font-bold">{user.public[0].data.displayName || 'FIGO'}</p>
+        <p className="text-2xl text-black dark:text-white font-bold">{user.public[0].data.displayName || 'FIGO'}</p>
 
         <div className="flex items-center space-x-2">
           <span className="text-green-400 font-semibold">Online</span>
@@ -117,7 +118,7 @@ const PlaceholderComponent: React.FC<PlaceholderComponentProps> = ({ user, onClo
         </div>
 
         <div className="w-full text-center space-y-2">
-          <p className="text-lg">{user.public[0].data.level || 1}</p>
+          <p className="text-lg text-black dark:text-white">{user.public[0].data.level || 1}</p>
           <div className="w-full bg-gray-700 rounded-full h-2">
             <div
               className="bg-green-400 h-2 rounded-full"
@@ -133,7 +134,7 @@ const PlaceholderComponent: React.FC<PlaceholderComponentProps> = ({ user, onClo
         </div>
 
         <div className="flex items-center space-x-2">
-          <span className="text-white-400 font-semibold">{user.public[0].data.bio}</span>
+          <span className="text-black dark:text-white-400 font-semibold">{user.public[0].data.bio}</span>
           
         </div>
 
@@ -144,8 +145,8 @@ const PlaceholderComponent: React.FC<PlaceholderComponentProps> = ({ user, onClo
 
         <div className="w-full text-left">
           <div className="flex items-center space-x-2 ml-4">
-          <FontAwesomeIcon icon={faUser} className="text-gray-400 mr-2" />
-            <span className="text-white text-lg ">Profile</span>
+          <FontAwesomeIcon icon={faUser} className="text-gray-400 mr-2" style={{ fontSize:'16px'}} />
+            <span className="text-black dark:text-white text-lg ">Profile</span>
           </div>
 
 
@@ -154,26 +155,26 @@ const PlaceholderComponent: React.FC<PlaceholderComponentProps> = ({ user, onClo
           <div className={`flex items-center space-x-2 ml-4 cursor-pointer ${
               isBlinking ? 'bg-gray-400' : ''
             }`} onClick={handleReferralClick}>
-          <FontAwesomeIcon icon={faShareAlt} className="text-gray-400 mr-2" />
-            <span className="text-white">Referral</span>
+          <FontAwesomeIcon icon={faShareAlt} className="text-gray-400 mr-2" style={{ fontSize:'16px'}}/>
+            <span className="text-black dark:text-white">Referral</span>
           </div>
 
           <hr className="w-full border-gray-600 my-4" />
 
           <div className="flex items-center space-x-2 mt-2 ml-4">
-          <FontAwesomeIcon icon={faCog} className="text-gray-400 mr-2" />
-            <span className="text-white">Settings</span>
+          <FontAwesomeIcon icon={faCog} className="text-gray-400 mr-2" style={{ fontSize:'16px'}} />
+            <span className="text-black dark:text-white">Settings</span>
           </div>
 
           <hr className="w-full border-gray-600 my-4" />
 
           <div className="flex items-center space-x-2 mt-2 ml-4">
-          <FontAwesomeIcon icon={faInfoCircle} className="text-gray-400 mr-2" />
-            <span className="text-white">About</span>
+          <FontAwesomeIcon icon={faInfoCircle} className="text-gray-400 mr-2" style={{ fontSize:'16px'}} />
+            <span className="text-black dark:text-white">About</span>
           </div>
         </div>
       </div>
-      {isReferralOpen && <ReferralComponent user={user} onClose={closeReferral} />}
+      
     </motion.div>
   );
 };

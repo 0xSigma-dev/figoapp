@@ -169,7 +169,7 @@ const UserSearch: React.FC<UserSearchProps> = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black z-30 p-4 overflow-auto">
+    <div className="fixed inset-0 bg-white dark:bg-black z-30 p-4 overflow-auto">
       <div className="flex justify-between items-center mb-4">
         <input
           type="text"
@@ -187,7 +187,7 @@ const UserSearch: React.FC<UserSearchProps> = ({ onClose }) => {
           <div 
             key={user.id} 
             id={user.id}
-            className="flex items-center justify-between p-2"
+            className="flex items-center  justify-between p-2"
             onClick={() => handleUserClick(user.id)}
           >
             <div 
@@ -196,9 +196,9 @@ const UserSearch: React.FC<UserSearchProps> = ({ onClose }) => {
             >
               {renderFriendAvatar(user)}
               <div>
-                <div className="font-bold text-lg text-white-600">{user.displayName}</div>
+                <div className="font-bold text-lg text-black dark:text-white">{user.displayName}</div>
                 <div className="text-sm text-gray-700">@{user.username}</div>
-                <div className="text-sm font-mono text-white-600">{user.bio}</div>
+                <div className="text-sm font-mono text-black dark:text-white-600">{user.bio}</div>
               </div>
             </div>
             <button

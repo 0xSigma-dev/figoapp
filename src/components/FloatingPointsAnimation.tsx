@@ -20,12 +20,12 @@ const FloatingPointsAnimation: React.FC<FloatingPointsAnimationProps> = ({ point
     <motion.div
       initial={{ opacity: 1, y: 0 }}
       animate={{ opacity: 0, y: -50 }}
-      transition={{ duration: 2 }}
+      transition={{ duration: 4 }}
       style={{
         position: 'absolute',
         left: `${x}px`,
         top: `${y}px`,
-        color: 'white',
+        color: 'text-black dark:text-white',
         fontSize: '20px',
         fontWeight: 'bold',
       }}

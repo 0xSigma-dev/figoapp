@@ -11,7 +11,7 @@ const IsLoading: React.FC<IsLoadingProps> = ({ loading }) => {
   if (!loading) return null; // Don't render the modal if not loading
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-90 z-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-white dark:bg-black bg-opacity-90 z-50">
       <div className="flex flex-col items-center justify-center relative">
         <Lottie
           loop

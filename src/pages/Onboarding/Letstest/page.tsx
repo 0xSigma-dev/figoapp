@@ -146,11 +146,11 @@ const getAccountAgeAndTransactions = async (publicKeyBase58: string) => {
 
   return (
     <WalletGuard>
-    <div className="mr-6 ml-6 flex flex-col h-screen items-center justify-center bg-black-800 text-center">
+    <div className="mr-6 ml-6 flex flex-col h-screen items-center justify-center bg-white dark:bg-black text-center">
       {isTyping ? (
-        <div className="text-xl font-mono ml-4 mr-4 text-white-700">{typedText}</div>
+        <div className="text-xl font-mono ml-4 mr-4 text-black dark:text-white-700">{typedText}</div>
       ) : (
-        <div className="text-xl font-mono text-white-700 mb-8">
+        <div className="text-xl font-mono text-black dark:text-white-700 mb-8">
           {typedText}
           <div className="mt-8">
             <input
@@ -177,9 +177,9 @@ const getAccountAgeAndTransactions = async (publicKeyBase58: string) => {
       {showResults && accountAge !== null && transactionCount !== null && (
         <div className="text-center mt-8">
           <div className="text-8xl text-purple-500">{accountAge}</div>
-          <div className="text-2xl text-white-700">months old</div>
+          <div className="text-2xl text-black dark:text-white-700">months old</div>
           <div className="text-6xl text-green-500 mt-4">{transactionCount}</div>
-          <div className="text-xl text-white-700">transactions completed</div>
+          <div className="text-xl text-black dark:text-white-700">transactions completed</div>
           <button
             onClick={handleClaimRewards}
             className="mt-8 p-4 bg-purple-500 text-white rounded-lg"

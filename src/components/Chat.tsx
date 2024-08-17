@@ -455,14 +455,14 @@ useEffect(() => {
 
 
   return (
-    <div className="flex fixed bottom-0 top 0 flex-col w-screen h-screen z-50" style={{ backgroundColor: 'black' }}>
+    <div className="flex fixed bottom-0 top 0 flex-col w-screen h-screen bg-white dark:bg-black z-50">
      
 
       <div className="flex items-center justify-between p-2 bg-transparent">
   <div className="flex items-center space-x-2">
     <FontAwesomeIcon
       icon={faArrowLeft}
-      className="w-4 h-4 text-white cursor-pointer " // Reduced margin-right
+      className="w-4 h-4 text-black dark:text-white cursor-pointer " // Reduced margin-right
       onClick={() => onClose()}
     />
     {isLoading ? (
@@ -471,7 +471,7 @@ useEffect(() => {
       <div className="flex items-center space-x-1">
         {renderFriendAvatar()}
         <div className='mr-2'>
-          <h2 className="text-white font-bold">{friendData?.displayName || 'User'}</h2>
+          <h2 className="text-black dark:text-white font-bold">{friendData?.displayName || 'User'}</h2>
           <p className="text-green-300 text-sm">{friendData?.onlineStatus || ''}</p>
         </div>
       </div>
@@ -479,8 +479,8 @@ useEffect(() => {
   </div>
   <EnergyProgressBar userId={userId || ''} />
   <div className="flex items-center space-x-2">
-    <div className="text-white font-semibold">{points}</div>
-    <FontAwesomeIcon icon={faEllipsisV} className="w-6 h-6 text-white cursor-pointer" />
+    <div className="text-black dark:text-white font-semibold">{points}</div>
+    <FontAwesomeIcon icon={faEllipsisV} className="w-6 h-6 text-black dark:text-white cursor-pointer" style={{fontSize:'16px'}} />
   </div>
   
 </div>
@@ -492,7 +492,7 @@ useEffect(() => {
   <div className="flex-grow flex items-center justify-center">
     <div className="flex flex-col items-center justify-center bg-gray-700 w-40 rounded-lg p-6">
       <div className="mb-4">{renderFriendAvatar()}</div>
-      <p className="text-white font-mono text-xs">Hi, Happy to meet you. Let&apos;s talk!</p>
+      <p className="text-black dark:text-white font-mono text-xs">Hi, Happy to meet you. Let&apos;s talk!</p>
     </div>
   </div>
 ) : (
@@ -511,7 +511,7 @@ useEffect(() => {
           <div className={`flex ${msg.senderId === userId ? 'justify-end' : 'justify-start'}`}>
             <div
               className={`p-3 rounded-lg ${
-                msg.senderId === userId ? 'bg-purple-500 text-white' : 'bg-gray-700 text-white'
+                msg.senderId === userId ? 'bg-purple-500 text-white' : 'bg-white text-black'
               }`}
               style={{ maxWidth: '80%' }}
             >
@@ -581,7 +581,7 @@ useEffect(() => {
             onClick={sendMessage}
             className="ml-4 bg-purple-500 text-white px-4 py-2 rounded-md"
           >
-            <FontAwesomeIcon icon={faPaperPlane} />
+            <FontAwesomeIcon icon={faPaperPlane} style={{fontSize: '16px'}} />
           </button>
         </div>
       </div>

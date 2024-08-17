@@ -38,19 +38,19 @@ const StatsPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="bg-black text-white h-screen flex flex-col items-center justify-center p-4">
+    <div className="bg-white dark:bg-black text-white h-screen flex flex-col items-center justify-center p-4">
       <div className="absolute top-4 left-4 flex items-center space-x-4">
-        <button onClick={() => router.push('/Home/page')} className="text-white text-3xl">
+        <button onClick={() => router.push('/Home/page')} className="text-black dark:text-white text-3xl">
           <FontAwesomeIcon icon={faArrowLeft} />
         </button>
-        <h1 className="text-4xl font-bold">Statistics</h1>
+        <h1 className="text-4xl text-black dark:text-white font-bold">Statistics</h1>
       </div>
       <div className="text-center mt-16">
         <div className="mb-8">
           <p className="text-8xl font-bold text-purple-400 shadow-lg">
             {userCount}
           </p>
-          <p className="text-xl font-semibold text-gray-400 mt-2">
+          <p className="text-xl font-semibold text-black dark:text-gray-400 mt-2">
             Total Number of Users
           </p>
         </div>
@@ -58,7 +58,7 @@ const StatsPage: React.FC = () => {
           <p className="text-4xl font-bold text-purple-400 shadow-lg">
             {totalPoints}
           </p>
-          <p className="text-xl font-semibold text-gray-400 mt-2">
+          <p className="text-xl font-semibold text-black dark:text-gray-400 mt-2">
             Total Points Farmed
           </p>
         </div>

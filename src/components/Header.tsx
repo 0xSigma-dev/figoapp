@@ -103,7 +103,7 @@ const Header: React.FC<HeaderProps> = ({ user, points }) => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 bg-black border-b border-purple-300 text-white p-4 flex items-center justify-between z-10">
+      <header className="fixed top-0 left-0 right-0 bg-white dark:bg-black border-b border-purple-300 text-black dark:text-white p-4 flex items-center justify-between z-10">
         <div className="flex items-center">
           {selectedAvatar ? (
             <Lottie
@@ -144,15 +144,15 @@ const Header: React.FC<HeaderProps> = ({ user, points }) => {
       </div>
         <div className="relative" ref={menuRef}>
           <div className="cursor-pointer mr-3" onClick={handleMenuClick}>
-            <FontAwesomeIcon icon={faEllipsisV} size="lg" />
+            <FontAwesomeIcon icon={faEllipsisV} style={{ fontSize: '16px'}} />
           </div>
           {showMenu && (
-            <div className="absolute right-0 mt-2 w-48 bg-gray-600 rounded-md shadow-lg py-2 z-20">
-              <a href="#" className="block px-4 py-2 text-white-800 hover:bg-white-100">
+            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-600 rounded-md shadow-lg py-2 z-20">
+              <a href="#" className="block px-4 py-2 text-black dark:text-white-800 hover:bg-white-100">
                 Roadmap
               </a>
               <Link href="/StatsPage">
-                <p className="block px-4 py-2 text-white-800 hover:bg-white-100">Statistics</p>
+                <p className="block px-4 py-2 text-black dark:text-white-800 hover:bg-white-100">Statistics</p>
               </Link>
               
             </div>

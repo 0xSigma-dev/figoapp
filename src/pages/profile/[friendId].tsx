@@ -116,7 +116,7 @@ const ProfilePage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center h-screen bg-black-100">
+    <div className="flex flex-col items-center h-screen bg-white dark:bg-black">
       <div className="relative w-full h-40">
         <Image
           src={bannerImage}
@@ -128,16 +128,16 @@ const ProfilePage: React.FC = () => {
         {isCurrentUser && (
           <FontAwesomeIcon
             icon={faEdit}
-            className="absolute top-4 right-4 text-white cursor-pointer"
+            className="absolute top-4 right-4 text-black dark:text-white cursor-pointer"
             onClick={handleEditClick}
           />
         )}
       </div>
       <div className="mt-6">{renderAvatar()}</div>
       <div className="mt-4 text-center">
-        <h1 className="text-xl font-bold text-white-900">{userDetails.displayName}</h1>
-        <p className="text-sm text-white-600">@{userDetails.username}</p>
-        <p className="text-md text-white-700 mt-2">{userDetails.bio}</p>
+        <h1 className="text-xl font-bold text-black dark:text-white-900">{userDetails.displayName}</h1>
+        <p className="text-sm text-black dark:text-white-600">@{userDetails.username}</p>
+        <p className="text-md text-black dark:text-white-700 mt-2">{userDetails.bio}</p>
         <p
           className={`mt-2 text-sm font-semibold ${
             userDetails.online ? "text-green-500" : "text-red-500"
@@ -147,18 +147,18 @@ const ProfilePage: React.FC = () => {
         </p>
       </div>
       <div className="flex-1 mt-6 w-full px-4 overflow-auto">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Stories</h2>
+        <h2 className="text-lg font-semibold text-black dark:text-white mb-4">Stories</h2>
         {userDetails.stories?.length > 0 ? (
           <div className="grid grid-cols-2 gap-4">
             {userDetails.stories.map((story: any, index: number) => (
               <div key={index} className="bg-white rounded-lg shadow-md p-4">
-                <p className="text-gray-700">{story.title}</p>
-                <p className="text-sm text-gray-500 mt-2">{story.content}</p>
+                <p className="text-black dark:text-white">{story.title}</p>
+                <p className="text-sm text-black dark:text-white mt-2">{story.content}</p>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-gray-500">No stories uploaded.</p>
+          <p className="text-black dark:text-white">No stories uploaded.</p>
         )}
       </div>
     </div>

@@ -333,7 +333,7 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
   
   return (
     <WalletGuard>
-      <div className={`flex flex-col h-screen ${loadingClass}`} onClick={handleCloseMenus}>
+      <div className={`flex flex-col h-screen bg-white dark:bg-black ${loadingClass}`} onClick={handleCloseMenus}>
         <Header user={user?.subcollections || { displayName: 'Guest' }} points={points} />
         <div>
           <EnergyProgressBar userId={userId || ''} />
@@ -354,8 +354,8 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
   >
     {renderFriendAvatar(conversation.friendAvatar, conversation.friendAvatar)}
     <div className='flex-1 ml-4'>
-      <div className='font-bold  text-lg text-white-600'>{conversation.friendName}</div>
-      <div className='text-sm font-mono text-gray-400'>
+      <div className='font-bold  text-lg text-black dark:text-white-600'>{conversation.friendName}</div>
+      <div className='text-sm font-mono text-black dark:text-white-400'>
         {conversation.latestMessage?.content.length > 40
           ? `${conversation.latestMessage.content.substring(0, 32)}...`
           : conversation.latestMessage?.content || ''}
@@ -365,7 +365,7 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
 ))}
             </div>
           ) : (
-            <div className={`text-lg text-gray-500 ${loadingClass}`}>You have no conversations</div>
+            <div className={`text-lg text-black dark:text-gray-500 ml-4 ${loadingClass}`}>You have no conversations</div>
           )}
         </main>
         {isChatOpen && currentChatFriend && (

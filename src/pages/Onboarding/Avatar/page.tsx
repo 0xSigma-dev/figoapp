@@ -83,10 +83,10 @@ const AvatarSelection: React.FC = () => {
 
   return (
     <WalletGuard>
-    <div className="h-screen flex flex-col items-center bg-black-800">
-      <div className="fixed top-0 left-0 right-0 flex flex-col items-center justify-center bg-black-800 p-4 z-10">
+    <div className="h-screen flex flex-col items-center bg-white dark:bg-black">
+      <div className="fixed top-0 left-0 right-0 flex flex-col items-center justify-center bg-white dark:bg-black p-4 z-10">
         <h1 className="text-2xl font-bold text-white">Pick Your Avatar</h1>
-        <p className="text-l font-bold text-white text-center">
+        <p className="text-l font-bold text-black dark:text-white text-center">
           Soon your NFT will be your identity on Figo. No more useless NFTs. But before then, choose an avatar for your account.
         </p>
       </div>
@@ -116,7 +116,7 @@ const AvatarSelection: React.FC = () => {
 
       <IsLoading loading={isLoading} />
 
-      <div className="fixed bottom-0 left-0 right-0 flex justify-center p-4 bg-black-800 z-10">
+      <div className="fixed bottom-0 left-0 right-0 flex justify-center p-4 z-10">
         <button
           onClick={handleContinue}
           className="px-6 py-3 bg-purple-600 text-white rounded-full hover:bg-purple-700"
