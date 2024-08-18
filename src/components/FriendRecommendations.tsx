@@ -174,6 +174,7 @@ const FriendRecommendations: React.FC<FriendRecommendationProps> = ({ currentUse
             icon={faPlusCircle}
             className='mt-2 text-lg ml-4 text-purple-500 cursor-pointer'
             onClick={() => handleSendFriendRequest(friend.id)}
+            style={{ fontSize:'24px'}}
           />
         </div>
       ))}

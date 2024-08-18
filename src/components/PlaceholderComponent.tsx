@@ -145,7 +145,7 @@ const PlaceholderComponent: React.FC<PlaceholderComponentProps> = ({ user, onClo
 
         <div className="w-full text-left">
           <div className="flex items-center space-x-2 ml-4">
-          <FontAwesomeIcon icon={faUser} className="text-gray-400 mr-2" style={{ fontSize:'16px'}} />
+          <FontAwesomeIcon icon={faUser} className="text-gray-400 mr-2" style={{ fontSize: '24px !important' }}/>
             <span className="text-black dark:text-white text-lg ">Profile</span>
           </div>
 
@@ -155,21 +155,21 @@ const PlaceholderComponent: React.FC<PlaceholderComponentProps> = ({ user, onClo
           <div className={`flex items-center space-x-2 ml-4 cursor-pointer ${
               isBlinking ? 'bg-gray-400' : ''
             }`} onClick={handleReferralClick}>
-          <FontAwesomeIcon icon={faShareAlt} className="text-gray-400 mr-2" style={{ fontSize:'16px'}}/>
+          <FontAwesomeIcon icon={faShareAlt} className="text-gray-400 mr-2" style={{ fontSize:'24px'}}/>
             <span className="text-black dark:text-white">Referral</span>
           </div>
 
           <hr className="w-full border-gray-600 my-4" />
 
           <div className="flex items-center space-x-2 mt-2 ml-4">
-          <FontAwesomeIcon icon={faCog} className="text-gray-400 mr-2" style={{ fontSize:'16px'}} />
+          <FontAwesomeIcon icon={faCog} className="text-gray-400 mr-2" style={{ fontSize:'24px'}} />
             <span className="text-black dark:text-white">Settings</span>
           </div>
 
           <hr className="w-full border-gray-600 my-4" />
 
           <div className="flex items-center space-x-2 mt-2 ml-4">
-          <FontAwesomeIcon icon={faInfoCircle} className="text-gray-400 mr-2" style={{ fontSize:'16px'}} />
+          <FontAwesomeIcon icon={faInfoCircle} className="text-gray-400 mr-2" style={{ fontSize:'24px'}} />
             <span className="text-black dark:text-white">About</span>
           </div>
         </div>

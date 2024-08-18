@@ -39,7 +39,7 @@ const Footer: React.FC<FooterProps> = ({ theme }) => {
                   <FontAwesomeIcon
                     icon={item.icon}
                     className={`${router.pathname === item.link ? 'text-purple-500' : 'text-black dark:text-white'}`}
-                    style={{ fontSize: '16px' }}
+                    style={{ fontSize: '24px' }}
                   />
                 </motion.div>
               </a>
@@ -54,7 +54,7 @@ const Footer: React.FC<FooterProps> = ({ theme }) => {
               <FontAwesomeIcon
                 icon={camera.icon}
                 className="text-gray-500"
-                style={{ fontSize: '16px' }}
+                style={{ fontSize: '24px' }}
               />
               <span className="absolute top-0 right-0 bg-green-500 text-white text-xs rounded-full px-1 transform rotate-45">
                 Soon
@@ -72,7 +72,7 @@ const Footer: React.FC<FooterProps> = ({ theme }) => {
               <FontAwesomeIcon
                 icon={swap.icon}
                 className="text-gray-500"
-                style={{ fontSize: '16px' }}
+                style={{ fontSize: '24px' }}
               />
               <span className="absolute top-0 right-0 bg-green-500 text-white text-xs rounded-full px-1 transform rotate-45">
                 Soon
@@ -90,7 +90,7 @@ const Footer: React.FC<FooterProps> = ({ theme }) => {
               <FontAwesomeIcon
                 icon={tasks.icon}
                 className="text-gray-500"
-                style={{ fontSize: '16px' }}
+                style={{ fontSize: '24px' }}
               />
               <span className="absolute top-0 right-0 bg-green-500 text-white text-xs rounded-full px-1 transform rotate-45">
                 Soon
@@ -108,7 +108,7 @@ const Footer: React.FC<FooterProps> = ({ theme }) => {
               <FontAwesomeIcon
                 icon={community.icon}
                 className="text-gray-500"
-                style={{ fontSize: '16px' }}
+                style={{ fontSize: '24px' }}
               />
               <span className="absolute top-0 right-0 bg-green-500 text-white text-xs rounded-full px-1 transform rotate-45">
                 Soon
@@ -126,7 +126,7 @@ const Footer: React.FC<FooterProps> = ({ theme }) => {
               <FontAwesomeIcon
                 icon={callIcon.icon}
                 className="text-gray-500"
-                style={{ fontSize: '16px' }}
+                style={{ fontSize: '24px' }}
               />
               <span className="absolute top-0 right-0 bg-green-500 text-white text-xs rounded-full px-1 transform rotate-45">
                 Soon

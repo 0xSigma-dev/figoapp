@@ -27,7 +27,7 @@ const PurpleIcon: React.FC<PurpleIconProps> = ({ onClick, showContactPage }) => 
         <FontAwesomeIcon
           icon={isContactPageVisible ? faMinus : faPlus}
           className="text-white"
-          style={{ fontSize:'16px'}}
+          style={{ fontSize:'24px'}}
         />
       </div>
     </div>

@@ -354,8 +354,8 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
   >
     {renderFriendAvatar(conversation.friendAvatar, conversation.friendAvatar)}
     <div className='flex-1 ml-4'>
-      <div className='font-bold  text-lg text-black dark:text-white-600'>{conversation.friendName}</div>
-      <div className='text-sm font-mono text-black dark:text-white-400'>
+      <div className='font-bold  text-lg text-black dark:text-white'>{conversation.friendName}</div>
+      <div className='text-sm font-mono text-black dark:text-white'>
         {conversation.latestMessage?.content.length > 40
           ? `${conversation.latestMessage.content.substring(0, 32)}...`
           : conversation.latestMessage?.content || ''}

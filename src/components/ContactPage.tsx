@@ -229,16 +229,16 @@ const ContactPage: React.FC<ContactPageProps> = ({ theme }) => {
         <div className="flex items-center space-x-4">
           <SearchIcon onClick={handleSearchClick} />
           <div className="relative" ref={menuRef}>
-            <FontAwesomeIcon icon={faEllipsisV} style={{ fontSize:'16px'}} className="cursor-pointer mr-4 ml-4 text-lg" onClick={handleMenuToggle} />
+            <FontAwesomeIcon icon={faEllipsisV} style={{ fontSize:'24px'}} className="cursor-pointer mr-4 ml-4 text-lg" onClick={handleMenuToggle} />
             {menuOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-2 z-50">
                 <a href="#" className="block px-4 py-2 text-black dark:text-white-800 hover:bg-gray-100">
                   Refresh
                 </a>
-                <a href="#" className="block px-4 py-2 text-black dark:text-white-800 hover:bg-gray-100">
+                <a href="#" className="block px-4 py-2 text-black dark:text-white hover:bg-gray-100">
                   Invite
                 </a>
-                <a href="#" className="block px-4 py-2 text-black dark:text-white-800 hover:bg-gray-100">
+                <a href="#" className="block px-4 py-2 text-black dark:text-white hover:bg-gray-100">
                   Help
                 </a>
               </div>
@@ -259,7 +259,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ theme }) => {
       <div className="flex items-center space-x-4">
         {renderFriendAvatar(friend)}
         <div >
-          <p className="text-black dark:text-white-9-- font-extrabold">{friend.data.displayName}</p>
+          <p className="text-black dark:text-white font-extrabold">{friend.data.displayName}</p>
           <p className="text-sm text-black dark:text-gray-400" >
             @{friend.data.username || 'Friend'}
           </p>
@@ -288,7 +288,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ theme }) => {
                 <div className="flex items-center space-x-4">
                   {renderFriendAvatar(request)}
                   <div>
-                    <p className="text-black dark:text-white-400 font-extrabold">{request.data.displayName}</p>
+                    <p className="text-black dark:text-white font-extrabold">{request.data.displayName}</p>
                     <p className="font-bold text-sm text-gray-400">@{request.data.username || 'Friend Request'}</p> 
                   </div>
                 </div>

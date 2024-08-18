@@ -515,7 +515,7 @@ useEffect(() => {
           backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" preserveAspectRatio="none"><defs><pattern id="lightPattern" width="50" height="50" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="20" fill="%23e0e0e0"/><circle cx="25" cy="25" r="10" fill="%23b39ddb"/></pattern></defs><rect width="100%" height="100%" fill="url(%23lightPattern)" /></svg>')`,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          zIndex: "10",
+          zIndex: "-1",
         }}
       />
       <div
@@ -524,15 +524,15 @@ useEffect(() => {
           backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" preserveAspectRatio="none"><defs><pattern id="darkPattern" width="50" height="50" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="20" fill="%23333333"/><circle cx="25" cy="25" r="10" fill="%237e57c2"/></pattern></defs><rect width="100%" height="100%" fill="url(%23darkPattern)" /></svg>')`,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          zIndex: "10",
+          zIndex: "-1",
         }}
       />
 
-      <div className="flex items-center justify-between p-2 bg-transparent">
+      <div className="flex items-center justify-between p-2 bg-gray-800">
   <div className="flex items-center space-x-2">
     <FontAwesomeIcon
       icon={faArrowLeft}
-      className="w-4 h-4 text-black dark:text-white cursor-pointer " // Reduced margin-right
+      className="w-4 h-4 text-white cursor-pointer " // Reduced margin-right
       onClick={() => onClose()}
     />
     {isLoading ? (
@@ -541,7 +541,7 @@ useEffect(() => {
       <div className="flex items-center space-x-1">
         {renderFriendAvatar()}
         <div className='mr-2'>
-          <h2 className="text-black dark:text-white font-bold">{friendData?.displayName || 'User'}</h2>
+          <h2 className="text-white font-bold">{friendData?.displayName || 'User'}</h2>
           <p className="text-green-300 text-sm">{friendData?.onlineStatus || ''}</p>
         </div>
       </div>
@@ -549,8 +549,8 @@ useEffect(() => {
   </div>
   <EnergyProgressBar userId={userId || ''} />
   <div className="flex items-center space-x-2">
-    <div className="text-black dark:text-white font-semibold">{points}</div>
-    <FontAwesomeIcon icon={faEllipsisV} className="w-6 h-6 text-black dark:text-white cursor-pointer" style={{fontSize:'16px'}} />
+    <div className="text-white font-semibold">{points}</div>
+    <FontAwesomeIcon icon={faEllipsisV} className="w-6 h-6 text-white cursor-pointer" style={{fontSize:'16px'}} />
   </div>
   
 </div>
@@ -562,7 +562,7 @@ useEffect(() => {
   <div className="flex-grow flex items-center justify-center">
     <div className="flex flex-col items-center justify-center bg-gray-700 w-40 rounded-lg p-6">
       <div className="mb-4">{renderFriendAvatar()}</div>
-      <p className="text-black dark:text-white font-mono text-xs">Hi, Happy to meet you. Let&apos;s talk!</p>
+      <p className="text-white font-mono text-xs">Hi, Happy to meet you. Let&apos;s talk!</p>
     </div>
   </div>
 ) : (
@@ -646,9 +646,9 @@ useEffect(() => {
           />
           <button
             onClick={sendMessage}
-            className="ml-4 bg-purple-500 text-white px-4 py-2 rounded-md"
+            className="ml-4 bg-purple-500 text-white p-4 rounded-md"
           >
-            <FontAwesomeIcon icon={faPaperPlane} style={{fontSize: '16px'}} />
+            <FontAwesomeIcon icon={faPaperPlane} style={{fontSize: '24px'}} />
           </button>
         </div>
       </div>

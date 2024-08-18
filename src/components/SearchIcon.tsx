@@ -9,7 +9,7 @@ interface SearchIconProps {
 
 const SearchIcon: React.FC<SearchIconProps> = ({ onClick }) => (
   <div onClick={onClick} className="cursor-pointer text-black dark:text-white">
-    <FontAwesomeIcon icon={faSearch} style={{ fontSize: '16px' }}/>
+    <FontAwesomeIcon icon={faSearch} style={{ fontSize: '24px' }}/>
   </div>
 );
 
