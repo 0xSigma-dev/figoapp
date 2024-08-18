@@ -63,6 +63,7 @@ const Chat: React.FC<ChatProps> = ({ friendId, onClose }) => {
   const [refillTimer, setRefillTimer] = useState<NodeJS.Timeout | null>(null);
   const [floatingPoints, setFloatingPoints] = useState<{ points: number; x: number; y: number } | null>(null);
   const { points, fetchUserPoints } = useUserPoints();
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   const fetchUserData = async () => {
     try {
@@ -112,6 +113,27 @@ const Chat: React.FC<ChatProps> = ({ friendId, onClose }) => {
       fetchUserData();
     }
   }, [friendId]);
+
+  useEffect(() => {
+    // Event listener for connection status
+    const handleOnline = () => {
+      setIsOnline(true);
+      sendPendingMessages(); // Send pending messages when back online
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
   
 
 //message fetch
@@ -119,31 +141,24 @@ useEffect(() => {
   if (userId && friendId) {
     const chatId = userId < friendId ? `${userId}_${friendId}` : `${friendId}_${userId}`;
     const messagesRef = collection(db, 'figos', chatId, 'messages');
-
-    // Fetch all messages, not just new ones
     const messagesQuery = query(messagesRef, orderBy('timestamp'), limit(20));
 
-    const unsubscribe = onSnapshot(
-      messagesQuery,
-      (snapshot) => {
-        const newMessages = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+    const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
+      const newMessages = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+      setMessages(newMessages);
 
-        // Set the messages to state directly from the fetched messages
-        setMessages(newMessages);
-
-        // Update local storage
-        localStorage.setItem(`messages_${chatId}`, JSON.stringify(newMessages));
-      },
-      (error) => {
-        console.error('Error fetching messages:', error);
-      }
-    );
+      // Update local storage
+      localStorage.setItem(`messages_${chatId}`, JSON.stringify(newMessages));
+    });
 
     return () => {
       unsubscribe();
     };
   }
 }, [userId, friendId]);
+
+
+
 
 
 useEffect(() => {
@@ -153,6 +168,32 @@ useEffect(() => {
     setMessages(storedMessages); // Set stored messages as initial messages
   }
 }, [userId, friendId]);
+
+
+const sendPendingMessages = async () => {
+  if (userId && friendId) {
+    const chatId = userId < friendId ? `${userId}_${friendId}` : `${friendId}_${userId}`;
+    const pendingMessages = JSON.parse(localStorage.getItem(`pendingMessages_${chatId}`) || '[]');
+
+    for (const message of pendingMessages) {
+      try {
+        const messagesRef = collection(db, 'figos', chatId, 'messages');
+        await addDoc(messagesRef, {
+          ...message,
+          timestamp: serverTimestamp(), // Replace with server timestamp
+          status: 'sent',
+        });
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
+    }
+
+    // Clear pending messages from local storage
+    localStorage.removeItem(`pendingMessages_${chatId}`);
+  }
+};
+
+
 
 
 const handleScroll = () => {
@@ -310,14 +351,31 @@ useEffect(() => {
         }
   
         const messagesRef = collection(db, 'figos', chatId, 'messages');
-        const message = {
+        const newMessage = {
           senderId: userId,
           receiverId: friendId,
           content: messageInput,
-          timestamp: serverTimestamp(),
+          timestamp: new Date().toISOString(), // Local timestamp for pending messages
+          status: isOnline ? 'sent' : 'pending',
         };
   
-        await addDoc(messagesRef, message);
+        if (isOnline) {
+          try {
+            await addDoc(messagesRef, {
+              ...newMessage,
+              timestamp: serverTimestamp(), // Replace with server timestamp
+            });
+          } catch (error) {
+            console.error('Error sending message:', error);
+          }
+        } else {
+          // Store the pending message in local storage
+          const pendingMessages = JSON.parse(localStorage.getItem(`pendingMessages_${chatId}`) || '[]');
+          pendingMessages.push(newMessage);
+          localStorage.setItem(`pendingMessages_${chatId}`, JSON.stringify(pendingMessages));
+        }
+  
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
         setMessageInput('');
         if (inputRef.current) {
           inputRef.current.focus();
@@ -340,35 +398,29 @@ useEffect(() => {
           const pointsToAdd = 20; // Points to add
           const newEnergy = Math.max(currentEnergy - pointsToAdd, 0); // Calculate new energy
   
-          // Update user points
+          // Update user points and energy
           if (newEnergy > 0) {
             await updateDoc(detailsRef, { points: currentPoints + pointsToAdd, currentEnergy: newEnergy });
             setFloatingPoints({ points: pointsToAdd, x: 300, y: 500 });
-
+  
             setTimeout(() => {
               setFloatingPoints(null);
             }, 1000);
-           
           } else {
             await updateDoc(detailsRef, { points: currentPoints + pointsToAdd, currentEnergy: 0 });
           }
-  
   
           // Update points for the receiver
           const receiverRef = doc(db, 'users', friendId);
           const receiverPrivateRef = collection(receiverRef, 'private');
           const receiverDetailsRef = doc(receiverPrivateRef, 'details');
-          
+  
           const receiverDoc = await getDoc(receiverDetailsRef);
           if (receiverDoc.exists()) {
             const receiverData = receiverDoc.data();
             const receiverCurrentPoints = receiverData?.points || 0;
             await updateDoc(receiverDetailsRef, { points: receiverCurrentPoints + 30 });
-            
-            
           }
-
-          
         }
       } catch (error) {
         console.error('Error sending message:', error);
@@ -377,6 +429,7 @@ useEffect(() => {
       console.warn('Message input is empty or userId/friendId is missing');
     }
   };
+  
   
   
 
@@ -456,7 +509,24 @@ useEffect(() => {
 
   return (
     <div className="flex fixed bottom-0 top 0 flex-col w-screen h-screen bg-white dark:bg-black z-50">
-     
+     <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" preserveAspectRatio="none"><defs><pattern id="lightPattern" width="50" height="50" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="20" fill="%23e0e0e0"/><circle cx="25" cy="25" r="10" fill="%23b39ddb"/></pattern></defs><rect width="100%" height="100%" fill="url(%23lightPattern)" /></svg>')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          zIndex: "10",
+        }}
+      />
+      <div
+        className="absolute inset-0 pointer-events-none dark:block hidden"
+        style={{
+          backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" preserveAspectRatio="none"><defs><pattern id="darkPattern" width="50" height="50" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="20" fill="%23333333"/><circle cx="25" cy="25" r="10" fill="%237e57c2"/></pattern></defs><rect width="100%" height="100%" fill="url(%23darkPattern)" /></svg>')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          zIndex: "10",
+        }}
+      />
 
       <div className="flex items-center justify-between p-2 bg-transparent">
   <div className="flex items-center space-x-2">
@@ -521,12 +591,9 @@ useEffect(() => {
                   {formatTime(msg.timestamp)}
                 </span>
                 {msg.senderId === userId && (
-                  <FontAwesomeIcon
-                    icon={msg.seen ? faCheckDouble : faCheck}
-                    className={`ml-2 ${
-                      msg.seen ? 'text-blue-400' : 'text-gray-400'
-                    }`}
-                  />
+                 <span>
+                 {msg.status === 'pending' ? <FontAwesomeIcon icon={faClock} /> : <FontAwesomeIcon icon={faCheck} />}
+               </span>
                 )}
               </div>
             </div>
