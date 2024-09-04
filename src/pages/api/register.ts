@@ -1,139 +1,136 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { db } from '../../lib/firebaseConfig';
-import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
-import { doc, setDoc, getDoc, collection, query, where, getDocs, writeBatch, increment, updateDoc } from 'firebase/firestore';
-import { Timestamp } from 'firebase/firestore';
-import { User } from '../../models/User';
+import { supabase } from '../../lib/supabaseClient'; // Import Supabase client
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
-    const { displayName, username, publicKey, referralId } = req.body;
+    const { displayName, username, publicKey, referralId, bio } = req.body;
 
     if (!displayName || !username || !publicKey) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
     try {
-      const batch = writeBatch(db);
+      // Check if username is already taken
+      const { data: userByUsername, error: usernameError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('username', username)
+        .maybeSingle();  // Changed from .single() to .maybeSingle()
 
-      // Check if username or public key is already taken
-      const userDocRef = doc(db, 'users', username);
-      const userDoc = await getDoc(userDocRef);
+      if (usernameError) {
+        console.error('Error checking username availability:', usernameError.message, usernameError.details);
+        return res.status(500).json({ message: 'Error checking username availability' });
+      }
 
-      if (userDoc.exists()) {
+      if (userByUsername) {
         return res.status(400).json({ message: 'Username already taken' });
       }
 
-      const publicKeyQuery = query(collection(db, 'users'), where('publicKey', '==', publicKey));
-      const publicKeySnapshot = await getDocs(publicKeyQuery);
+      // Check if public key is already associated with an existing user
+      const { data: userByPublicKey, error: publicKeyError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('publicKey', publicKey)
+        .maybeSingle();  // Changed from .single() to .maybeSingle()
 
-      if (!publicKeySnapshot.empty) {
+      if (publicKeyError) {
+
+        return res.status(500).json({ message: 'Error checking public key availability' });
+      }
+
+      if (userByPublicKey) {
         return res.status(400).json({ message: 'Public key already associated with an existing user' });
       }
 
-      // Create a new user with Firebase Authentication
-      const auth = getAuth();
-      const email = `${username}@figoapp.xyz`;
+      // Create a new user in Supabase Auth
+      const { data: authUser, error: authError } = await supabase.auth.signUp({
+        email: `${username}@figoapp.xyz`,
+        password: publicKey, // Using public key as the password
+      });
 
-      try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, publicKey);
-        const user = userCredential.user;
-        const accessToken = await user.getIdToken();
-
-        // Define the new user document data
-        const uniqueId = user.uid;
-        const referralLink = `https://app.figoapp.xyz?referralId=${uniqueId}`;
-        const newUser: User = {
-          id: uniqueId,
-          displayName,
-          username,
-          publicKey,
-          referralLink,
-          referredBy: referralId || '',
-          premium: false,
-          referralCount: 0,
-          status: true,
-          bio: '',
-          level: 'novice',
-          points: 1000,
-          createdAt: Timestamp.now(),
-          totalEnergy: 500,
-          currentEnergy: 500,
-          friends: [],
-          friendRequests: [],
-          tip: accessToken,
-          solanaagecheck: false,
-          welcomedisplayed: false,
-          solanaaccountage: 0
-        };
-
-        // Create references to the new user document
-        const newUserRef = doc(db, 'users', uniqueId);
-        const publicDocRef = doc(db, 'users', uniqueId, 'public', 'details');
-        const privateDocRef = doc(db, 'users', uniqueId, 'private', 'details');
-
-        // Set user document data with placeholders for public and private subcollections
-        await setDoc(newUserRef, {
-          id: uniqueId,
-          createdAt: newUser.createdAt,
-        });
-
-        // Set public document data
-        await setDoc(publicDocRef, {
-          username,
-          displayName,
-          publicKey,
-          bio: newUser.bio,
-          level: newUser.level,
-          id: uniqueId,
-          createdAt: newUser.createdAt,
-        });
-
-        // Set private document data
-        await setDoc(privateDocRef, {
-          referralLink: newUser.referralLink,
-          referredBy: newUser.referredBy,
-          premium: newUser.premium,
-          referralCount: newUser.referralCount,
-          points: newUser.points,
-          totalEnergy: newUser.totalEnergy,
-          currentEnergy: newUser.currentEnergy,
-          friends: newUser.friends,
-          friendRequests: newUser.friendRequests,
-          tip: accessToken,
-          solanaagecheck: newUser.solanaagecheck,
-          welcomedisplayed: newUser.welcomedisplayed,
-          solanaaccountage: newUser.solanaaccountage
-        });
-
-        // Commit all batched writes
-        await batch.commit();
-
-        // If there is a referrer, update the referrer’s referral count and points
-        if (referralId) {
-          const referrerPrivateDocRef = doc(db, 'users', referralId, 'private', 'details');
-          const referrerDoc = await getDoc(referrerPrivateDocRef);
-
-          if (referrerDoc.exists()) {
-            const referrerData = referrerDoc.data();
-            const newReferralCount = (referrerData?.referralCount || 0) + 1;
-            const newPoints = (referrerData?.points || 0) + 1000;
-
-            await updateDoc(referrerPrivateDocRef, {
-              referralCount: newReferralCount,
-              points: newPoints,
-            });
-          }
-        }
-
-        return res.status(200).json({ user: uniqueId, accessToken });
-      } catch (authError) {
-        //console.error('Authentication error:', authError);
-        return res.status(500).json({ message: 'Error creating user with Firebase Authentication' });
+      if (authError) {
+      
+        return res.status(500).json({ message: 'Error creating user Authentication' });
       }
 
+      const uniqueId = authUser.user?.id;
+      const referralLink = `https://app.figoapp.xyz?referralId=${uniqueId}`;
+      const newUser = {
+        id: uniqueId,
+        displayName,
+        username,
+        publicKey,
+        referralLink,
+        referredBy: referralId || '',
+        pendingref: 0,
+        premium: false,
+        referralCount: 0,
+        status: true,
+        bio: bio,
+        level: 'novice',
+        points: 1000,
+        createdAt: new Date(),
+        totalEnergy: 500,
+        currentEnergy: 500,
+        friends: [],
+        friendRequests: [],
+        solanaagecheck: false,
+        welcomedisplayed: false,
+        solanaaccountage: 0,
+        avatar: null, // Placeholder for avatar
+      };
+
+      // Insert the new user into the 'users' table
+      const { data: insertedUser, error: userInsertError } = await supabase
+        .from('users')
+        .insert(newUser)
+        .select()
+        .single(); // Use .single() to get the inserted record
+
+        console.log('Inserted user data:', insertedUser);
+
+
+      if (userInsertError) {
+        console.error('Error inserting new user data:', userInsertError.message, userInsertError.details);
+        return res.status(500).json({ message: 'Error inserting new user data' });
+      }
+
+      // If there is a referrer, update the referrer's referral count and points
+      if (referralId) {
+        const { data: referrer, error: referrerError } = await supabase
+          .from('users')
+          .select('referralCount, pendingref')
+          .eq('id', referralId)
+          .maybeSingle();  // Changed from .single() to .maybeSingle()
+
+        if (referrerError) {
+          console.error('Error retrieving referrer data:', referrerError.message, referrerError.details);
+          return res.status(500).json({ message: 'Error retrieving referrer data' });
+        }
+
+        if (referrer) {  // Ensure referrer exists before updating
+          const newReferralCount = (referrer?.referralCount || 0) + 1;
+          const newpendingPoints = (referrer?.pendingref || 0) + 1;
+
+          const { error: referrerUpdateError } = await supabase
+            .from('users')
+            .update({ referralCount: newReferralCount, pendingref: newpendingPoints })
+            .eq('id', referralId);
+
+          if (referrerUpdateError) {
+            console.error('Error updating referrer data:', referrerUpdateError.message, referrerUpdateError.details);
+            return res.status(500).json({ message: 'Error updating referrer data' });
+          }
+        }
+      }
+
+      // Return the complete user information
+      return res.status(200).json({ 
+        user: insertedUser, 
+        uniqueId: uniqueId 
+      });
     } catch (error) {
-      //console.error('Unexpected error:', error);
+      console.error('Unexpected error occurred:', error);
       return res.status(500).json({ message: 'Unexpected error occurred' });
     }
   } else {
@@ -141,6 +138,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
+
+
+
+
 
 
 

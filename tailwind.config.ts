@@ -16,7 +16,12 @@ const config: Config = {
         'secondary': '#D602F0',
         'gradient-start': '#8c52ff',
         'gradient-end': '#5ce1e6',
-      }
+      },
+      backgroundColor: {
+        'white':'#F7F7F7',
+        'black': '#100113',
+        'deep-purple': '#100113'
+      },
     },
   },
   plugins: [],

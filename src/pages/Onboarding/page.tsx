@@ -1,19 +1,24 @@
-
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import { collection, getDocs, query, where } from 'firebase/firestore';
 import { useTheme } from 'next-themes';
 import { useRouter } from 'next/router';
 import { useEffect, useState, useRef, useMemo } from 'react';
 import { Suspense, lazy } from 'react';
 import Lottie from 'react-lottie-player';
-import Welcome from '../../components/lottie/welcome.json'
-import { db } from '../../lib/firebaseConfig'; // Adjust the import path as necessary
+import Welcome from '../../components/lottie/welcome.json';
 import Cookies from 'js-cookie';
 import { useUser } from '../../context/UserContext';
 import IsLoading from '../../components/isLoading';
+import { supabase } from '@/lib/supabaseClient';
+import { Gajraj_One } from '@next/font/google';
+
+
+const gajrajOne = Gajraj_One({
+  weight: '400', 
+  subsets: ['latin'], 
+});
 
 const ErrorModal = lazy(() => import('../../components/ErrorModal'));
 const SuccessModal = lazy(() => import('../../components/SuccessModal'));
@@ -52,8 +57,10 @@ const SignUp = () => {
   const router = useRouter();
   const { user, setUser } = useUser();
   const [hasModalBeenShown, setHasModalBeenShown] = useState<boolean>(false);
-  const [isUserDataStale, setIsUserDataStale] = useState<boolean>(false);
   const { referralId } = router.query;
+  const userId = Cookies.get('userId');
+
+    
 
   
   useEffect(() => {
@@ -61,74 +68,58 @@ const SignUp = () => {
     router.prefetch('/Home/page')
   }, []);
 
+  useEffect(() => {
+    // Check if the user is already connected
+    if (connected && userId ) {
+      router.push('/Home/page');
+    }
+  }, [connected]);
+  
+
   const checkUserByPublicKey = async () => {
     if (!wallet.publicKey) {
         return;
     }
 
     const publicKeyStr = wallet.publicKey.toBase58();
-    const usersCollection = collection(db, 'users');
-  
+
     try {
-        const usersSnapshot = await getDocs(usersCollection);
-        
+        const { data, error } = await supabase
+            .from('users')
+            .select('id')  
+            .eq('publicKey', publicKeyStr); 
 
-        let userFound = false;
-  
-        // Iterate through each document in the 'users' collection
-        for (const userDoc of usersSnapshot.docs) {
-            if (userFound) break;
-
-            // Get the 'public' subcollection
-            const publicSubCollection = collection(db, `users/${userDoc.id}/public`);
-            const publicSnapshot = await getDocs(publicSubCollection); 
-            // Iterate through each document in the 'public' subcollection
-            for (const publicDoc of publicSnapshot.docs) {
-                const publicData = publicDoc.data();
-        
-
-                if (publicData.publicKey === publicKeyStr) {
-                    
-                    userFound = true;
-                    await loginUser();
-                    break;
-                }
-            }
+        if (error) {
+            throw error;
         }
-  
-        if (!userFound) {
-            //console.log("No user found with the provided public key.");
-            setErrorMessage('No Account Found. Create a new account');
 
+        if (data && data.length > 0) {
+            await loginUser();
+        } else {
+            setErrorMessage('No Account Found. Create a new account');
             if (!hasModalBeenShown) {
-                //console.log("Showing user details modal for registration.");
                 setIsModalOpen(true);
                 setHasModalBeenShown(true);
             }
         }
-    } catch (error: unknown) {
-        if (error instanceof Error) {
-            //console.error('Error checking user:', error.message);
-            setErrorMessage('Error checking user: ' + error.message);
-        } else {
-            setErrorMessage('An unexpected error occurred.');
-        }
+    } catch (error: any) {
+        setErrorMessage('Error checking user: ' + error.message);
     }
 };
 
-  
-  const checkUserOnceRef = useRef(false);
-  
-  useEffect(() => {
+const checkUserOnceRef = useRef(false);
+
+useEffect(() => {
     if (connected && !checkUserOnceRef.current) {
-      checkUserByPublicKey();
-      checkUserOnceRef.current = true;
+        checkUserByPublicKey();
+        checkUserOnceRef.current = true;
     } else if (!connected) {
-      // Reset the flag when wallet disconnects
-      checkUserOnceRef.current = false;
-      setHasModalBeenShown(false);
+        checkUserOnceRef.current = false;
+        setHasModalBeenShown(false);
+        setIsModalOpen(false);
     }
-  }, [connected]);
+}, [connected]);
+
   
   
   
@@ -146,14 +137,12 @@ const SignUp = () => {
         body: JSON.stringify({publicKey: wallet.publicKey.toBase58() })
       });
       const data = await response.json();
-      //console.log('data', data)
 
       if (response.ok) {
-        router.push('/Home/page');
         setSuccessMessage("Welcome Back");
         Cookies.set('userId', data.user.public.id);
-        localStorage.setItem('userId', data.user.public.id);
-        Cookies.set('token', data.accessToken); 
+        Cookies.set('token', data.accessToken);
+        router.push('/Home/page');
         setIsLoading(false);
       } else {
         setIsModalOpen(true);
@@ -173,48 +162,49 @@ const SignUp = () => {
 
   useEffect(() => {
     const checkUsername = async () => {
-      if (username.length === 0) {
-        setIsUsernameTaken(null);
-        setIsLoading(false);
-        setUsernameErrors([]);
-        return;
-      }
-
-      setIsLoading(true);
-
-      const errors = validateUsername(username);
-      setUsernameErrors(errors);
-
-      if (errors.length > 0) {
-        setIsUsernameTaken(null);
-        setIsLoading(false);
-        return;
-      }
-
-      const usersCollection = collection(db, 'users');
-      const q = query(usersCollection, where('username', '==', username));
-
-      try {
-        const querySnapshot = await getDocs(q);
-        const usernameTaken = !querySnapshot.empty;
-        setIsUsernameTaken(usernameTaken);
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          setErrorMessage('Error checking username: ' + error.message);
-        } else {
-          setErrorMessage('An unexpected error occurred.');
+        if (username.length === 0) {
+            setIsUsernameTaken(null);
+            setIsLoading(false);
+            setUsernameErrors([]);
+            return;
         }
-      } finally {
-        setIsLoading(false);
-      }
+
+        setIsLoading(true);
+
+        const errors = validateUsername(username);
+        setUsernameErrors(errors);
+
+        if (errors.length > 0) {
+            setIsUsernameTaken(null);
+            setIsLoading(false);
+            return;
+        }
+
+        try {
+            const { data, error } = await supabase
+                .from('users')
+                .select('username')
+                .eq('username', username);
+
+            if (error) {
+                throw error;
+            }
+
+            setIsUsernameTaken(data.length > 0);
+        } catch (error: any) {
+            setErrorMessage('Error checking username: ' + error.message);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const debounceTimeout = setTimeout(checkUsername, 500);
 
     return () => clearTimeout(debounceTimeout);
-  }, [username]);
+}, [username]);
 
-  const registerUser = async (displayName: string, username: string) => {
+
+  const registerUser = async (displayName: string, username: string, bio: string) => {
     router.prefetch('/Onboarding/Avatar/page');
     setIsLoading(true);
     if (!wallet.publicKey) {
@@ -231,18 +221,16 @@ const SignUp = () => {
         displayName,
         username,
         publicKey: wallet.publicKey.toBase58(),
-        referralId: referralId || '', // Include the referralId here
+        referralId: referralId || '',
+        bio: bio || '' // Include the referralId here
       })
     };
   
     try {
       const response = await fetch('/api/register', requestOptions);
       const data = await response.json();
-  
       if (response.ok) {
-        localStorage.setItem('userId', data.user);
-        Cookies.set('userId', data.user);
-        //console.log('token', data.accessToken);
+        Cookies.set('userId', data.uniqueId);
         setSuccessMessage("Welcome To The Purple Family");
         router.push('/Onboarding/Avatar/page');
         setIsLoading(false);
@@ -261,7 +249,7 @@ const SignUp = () => {
   
 
   return (
-    <div className="relative h-screen w-screen flex flex-col items-center justify-center bg-white dark:bg-black p-4 overflow-hidden">
+    <div className="relative h-screen w-screen flex flex-col items-center justify-center bg-white dark:bg-deep-purple p-4 overflow-hidden">
 <svg
   className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2"
   width="400"
@@ -280,8 +268,8 @@ const SignUp = () => {
 
 <IsLoading loading={isLoading} />
 
-      <div className="text-center" data-aos="fade-down">
-        <h1 className="text-primary font-bold text-4xl logo" style={{ fontFamily: 'Gajraj One, sans-serif' }}>Figo</h1>
+      <div className="text-center mt-24" data-aos="fade-down">
+        <h1 className={`text-primary font-bold text-4xl logo ${gajrajOne.className}`}>Figo</h1>
         <p className="mt-2 text-lg text-black dark:text-white whitespace-nowrap slogan">Fly High, Connect Fast</p>
       </div>
       <div className='mb-8'>
@@ -290,14 +278,14 @@ const SignUp = () => {
           animationData={Welcome}
           play
           style={{
-            width: 240,
-            height: 240,
+            width: 280,
+            height: 280,
             position: 'absolute'
           }}
         />
       </div>
-      <div className="mt-20" data-aos="fade-up">
-        <h2 className="text-2xl font-bold text-black dark:text-white mb-11 welcome">Welcome</h2>
+      <div className="mt-24" data-aos="fade-up">
+        <h2 className="text-2xl font-bold text-black dark:text-white mb-11 mt-4 welcome">Welcome</h2>
         {wallet.connected ? (
           <div className="text-center mt-4 ml-4" data-aos="fade-up">
             <p className="text-lg text-black dark:text-white">Connected Wallet:</p>
@@ -313,9 +301,9 @@ const SignUp = () => {
   <UserDetailsModal
     isOpen={isModalOpen}
     onClose={() => setIsModalOpen(false)}
-    onSave={(displayName, username) => {
+    onSave={(displayName, username, bio) => {
       setUsername(username);
-      registerUser(displayName, username);
+      registerUser(displayName, username, bio);
     }}
   />
 </Suspense>

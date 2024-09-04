@@ -1,50 +1,81 @@
-import { doc, onSnapshot } from 'firebase/firestore';
-import { useCallback, useState } from 'react';
-import { db } from '../lib/firebaseConfig';
+import { useCallback, useState, useEffect } from 'react';
+import { useUser } from '@/context/UserContext';
+import { supabase } from '@/lib/supabaseClient';
+import { getUserData, saveUserData } from '@/utils/indexedDB'; // Import the IndexedDB utility function
+
+interface User {
+  id: string;
+  displayName: string;
+  username: string;
+  publicKey: string;
+  avatar?: string;
+  points?: number;
+  currentEnergy?: number;
+  [key: string]: any;
+}
+
+interface UserContextType {
+  user: User | null;
+  setUser: (user: User | null) => void;
+}
 
 const useUserPoints = () => {
   const [points, setPoints] = useState<number>(0);
   const [currentEnergy, setCurrentEnergy] = useState<number>(0);
+  const { user, setUser } = useUser();
 
-  const fetchUserPoints = useCallback((userId: string | undefined) => {
+  const fetchUserPoints = useCallback(async (userId: string | undefined) => {
     if (!userId) {
-      console.error('No userId provided');
       return;
     }
+    const storedData = await getUserData(userId);
 
-    // Navigate to the 'details' document inside the 'private' subcollection
-    const userDetailsDocRef = doc(db, 'users', userId, 'private', 'details');
+    if (storedData && storedData.id === userId) {
+      setPoints(storedData.points || 0);
+      setCurrentEnergy(storedData.currentEnergy || 0);
+    } else {
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('points, currentEnergy')
+          .eq('id', userId)
+          .single();
 
-    if (!userDetailsDocRef) {
-      console.error('Invalid document reference');
-      return;
+        if (error) {
+          throw error;
+        }
+
+        if (data) {
+          setPoints(data.points || 0);
+          setCurrentEnergy(data.currentEnergy || 0);
+          await saveUserData({
+            id: userId,
+            points: data.points,
+            currentEnergy: data.currentEnergy,
+          });
+        } else {
+        }
+      } catch (error) {
+      }
     }
+  }, [user, setUser]);
 
-    const unsubscribe = onSnapshot(userDetailsDocRef, (docSnapshot) => {
-      if (!docSnapshot.exists()) {
-        console.error('Document does not exist');
-        return;
-      }
-
-      const userData = docSnapshot.data();
-      if (userData) {
-        console.log('userdata', userData);
-        setPoints(userData.points || 0);
-        setCurrentEnergy(userData.currentEnergy || 0);
-      } else {
-        console.error('No user data found');
-      }
-    }, (error) => {
-      console.error('Error fetching user data:', error);
-    });
-
-    return () => unsubscribe();
-  }, []);
+  useEffect(() => {
+    if (user?.id) {
+      fetchUserPoints(user.id);
+    }
+  }, [user?.id, fetchUserPoints]);
 
   return { points, currentEnergy, fetchUserPoints };
 };
 
 export default useUserPoints;
+
+
+
+
+
+
 
 
 

@@ -25,8 +25,8 @@ import avatar12 from './lottie/avatar12.json';
 import avatar13 from './lottie/avatar13.json';
 import typing from './lottie/typing.json';
 import EnergyProgressBar from '@/components/EnergyProgressBar';
-import ReactDOM from 'react-dom';
 import useUserPoints from '@/hooks/useUserPoints';
+import * as Ably from 'ably';
 
 interface ChatProps {
   friendId: string;
@@ -397,7 +397,7 @@ useEffect(() => {
   
           const pointsToAdd = 20; // Points to add
           const newEnergy = Math.max(currentEnergy - pointsToAdd, 0); // Calculate new energy
-  
+  // #1C0128
           // Update user points and energy
           if (newEnergy > 0) {
             await updateDoc(detailsRef, { points: currentPoints + pointsToAdd, currentEnergy: newEnergy });

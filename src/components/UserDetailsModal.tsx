@@ -1,7 +1,5 @@
-"use client"
-import { collection, getDocs, query, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { db } from '../lib/firebaseConfig'; // Adjust the import path as necessary
+import { supabase } from '../lib/supabaseClient'; // Adjust the import path as necessary
 
 interface UserDetailsModalProps {
   isOpen: boolean;
@@ -18,7 +16,7 @@ const validateUsername = (username: string) => {
     errors.push('Username cannot contain spaces.');
   }
   if (!/^[a-zA-Z_0-9]/.test(username)) {
-    errors.push('Username must start with a letter, number or an underscore (_).');
+    errors.push('Username must start with a letter, number, or an underscore (_).');
   }
   return errors;
 };
@@ -52,30 +50,18 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ isOpen, onClose, on
       }
 
       try {
-        const usersCollection = collection(db, 'users');
-        const usersSnapshot = await getDocs(usersCollection);
-        
-        let usernameTaken = false;
+        // Supabase query to check if the username already exists
+        const { data, error } = await supabase
+          .from('users')
+          .select('id')  // Selecting 'id' or any other field
+          .eq('username', username);  // Matching the username
 
-        // Iterate through each document in the 'users' collection
-        for (const userDoc of usersSnapshot.docs) {
-          if (usernameTaken) break;
-
-          // Get the 'public' subcollection
-          const publicSubCollection = collection(db, `users/${userDoc.id}/public`);
-          const publicSnapshot = await getDocs(publicSubCollection);
-
-          // Iterate through each document in the 'public' subcollection
-          for (const publicDoc of publicSnapshot.docs) {
-            const publicData = publicDoc.data();
-            if (publicData.username === username) {
-              usernameTaken = true;
-              break;
-            }
-          }
+        if (error) {
+          throw error;
         }
 
-        setIsUsernameTaken(usernameTaken);
+        // If data is returned, the username is already taken
+        setIsUsernameTaken(data.length > 0);
       } catch (error) {
         if (error instanceof Error) {
           setUsernameErrors(['Error checking username: ' + error.message]);
@@ -130,6 +116,16 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ isOpen, onClose, on
           )}
         </div>
       
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Bio</label>
+          <input
+            type="text"
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            className="mt-1 p-2 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+          />
+        </div>
+
         <div className="flex justify-end">
           <button onClick={onClose} className="mr-2 bg-gray-500 text-white py-2 px-4 rounded">Cancel</button>
           <button onClick={handleSave} disabled={isSaveButtonDisabled} className={`bg-blue-500 text-white py-2 px-4 rounded ${isSaveButtonDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}>Save</button>
@@ -140,5 +136,6 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ isOpen, onClose, on
 };
 
 export default UserDetailsModal;
+
 
 

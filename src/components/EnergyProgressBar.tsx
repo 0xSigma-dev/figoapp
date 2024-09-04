@@ -1,7 +1,8 @@
-"use client"
-import { collection, doc, onSnapshot } from 'firebase/firestore';
+"use client";
 import React, { useCallback, useEffect, useState } from 'react';
-import { db } from '../lib/firebaseConfig';
+import { getUserData } from '@/utils/indexedDB'; // Update the path accordingly
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBoltLightning } from '@fortawesome/free-solid-svg-icons';
 
 interface EnergyProgressBarProps {
   userId: string;
@@ -9,43 +10,29 @@ interface EnergyProgressBarProps {
 
 const EnergyProgressBar: React.FC<EnergyProgressBarProps> = ({ userId }) => {
   const [currentEnergy, setCurrentEnergy] = useState<number>(0);
-  const [totalEnergy, setTotalEnergy] = useState<number>(0);
+  const [totalEnergy, setTotalEnergy] = useState<number>(100); // Default total energy
 
-  const fetchEnergyData = useCallback(() => {
+  const fetchEnergyData = useCallback(async () => {
     if (!userId) {
       console.error('No userId provided');
       return;
     }
-  
-    // Reference to the user's document in the main collection
-    const userDocRef = doc(db, 'users', userId);
-  
-    // Reference to the private subcollection and details document
-    const detailsDocRef = doc(userDocRef, 'private', 'details');
-  
-    // Subscribe to the details document to fetch data
-    const unsubscribe = onSnapshot(detailsDocRef, (docSnapshot) => {
-      if (!docSnapshot.exists()) {
-        console.error('No document found in the private subcollection');
-        return;
-      }
-  
-      const privateData = docSnapshot.data();
-  
-      if (privateData) {
-        console.log('Private data:', privateData);
-        setCurrentEnergy(privateData.currentEnergy || 0);
-        setTotalEnergy(privateData.totalEnergy || 100); // Default to 100 if totalEnergy is not set
+
+    try {
+      // Fetch user data from IndexedDB
+      const userData = await getUserData(userId);
+
+      if (userData) {
+        setCurrentEnergy(userData.currentEnergy || 0);
+        setTotalEnergy(userData.totalEnergy || 100); // Default to 100 if totalEnergy is not set
       } else {
-        console.error('No data found in the details document');
+        console.error('No energy data found for this user in IndexedDB');
       }
-    }, (error) => {
-      console.error('Error fetching private data:', error);
-    });
-  
-    return () => unsubscribe();
+    } catch (error) {
+      console.error('Error fetching energy data from IndexedDB:', error);
+    }
   }, [userId]);
-  
+
   useEffect(() => {
     fetchEnergyData();
   }, [fetchEnergyData]);
@@ -54,17 +41,19 @@ const EnergyProgressBar: React.FC<EnergyProgressBarProps> = ({ userId }) => {
 
   return (
     <div style={{
-      width: '100%',
+      width: '60%',
       backgroundColor: '#eee',
       borderRadius: '5px',
       overflow: 'hidden',
       position: 'relative',
-      zIndex: 10, // Adjust the z-index as needed
-    }}>
+      alignSelf: 'justify-end',
+      zIndex: 26, // Adjust the z-index as needed
+    }} className='fixed bottom-28 mr-3 ml-6'>
+      
       <div
         style={{
           width: `${progress}%`,
-          height: '8px',
+          height: '14px',
           backgroundColor: '#4caf50',
           transition: 'width 0.5s ease-in-out',
           textAlign: 'center',
@@ -74,13 +63,15 @@ const EnergyProgressBar: React.FC<EnergyProgressBarProps> = ({ userId }) => {
           position: 'relative',
         }}
       >
-        {`${Math.round(progress)}%`}
+        <FontAwesomeIcon icon={faBoltLightning} className="text-xs mr-2 text-yellow-500" />
+        <span className='text-xs'>{currentEnergy} / {totalEnergy}</span>
       </div>
     </div>
   );
 };
 
 export default EnergyProgressBar;
+
 
 
 

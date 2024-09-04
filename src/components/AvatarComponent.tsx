@@ -1,6 +1,8 @@
+// components/AvatarComponent.tsx
 import React from 'react';
-import Image from 'next/image';
 import Lottie from 'react-lottie-player';
+
+// Lottie animation imports
 import avatar1 from './lottie/avatar1.json';
 import avatar2 from './lottie/avatar2.json';
 import avatar3 from './lottie/avatar3.json';
@@ -15,6 +17,7 @@ import avatar11 from './lottie/avatar11.json';
 import avatar12 from './lottie/avatar12.json';
 import avatar13 from './lottie/avatar13.json';
 
+// Create a mapping of avatar animations
 const avatars = [
   { id: 1, animation: avatar1 },
   { id: 2, animation: avatar2 },
@@ -31,42 +34,39 @@ const avatars = [
   { id: 13, animation: avatar13 },
 ];
 
-interface AvatarProps {
-  avatarId?: number;
-  profileImage?: string;
+interface AvatarComponentProps {
+  avatarId: any;
+  width?: number;
+  height?: number;
+  onClick?: () => void;
 }
 
-const Avatar: React.FC<AvatarProps> = ({ avatarId, profileImage }) => {
+const AvatarComponent: React.FC<AvatarComponentProps> = ({ avatarId, width = 45, height = 45, onClick }) => {
+  // Find the corresponding avatar object in the avatars array
   const selectedAvatar = avatars.find((item) => item.id === avatarId);
 
-  if (selectedAvatar) {
-    return (
-      <Lottie
-        loop
-        animationData={selectedAvatar.animation}
-        play
-        style={{
-          width: 50,
-          height: 50,
-          borderRadius: '50%',
-          overflow: 'hidden',
-        }}
-      />
-    );
-  }
-
-  // Handle cases where profileImage might be null or undefined
   return (
-    <Image
-      src='/img/boy1.png'
-      alt='Avatar'
-      width={50}
-      height={50}
-      className='rounded-full'
-      style={{ objectFit: 'cover' }} // Ensures the image fits well
-    />
+    <>
+      {selectedAvatar ? (
+        <Lottie
+          loop
+          animationData={selectedAvatar.animation}
+          play
+          style={{
+            width, // Use width prop
+            height, // Use height prop
+            position: 'relative',
+            borderRadius: '50%',
+            overflow: 'hidden',
+          }}
+          onClick={onClick}
+        />
+      ) : (
+        // Fallback if no avatar is found
+        <div style={{ width, height, backgroundColor: '#ccc', borderRadius: '50%' }} />
+      )}
+    </>
   );
 };
 
-export default Avatar;
-
+export default AvatarComponent;

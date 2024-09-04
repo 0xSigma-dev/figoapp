@@ -51,10 +51,9 @@ const AvatarSelection: React.FC = () => {
     setSelectedAvatar(avatarId);
   };
 
-  //console.log('userId',userId);
 
   const handleContinue = async () => {
-    router.prefetch('../Letstest/page');
+    router.prefetch('../../Home/page');
     setIsLoading(true);
     if (selectedAvatar !== null && userId !== null) {
       try {
@@ -65,14 +64,13 @@ const AvatarSelection: React.FC = () => {
         });
 
         if (response.ok) { 
-          router.push('../Letstest/page');
+          router.push('../../Home/page');
           setSuccessMessage('Avatar updated successfully');
           setIsLoading(false);
         } else {
           setErrorMessage('Failed to update avatar');
         }
       } catch (error) {
-        //console.error('Error updating avatar:', error);
         setErrorMessage('Error updating avatar');
       }
     } else {
@@ -83,7 +81,7 @@ const AvatarSelection: React.FC = () => {
 
   return (
     <WalletGuard>
-    <div className="h-screen flex flex-col items-center bg-white dark:bg-black">
+    <div className="h-screen flex flex-col items-center bg-white dark:bg-deep-purple">
       <div className="fixed top-0 left-0 right-0 flex flex-col items-center justify-center bg-white dark:bg-black p-4 z-10">
         <h1 className="text-2xl font-bold text-white">Pick Your Avatar</h1>
         <p className="text-l font-bold text-black dark:text-white text-center">

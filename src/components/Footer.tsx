@@ -27,7 +27,7 @@ const Footer: React.FC<FooterProps> = ({ theme }) => {
 
   return (
     <>
-      <footer className="fixed bottom-0 top border-t-2 border-purple-500 left-0 right-0 bg-white dark:bg-black text-black dark:text-white p-1 flex items-center justify-between z-10">
+      <footer className="fixed bottom-0 top border-t border-gray-900 left-0 right-0 bg-white dark:bg-deep-purple text-black dark:text-white p-1 flex items-center justify-between z-10">
         <div className="flex-1 flex justify-around items-center">
           {icons.map((item, index) => (
             <Link href={item.link} key={index} legacyBehavior>
@@ -56,7 +56,7 @@ const Footer: React.FC<FooterProps> = ({ theme }) => {
                 className="text-gray-500"
                 style={{ fontSize: '24px' }}
               />
-              <span className="absolute top-0 right-0 bg-green-500 text-white text-xs rounded-full px-1 transform rotate-45">
+              <span className="absolute top-0 right-0 bg-green-500 text-white text-xs rounded-full px-1 ">
                 Soon
               </span>
 
@@ -74,7 +74,7 @@ const Footer: React.FC<FooterProps> = ({ theme }) => {
                 className="text-gray-500"
                 style={{ fontSize: '24px' }}
               />
-              <span className="absolute top-0 right-0 bg-green-500 text-white text-xs rounded-full px-1 transform rotate-45">
+              <span className="absolute top-0 right-0 bg-green-500 text-white text-xs rounded-full px-1 ">
                 Soon
               </span>
 
@@ -92,7 +92,7 @@ const Footer: React.FC<FooterProps> = ({ theme }) => {
                 className="text-gray-500"
                 style={{ fontSize: '24px' }}
               />
-              <span className="absolute top-0 right-0 bg-green-500 text-white text-xs rounded-full px-1 transform rotate-45">
+              <span className="absolute top-0 right-0 bg-green-500 text-white text-xs rounded-full px-1 ">
                 Soon
               </span>
 
@@ -110,7 +110,7 @@ const Footer: React.FC<FooterProps> = ({ theme }) => {
                 className="text-gray-500"
                 style={{ fontSize: '24px' }}
               />
-              <span className="absolute top-0 right-0 bg-green-500 text-white text-xs rounded-full px-1 transform rotate-45">
+              <span className="absolute top-0 right-0 bg-green-500 text-white text-xs rounded-full px-1 ">
                 Soon
               </span>
 
@@ -128,7 +128,7 @@ const Footer: React.FC<FooterProps> = ({ theme }) => {
                 className="text-gray-500"
                 style={{ fontSize: '24px' }}
               />
-              <span className="absolute top-0 right-0 bg-green-500 text-white text-xs rounded-full px-1 transform rotate-45">
+              <span className="absolute top-0 right-0 bg-green-500 text-white text-xs rounded-full px-1 ">
                 Soon
               </span>
 

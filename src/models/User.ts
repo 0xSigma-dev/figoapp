@@ -8,8 +8,9 @@ export interface User {
   referralLink: string;
   referredBy: string;
   referralCount: number;
+  pendingref: number;
   premium?: boolean;
-  avatar?: string;
+  avatar?: number;
   status: boolean;
   level: string;
   points: number;

@@ -21,7 +21,7 @@ const PurpleIcon: React.FC<PurpleIconProps> = ({ onClick, showContactPage }) => 
   return (
     <div className="fixed bottom-16 right-4 flex flex-col items-end z-30">
       <div
-        className="bg-purple-500 w-12 h-12 flex items-center justify-center rounded-full cursor-pointer mb-6"
+        className="bg-purple-500 w-16 h-16 flex items-center justify-center rounded-full cursor-pointer mb-6"
         onClick={handleButtonClick}
       >
         <FontAwesomeIcon

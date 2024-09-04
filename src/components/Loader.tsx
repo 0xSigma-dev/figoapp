@@ -3,7 +3,8 @@ import React, { useEffect, useState, memo } from 'react';
 import { useRouter } from 'next/router';
 import Lottie from 'react-lottie-player';
 import lightModeAnimation from './lottie/loader.json'; // Corrected path for light mode Lottie JSON file
-import darkModeAnimation from './lottie/loaderblack.json'; // Corrected path for dark mode Lottie JSON file
+import darkModeAnimation from './lottie/loaderblack.json';
+import Cookies from 'js-cookie'; // Corrected path for dark mode Lottie JSON file
 
 // Memoize the Lottie component to avoid unnecessary re-renders
 const MemoizedLottie = memo(Lottie);
@@ -42,7 +43,19 @@ const Loader: React.FC = () => {
     };
   }, [router]);
 
+
   useEffect(() => {
+    // Check for userId in cookies and local storage
+    //const userIdFromCookie = Cookies.get('userId');
+    //const userIdFromLocalStorage = localStorage.getItem('userId');
+
+    //if (userIdFromCookie || userIdFromLocalStorage) {
+      // UserId found, navigate to the Home page
+    //  router.push('/Home/page');
+    //  return;
+    //}
+
+    // If no userId, proceed with the loading and onboarding process
     let animationFrameId: any;
 
     const updateProgress = () => {
@@ -64,6 +77,7 @@ const Loader: React.FC = () => {
 
     return () => cancelAnimationFrame(animationFrameId);
   }, [router, referralId]);
+
 
   return (
     <div className="loader-container">

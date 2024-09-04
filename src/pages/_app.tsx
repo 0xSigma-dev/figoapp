@@ -9,6 +9,15 @@ import { UserProvider } from '../context/UserContext'; // Adjust the import path
 import Head from "next/head";
 import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
+import { Montagu_Slab } from '@next/font/google';
+
+
+const montaguSlab = Montagu_Slab({
+  weight: '400',
+  subsets: ['latin'], // Specify subsets if needed
+});
+
+
 config.autoAddCss = false
 
 
@@ -25,6 +34,8 @@ export const metadata: Metadata = {
 
 function MyApp({ Component, pageProps }: AppProps) {
 
+
+
   if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       const swUrl = '/service-worker.js';
@@ -38,6 +49,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         });
     });
   }
+
   
 
   
@@ -80,14 +92,19 @@ function MyApp({ Component, pageProps }: AppProps) {
         <meta property="og:url" content="https://app.figoapp.xyz" />
         <meta property="og:image" content="/icons/og.png" />
       </Head>
+      <div className={montaguSlab.className}>
     <ThemeProvider attribute="class" enableSystem={true} defaultTheme="system">
+    
       <AppWalletProvider>
         <UserProvider>
           <Component {...pageProps} />
           <ToastContainer />
         </UserProvider>
       </AppWalletProvider>
+    
     </ThemeProvider>
+    </div>
+    
     </>
   );
 }

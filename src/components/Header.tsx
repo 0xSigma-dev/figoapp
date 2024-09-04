@@ -3,123 +3,115 @@ import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
 import PlaceholderComponent from './PlaceholderComponent';
-import Lottie from 'react-lottie-player';
 import Link from 'next/link'; // Import Link
-
-// Lottie animation imports
-import avatar1 from './lottie/avatar1.json';
-import avatar2 from './lottie/avatar2.json';
-import avatar3 from './lottie/avatar3.json';
-import avatar4 from './lottie/avatar4.json';
-import avatar5 from './lottie/avatar5.json';
-import avatar6 from './lottie/avatar6.json';
-import avatar7 from './lottie/avatar7.json';
-import avatar8 from './lottie/avatar8.json';
-import avatar9 from './lottie/avatar9.json';
-import avatar10 from './lottie/avatar10.json';
-import avatar11 from './lottie/avatar11.json';
-import avatar12 from './lottie/avatar12.json';
-import avatar13 from './lottie/avatar13.json';
-
-const avatars = [
-  { id: 1, animation: avatar1 },
-  { id: 2, animation: avatar2 },
-  { id: 3, animation: avatar3 },
-  { id: 4, animation: avatar4 },
-  { id: 5, animation: avatar5 },
-  { id: 6, animation: avatar6 },
-  { id: 7, animation: avatar7 },
-  { id: 8, animation: avatar8 },
-  { id: 9, animation: avatar9 },
-  { id: 10, animation: avatar10 },
-  { id: 11, animation: avatar11 },
-  { id: 12, animation: avatar12 },
-  { id: 13, animation: avatar13 },
-];
+import Cookies from 'js-cookie';
+import AvatarComponent from './AvatarComponent';
+import router from 'next/router';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
+import { Gajraj_One } from '@next/font/google';
+import { deleteDatabase } from '@/utils/indexedDB';
+import WarningModal from './WarningModal';
+const gajrajOne = Gajraj_One({
+  weight: '400',
+  subsets: ['latin'], 
+});
 
 interface User {
-  public: any;
-  private: any;
-  displayName?: string; // Allow displayName to be undefined
-  subcollections?: {
-    public?: Array<{ data?: { avatar?: any } }>;
-  };
+  user?: User;
+  displayName?: any;
+  avatar?: any;
 }
 
 interface HeaderProps {
   user: User;
-  points: number;
+  points: any;
 }
 
 const Header: React.FC<HeaderProps> = ({ user, points }) => {
   const [showDrawer, setShowDrawer] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  const [lottieLoaded, setLottieLoaded] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const [previousPoints, setPreviousPoints] = useState(points);
   const [animationClass, setAnimationClass] = useState('');
+  const { disconnect } = useWallet();
+  const drawerRef = useRef<HTMLDivElement>(null);
+  const pointsString = points.toString().split('');
+  const [showWarning, setShowWarning] = useState(false); 
+  
 
   useEffect(() => {
     if (points !== previousPoints) {
       setAnimationClass('change');
-      setTimeout(() => setAnimationClass(''), 100); // Remove animation class after 0.5s
+      setTimeout(() => setAnimationClass(''), 100);
       setPreviousPoints(points);
     }
   }, [points, previousPoints]);
 
-  const pointsString = points.toString().split('');
-  
-  // Assuming avatar returned from the user is an ID (e.g., 9)
-  const avatarId = user?.public?.[0]?.data?.avatar;
-
-  // Find the corresponding avatar object in the avatars array
-  const selectedAvatar = avatars.find((item) => item.id === avatarId);
-
-  console.log('selectedAvatar', selectedAvatar);
-
   const handleImageClick = () => {
     setShowDrawer(!showDrawer);
-    setShowMenu(false); // Ensure the menu is closed when the drawer is opened
+    setShowMenu(false);
   };
 
   const handleMenuClick = () => {
     setShowMenu(!showMenu);
-    setShowDrawer(false); // Ensure the drawer is closed when the menu is opened
+    setShowDrawer(false);
   };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      const isClickInsideMenu = menuRef.current?.contains(event.target as Node);
+      const isClickInsideDrawer = drawerRef.current?.contains(event.target as Node);
+      
+      if (!isClickInsideMenu && !isClickInsideDrawer) {
         setShowMenu(false);
         setShowDrawer(false);
       }
     };
-
+  
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [menuRef]);
+  }, []);
+  
+
+
+  const handleDisconnectWallet = async () => {
+    try {
+      const userId = Cookies.get('userId');
+      if (userId) {
+        await deleteDatabase(userId); // Pass userId to deleteDatabase
+        console.log("All database content deleted successfully.");
+      } else {
+        console.error('User ID is not available for database deletion.');
+      }
+  
+      await disconnect();
+      Cookies.remove('userId');
+      localStorage.clear();
+      router.push('/');
+    } catch (error) {
+      console.error('Error disconnecting wallet:', error);
+    }
+  };
+
+  const handleCloseWarning = () => {
+    setShowWarning(false);  // Function to close the warning modal
+  };
+
+  const handleOpenWarning = () => {
+    setShowWarning(true);
+    setShowMenu(false);
+  };
+  
 
   return (
     <>
-      <header className="fixed top-0 w-screen left-0 right-0 bg-white dark:bg-black border-b border-purple-300 text-black dark:text-white p-4 flex items-center justify-between z-10">
+      <header className="fixed top-0 w-screen left-0 right-0 bg-white dark:bg-deep-purple text-black dark:text-white  flex items-center justify-between z-10 border-b border-gray-900">
         <div className="flex items-center">
-          {selectedAvatar ? (
-            <Lottie
-              loop
-              animationData={selectedAvatar.animation}
-              play
-              onLoad={() => setLottieLoaded(true)}
-              style={{
-                width: 50, // Adjusted size
-                height: 50, // Adjusted size
-                position: 'relative',
-                borderRadius: '50%',
-                overflow: 'hidden',
-              }}
-              onClick={handleImageClick}  
-            />
+        {user?.avatar ? (
+            <AvatarComponent avatarId={user.avatar} onClick={handleImageClick} />
           ) : (
             <Image
               src="/img/boy1.png"
@@ -128,38 +120,41 @@ const Header: React.FC<HeaderProps> = ({ user, points }) => {
               width={50}
               height={50}
               onClick={handleImageClick}
-              onError={() => setLottieLoaded(false)}
             />
           )}
-          <span className={`ml-2 text-lg text-black dark:text-white font-bold ${!user?.public?.[0]?.data?.displayName ? 'text-purple-500' : ''}`}>
-            {user?.public?.[0]?.data?.displayName || 'FIGO'}
-          </span>
         </div>
         <div>
-        <div className={`points-container ${pointsString.length === 1 ? 'single' : 'multi'} ${animationClass}`}>
-          {pointsString.map((digit, index) => (
-            <span key={index}>{digit}</span>
-          ))}
+        <div className={` text-purple-500 text-2xl ${pointsString.length === 1 ? 'single' : 'multi'} `}>   
+            <span className={`${gajrajOne.className}`}>Figo</span>
         </div>
       </div>
         <div className="relative" ref={menuRef}>
-          <div className="cursor-pointer mr-3 text-black dark:text-white" onClick={handleMenuClick}>
+          <div className="cursor-pointer mr-6 text-black dark:text-white" onClick={handleMenuClick}>
             <FontAwesomeIcon icon={faEllipsisV} style={{ fontSize: '24px'}} />
           </div>
           {showMenu && (
-            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-600 rounded-md shadow-lg py-2 z-20">
-              <a href="#" className="block px-4 py-2 text-black dark:text-white-800 hover:bg-white-100">
-                Roadmap
-              </a>
+            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-900 rounded-md shadow-lg py-2 z-20">
               <Link href="/StatsPage">
-                <p className="block px-4 py-2 text-black dark:text-white-800 hover:bg-white-100">Statistics</p>
+                <p className="block px-4 py-2 text-black dark:text-white hover:bg-gray-700">Statistics</p>
               </Link>
+              <button
+                onClick={handleOpenWarning}
+                className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-200 dark:hover:bg-gray-700"
+              >
+              <FontAwesomeIcon icon={faSignOutAlt} className="text-red-600 mr-2" style={{ fontSize: "24px" }} />
+              <span className="text-red-600">DisConnect</span>
+              </button>
               
             </div>
           )}
         </div>
       </header>
-      {showDrawer && <PlaceholderComponent user={user} onClose={handleImageClick} />}
+      {showDrawer && <PlaceholderComponent user={user} onClose={handleImageClick} ref={drawerRef} />}
+      <WarningModal
+        isOpen={showWarning}
+        onClose={handleCloseWarning}
+        onDisconnect={handleDisconnectWallet} // Call the disconnect function when confirmed
+      />
     </>
   );
 };

@@ -1,6 +1,5 @@
-import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { db } from '../../lib/firebaseConfig';
+import { supabase } from '../../lib/supabaseClient'; // Import Supabase client
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { authorization } = req.headers;
@@ -12,70 +11,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const userId = authorization.split(' ')[1];
 
   try {
-    const userDocRef = doc(db, 'users', userId);
-    const userDoc = await getDoc(userDocRef);
+    // Fetch the user data from the 'users' table using userId
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', userId)
+      .single();
 
-    if (!userDoc.exists()) {
+    if (userError) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const userData = userDoc.data();
-
-    // Fetch 'public' and 'private' subcollections
-    const publicData = await fetchSubcollectionData(userDocRef, 'public', ['friends', 'friendRequests', 'receivedFriendRequests']);
-    const privateData = await fetchSubcollectionData(userDocRef, 'private');
-
-    const result = {
-      user: userData,
-      subcollections: {
-        public: publicData,
-        private: privateData,
-      },
-    };
-
-    //console.log('User data with all nested subcollections:', result);
-
-    return res.status(200).json(result);
+    // Return the user data directly
+    return res.status(200).json({ user });
 
   } catch (error) {
-    //console.error('Error fetching user data and subcollections:', error);
+    console.error('Error fetching user data:', error);
     return res.status(500).json({ message: 'Internal Server Error' });
   }
 }
 
-// Helper function to fetch subcollection data, including nested subcollections
-async function fetchSubcollectionData(
-  docRef: any,
-  subcollectionName: string,
-  nestedSubcollectionNames: string[] = []
-): Promise<any> {
-  const subcollectionRef = collection(docRef, subcollectionName);
-  const subcollectionSnapshot = await getDocs(subcollectionRef);
-  const subcollectionData = [];
-
-  for (const subdocSnapshot of subcollectionSnapshot.docs) {
-    const subdocData = subdocSnapshot.data();
-
-    // Initialize the nested subcollections object with dynamic string keys
-    const nestedSubcollections: { [key: string]: any } = {};
-
-    // Recursively fetch nested subcollections if any are specified
-    for (const nestedSubcollectionName of nestedSubcollectionNames) {
-      nestedSubcollections[nestedSubcollectionName] = await fetchSubcollectionData(
-        subdocSnapshot.ref,
-        nestedSubcollectionName
-      );
-    }
-
-    subcollectionData.push({
-      id: subdocSnapshot.id,
-      data: subdocData,
-      subcollections: nestedSubcollections,
-    });
-  }
-
-  return subcollectionData;
-}
 
 
 

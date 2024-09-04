@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { useRouter } from 'next/router';
-import { db } from '../lib/firebaseConfig'; // Adjust this import based on your Firebase setup
-import { collection, onSnapshot, doc, getDoc } from 'firebase/firestore';
+import { supabase } from '../lib/supabaseClient';
 
 const StatsPage: React.FC = () => {
   const router = useRouter();
@@ -11,30 +10,27 @@ const StatsPage: React.FC = () => {
   const [totalPoints, setTotalPoints] = useState<number>(0);
 
   useEffect(() => {
-    const usersCollectionRef = collection(db, 'users');
-    
-    // Listener to count number of users
-    const unsubscribeUsers = onSnapshot(usersCollectionRef, async (snapshot) => {
-      setUserCount(snapshot.size);
+    const fetchStats = async () => {
+      try {
+        const { data: users, error } = await supabase
+          .from('users')
+          .select('points');
 
-      let total = 0;
-      for (const userDoc of snapshot.docs) {
-        const userId = userDoc.id;
-        const privateCollectionRef = collection(db, `users/${userId}/private`);
-        const detailsDocRef = doc(privateCollectionRef, 'details');
-        
-        const detailsDoc = await getDoc(detailsDocRef);
-        if (detailsDoc.exists()) {
-          const data = detailsDoc.data();
-          total += data?.points || 0;
+        if (error) {
+          return;
         }
-      }
-      setTotalPoints(total);
-    });
 
-    return () => {
-      unsubscribeUsers();
+        if (users) {
+          setUserCount(users.length);
+
+          const total = users.reduce((acc, user) => acc + (user.points || 0), 0);
+          setTotalPoints(total);
+        }
+      } catch (error) {
+      }
     };
+
+    fetchStats();
   }, []);
 
   return (
@@ -68,5 +64,6 @@ const StatsPage: React.FC = () => {
 };
 
 export default StatsPage;
+
 
 

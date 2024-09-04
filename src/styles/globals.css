@@ -458,7 +458,6 @@ body {
   display: inline-flex;
   font-size: 1.5rem;
   font-weight: bold;
-  color: gold; /* Shining color */
 }
 
 /* Bounce animation for single digit */
@@ -473,11 +472,20 @@ body {
 
 /* Shimmer effect for shining appearance */
 .points-container span {
-  background: linear-gradient(90deg, #8c52ff 25%, #5ce1e6 50%, #8c52ff 75%);
+  background: linear-gradient(90deg, gold, goldenrod);
   background-size: 400% 100%;
   animation: shimmer 2s infinite;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+
+  /* Shining Gold Neon Effect */
+  text-shadow: 
+    0 0 2px rgba(255, 215, 0, 0.8),   /* Subtle inner glow */
+    0 0 5px rgba(255, 223, 0, 0.6),   /* Slightly larger glow */
+    0 0 10px rgba(255, 223, 0, 0.4),  /* Moderate glow */
+    0 0 15px rgba(255, 223, 0, 0.3),  /* Larger outer glow */
+    0 0 30px rgba(218, 165, 32, 0.2), /* Goldenrod for depth */
+    0 0 40px rgba(173, 255, 47, 0.3); /* Greenyellow for highlight */
 }
 
 
