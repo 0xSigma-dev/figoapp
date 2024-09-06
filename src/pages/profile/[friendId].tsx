@@ -19,6 +19,7 @@ import Link from "next/link";
 import { getContactById, getUserData, saveUserData, updateUserDataFields } from "@/utils/indexedDB";
 import SkeletonProfile from '../../components/Skeleton/SkeletonProfile';
 import AvatarComponent from "@/components/AvatarComponent";
+import WalletGuard from "@/components/WalletGuard";
 
 
 const ProfilePage: React.FC = () => {
@@ -86,7 +87,7 @@ const ProfilePage: React.FC = () => {
     };
 
     fetchUserDetails();
-  }, [friendId, isCurrentUser]);
+  }, [friendId, isCurrentUserg]);
 
   const fetchUserDetails = async () => {
     try {
@@ -319,6 +320,7 @@ const ProfilePage: React.FC = () => {
 
 
   return (
+    <WalletGuard>
     <div className="relative w-full h-screen flex flex-col items-center bg-gradient-to-r from-purple-900 via-purple-400 to-blue-500">
   <div className="relative w-full h-1/3 bg-gradient-to-r from-purple-900 via-purple-400 to-blue-500 flex justify-center items-center">
     <FontAwesomeIcon
@@ -481,7 +483,7 @@ const ProfilePage: React.FC = () => {
         </Suspense>
       )}
 </div>
-
+</WalletGuard>
   );
 };
 

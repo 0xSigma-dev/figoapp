@@ -18,6 +18,7 @@ import { autoRefillEnergy, saveCurrentEnergy } from '@/utils/energyManager';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import FloatingPointsAnimation from '../../components/FloatingPointsAnimation';
+import WalletGuard from '../../components/WalletGuard';
 
 
 
@@ -51,6 +52,20 @@ const Chat: React.FC = () => {
     const resetRefillTimer = useRef<(() => void) | null>(null);
     const startRefill = useRef<(() => void) | null>(null);
     const [floatingPoints, setFloatingPoints] = useState<{ points: number; x: number; y: number } | null>(null);
+    const inputRef = useRef<HTMLInputElement | null>(null);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
+
+    const scrollToBottom = () => {
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ behavior: 'auto' });
+      }
+    };
+
+    useEffect(() => {
+      // Scroll to the bottom when messages change
+      scrollToBottom();
+    }, [messages]);
 
     useEffect(() => {
       const savedWallpaper = localStorage.getItem('chatWallpaper');
@@ -327,6 +342,7 @@ const Chat: React.FC = () => {
         }
     
         setMessageInput('');
+        inputRef.current?.focus();
         resetRefillTimer.current && resetRefillTimer.current(); // Reset refill timer after sending message
       } catch (error) {
       }
@@ -357,6 +373,8 @@ const Chat: React.FC = () => {
           // If there's a new message, add it to the list of stored messages
           const updatedMessages = newMessage ? [...storedMessages, newMessage] : storedMessages;
           setMessages(updatedMessages);
+          scrollToBottom();
+          inputRef.current?.focus();
         }
       } catch (error) {
         //console.error('Error loading messages:', error);
@@ -429,7 +447,7 @@ const Chat: React.FC = () => {
         setShowMenu(!showMenu);
       };
       const handleProfileClick = () => {
-        setShowMenu(!showMenu);
+        setShowMenu(false);
         router.push(`/profile/${friendId}`);
       };
     
@@ -454,7 +472,8 @@ const Chat: React.FC = () => {
     }
 
       return (
-        <div className="flex flex-col h-screen max-w-full overflow-x-hidden">
+        <WalletGuard>
+        <div className="flex flex-col h-screen max-w-full overflow-x-hidden overflow-y-hidden">
           <div
         style={{
           backgroundImage: `url(${backgroundImage})`,
@@ -468,7 +487,7 @@ const Chat: React.FC = () => {
           zIndex: -1, // Make sure the background is behind all other elements
         }}
       />
-        <div className="flex fixed top-0 items-center p-1 bg-black text-white z-10">
+        <div className="flex left-0 right-0 top-0 items-center p-1 bg-black text-white z-10">
           <div className="flex items-center space-x-2">
             <FontAwesomeIcon
               icon={faArrowLeft}
@@ -574,8 +593,11 @@ const Chat: React.FC = () => {
                 </div>
               ))
             )}
+            <div ref={messagesEndRef} />
           </div>
                 )}
+
+
 
 
 {floatingPoints && (
@@ -591,6 +613,7 @@ const Chat: React.FC = () => {
             <div className="flex-grow flex  items-center">
               <ChatInput
                 message={messageInput}
+                ref={inputRef} 
                 isRecording={isRecording}
                 onSend={sendMessage}
                 onRecord={startRecording}
@@ -615,6 +638,7 @@ const Chat: React.FC = () => {
         onSave={saveWallpaper}
       />
         </div>
+        </WalletGuard>
       );
       
 };

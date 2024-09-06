@@ -124,7 +124,6 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
       const storedData = await getUserData(userId || '');
       if (storedData && storedData.id === userId) {
         setUser(storedData);
-        setFriends(storedData.friends || []);
       } else {
         const response = await fetch('/api/user', {
           headers: {
@@ -136,7 +135,6 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
         }
         const data = await response.json();
         setUser(data.user);
-        setFriends(data.user.friends || []);
         await saveUserData({ id: userId, ...data.user });
       }
       fetchUserPoints(token);

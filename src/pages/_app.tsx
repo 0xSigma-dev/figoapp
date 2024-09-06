@@ -62,21 +62,21 @@ function MyApp({ Component, pageProps }: AppProps) {
         <link rel="shortcut icon" href="/favicon.ico" />
         <link rel="mask-icon" href="/icons/mask-icon.svg" color="#FFFFFF" />
         <meta name="theme-color" content="#ffffff" />
-        <link rel="apple-touch-icon" href="/icons/touch-icon-iphone.png" />
+        <link rel="apple-touch-icon" href="/ios/50.png" />
         <link
           rel="apple-touch-icon"
           sizes="152x152"
-          href="/icons/touch-icon-ipad.png"
+          href="/ios/50.png"
         />
         <link
           rel="apple-touch-icon"
           sizes="180x180"
-          href="/icons/touch-icon-iphone-retina.png"
+          href="/ios/50.png"
         />
         <link
           rel="apple-touch-icon"
           sizes="167x167"
-          href="/icons/touch-icon-ipad-retina.png"
+          href="/ios/50.png"
         />
         <link rel="manifest" href="/manifest.json" />
         <meta name="twitter:card" content="summary" />
@@ -90,7 +90,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         <meta property="og:description" content="First Multidimensional Gamified Web App!" />
         <meta property="og:site_name" content="Figo" />
         <meta property="og:url" content="https://app.figoapp.xyz" />
-        <meta property="og:image" content="/icons/og.png" />
+        <meta property="og:image" content="/ios/60.png" />
       </Head>
       <div className={montaga.className}>
     <ThemeProvider attribute="class" enableSystem={true} defaultTheme="system">
