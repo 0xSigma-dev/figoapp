@@ -82,9 +82,9 @@ const Header: React.FC<HeaderProps> = ({ user, points }) => {
       const userId = Cookies.get('userId');
       if (userId) {
         await deleteDatabase(userId); // Pass userId to deleteDatabase
-        console.log("All database content deleted successfully.");
+        //console.log("All database content deleted successfully.");
       } else {
-        console.error('User ID is not available for database deletion.');
+        //console.error('User ID is not available for database deletion.');
       }
   
       await disconnect();
@@ -92,7 +92,7 @@ const Header: React.FC<HeaderProps> = ({ user, points }) => {
       localStorage.clear();
       router.push('/');
     } catch (error) {
-      console.error('Error disconnecting wallet:', error);
+      //console.error('Error disconnecting wallet:', error);
     }
   };
 

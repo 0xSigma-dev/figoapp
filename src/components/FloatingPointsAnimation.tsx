@@ -12,15 +12,15 @@ const FloatingPointsAnimation: React.FC<FloatingPointsAnimationProps> = ({ point
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(false), 2000); // Hide after 2 seconds
+    const timer = setTimeout(() => setIsVisible(false), 3000); // Hide after 2 seconds
     return () => clearTimeout(timer);
   }, []);
 
   return isVisible ? (
     <motion.div
       initial={{ opacity: 1, y: 0 }}
-      animate={{ opacity: 0, y: -50 }}
-      transition={{ duration: 4 }}
+      animate={{ opacity: 0, y: -100 }}
+      transition={{ duration: 5 }}
       style={{
         position: 'absolute',
         left: `${x}px`,
@@ -28,6 +28,7 @@ const FloatingPointsAnimation: React.FC<FloatingPointsAnimationProps> = ({ point
         color: 'text-black dark:text-white',
         fontSize: '20px',
         fontWeight: 'bold',
+        zIndex: '20'
       }}
     >
       +{points}

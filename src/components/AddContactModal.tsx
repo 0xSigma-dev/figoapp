@@ -62,7 +62,7 @@ const AddContactModal: React.FC<AddContactModalProps> = ({ userDetails, onClose,
       onClose();
 
     } catch (error) {
-      console.error('Failed to save contact:', error);
+      //console.error('Failed to save contact:', error);
       setMessageType('error');
       setMessage('Failed to save contact. Please try again.');
     }

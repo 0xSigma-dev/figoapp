@@ -9,10 +9,10 @@ import { UserProvider } from '../context/UserContext'; // Adjust the import path
 import Head from "next/head";
 import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
-import { Montagu_Slab } from '@next/font/google';
+import { Montaga } from '@next/font/google';
 
 
-const montaguSlab = Montagu_Slab({
+const montaga = Montaga({
   weight: '400',
   subsets: ['latin'], // Specify subsets if needed
 });
@@ -92,7 +92,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         <meta property="og:url" content="https://app.figoapp.xyz" />
         <meta property="og:image" content="/icons/og.png" />
       </Head>
-      <div className={montaguSlab.className}>
+      <div className={montaga.className}>
     <ThemeProvider attribute="class" enableSystem={true} defaultTheme="system">
     
       <AppWalletProvider>

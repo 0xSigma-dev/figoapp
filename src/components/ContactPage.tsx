@@ -140,7 +140,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ theme }) => {
                 <div className="flex items-center">
                   <AvatarComponent avatarId={contact.avatar} width={50} height={50} />
                   <div className="ml-4">
-                    <p className="text-white font-bold">{contact.displayName}</p>
+                    <p className="text-black dark:text-white font-bold">{contact.displayName}</p>
                     <p className="text-gray-400 text-sm">{contact.bio}</p>
                   </div>
                 </div>

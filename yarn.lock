@@ -1288,6 +1288,11 @@
     "@babel/helper-validator-identifier" "^7.24.7"
     to-fast-properties "^2.0.0"
 
+"@capsizecss/metrics@^3.2.0":
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/@capsizecss/metrics/-/metrics-3.2.0.tgz#7a97a39bdb65b1cb08c0eb90822b1422759fa9ea"
+  integrity sha512-EVWRXJaakH6NTq+7cZawgFiqA+UyESMszN/c1oDHbC/b0SAzQJ/QLS0xpaa3Y+YMfXOkEEjkuChYIV5pSkgmcg==
+
 "@ducanh2912/next-pwa@^10.2.8":
   version "10.2.8"
   resolved "https://registry.yarnpkg.com/@ducanh2912/next-pwa/-/next-pwa-10.2.8.tgz#6e7e2e2a36e791ed78e0c8c7f34c7c969fd1a02e"
@@ -3824,6 +3829,11 @@
     "@types/node" "*"
     "@types/responselike" "^1.0.0"
 
+"@types/canvas-confetti@^1.6.4":
+  version "1.6.4"
+  resolved "https://registry.yarnpkg.com/@types/canvas-confetti/-/canvas-confetti-1.6.4.tgz#620fd8d78b335d6a4046c0f73236d6988b37552a"
+  integrity sha512-fNyZ/Fdw/Y92X0vv7B+BD6ysHL4xVU5dJcgzgxLdGbn8O3PezZNIJpml44lKM0nsGur+o/6+NZbZeNTt00U1uA==
+
 "@types/caseless@*":
   version "0.12.5"
   resolved "https://registry.yarnpkg.com/@types/caseless/-/caseless-0.12.5.tgz#db9468cb1b1b5a925b8f34822f1669df0c5472f5"
@@ -5445,6 +5455,11 @@ caniuse-lite@^1.0.30001646:
   version "1.0.30001651"
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001651.tgz#52de59529e8b02b1aedcaaf5c05d9e23c0c28138"
   integrity sha512-9Cf+Xv1jJNe1xPZLGuUXLNkE1BoDkqRqYyFJ9TDYSqhduqA4hu4oR9HluGoWYQC/aj8WHjsGVV+bwkh0+tegRg==
+
+canvas-confetti@^1.9.3:
+  version "1.9.3"
+  resolved "https://registry.yarnpkg.com/canvas-confetti/-/canvas-confetti-1.9.3.tgz#ef4c857420ad8045ab4abe8547261c8cdf229845"
+  integrity sha512-rFfTURMvmVEX1gyXFgn5QMn81bYk70qa0HLzcIOSVEyl57n6o9ItHeBtUSWdvKAPY0xlvBHno4/v3QPrT83q9g==
 
 cashaddrjs@0.4.4:
   version "0.4.4"
@@ -9476,6 +9491,11 @@ react-dom@^18:
     loose-envify "^1.1.0"
     scheduler "^0.23.2"
 
+react-icons@^5.3.0:
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/react-icons/-/react-icons-5.3.0.tgz#ccad07a30aebd40a89f8cfa7d82e466019203f1c"
+  integrity sha512-DnUk8aFbTyQPSkCfF8dbX6kQjXA9DktMeJqfjrg6cK9vwQVMxmcA3BfP4QoiztVmEHtwlTgLFsPuH2NskKT6eg==
+
 react-intersection-observer@^9.13.0:
   version "9.13.0"
   resolved "https://registry.yarnpkg.com/react-intersection-observer/-/react-intersection-observer-9.13.0.tgz#ee10827954cf6ccc204d027f8400a6ddb8df163a"
@@ -9495,6 +9515,11 @@ react-lifecycles-compat@^3.0.0:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
   integrity sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==
+
+react-loading-skeleton@^3.4.0:
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/react-loading-skeleton/-/react-loading-skeleton-3.4.0.tgz#c71a3a17259d08e4064974aa0b07f150a09dfd57"
+  integrity sha512-1oJEBc9+wn7BbkQQk7YodlYEIjgeR+GrRjD+QXkVjwZN7LGIcAFHrx4NhT7UHGBxNY1+zax3c+Fo6XQM4R7CgA==
 
 react-lottie-player@^2.1.0:
   version "2.1.0"

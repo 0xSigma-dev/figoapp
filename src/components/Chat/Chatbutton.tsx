@@ -28,6 +28,8 @@ const ChatButton: React.FC<ChatButtonProps> = ({ isRecording, message, onSend, o
     }
   };
 
+ 
+
   return (
     <button
       onClick={handleClick}

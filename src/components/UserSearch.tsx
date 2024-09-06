@@ -51,7 +51,7 @@ const UserSearch: React.FC<UserSearchProps> = ({ onClose }) => {
           .or(`username.ilike.%${searchTerm}%, publicKey.ilike.%${searchTerm}%`);
 
         if (error) {
-          console.error("Error searching users:", error.message);
+          //console.error("Error searching users:", error.message);
           return;
         }
 
@@ -59,7 +59,7 @@ const UserSearch: React.FC<UserSearchProps> = ({ onClose }) => {
         const results = data?.filter((user: User) => user.id !== currentUser) || [];
         setSearchResults(results);
       } catch (error) {
-        console.error("Unknown error occurred:", error);
+        //console.error("Unknown error occurred:", error);
       }
       setLoading(false);
     };

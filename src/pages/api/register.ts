@@ -18,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .maybeSingle();  // Changed from .single() to .maybeSingle()
 
       if (usernameError) {
-        console.error('Error checking username availability:', usernameError.message, usernameError.details);
+        //console.error('Error checking username availability:', usernameError.message, usernameError.details);
         return res.status(500).json({ message: 'Error checking username availability' });
       }
 
@@ -87,11 +87,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .select()
         .single(); // Use .single() to get the inserted record
 
-        console.log('Inserted user data:', insertedUser);
+        //console.log('Inserted user data:', insertedUser);
 
 
       if (userInsertError) {
-        console.error('Error inserting new user data:', userInsertError.message, userInsertError.details);
+        //console.error('Error inserting new user data:', userInsertError.message, userInsertError.details);
         return res.status(500).json({ message: 'Error inserting new user data' });
       }
 
@@ -104,7 +104,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .maybeSingle();  // Changed from .single() to .maybeSingle()
 
         if (referrerError) {
-          console.error('Error retrieving referrer data:', referrerError.message, referrerError.details);
+          //console.error('Error retrieving referrer data:', referrerError.message, referrerError.details);
           return res.status(500).json({ message: 'Error retrieving referrer data' });
         }
 
@@ -118,7 +118,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             .eq('id', referralId);
 
           if (referrerUpdateError) {
-            console.error('Error updating referrer data:', referrerUpdateError.message, referrerUpdateError.details);
+            //console.error('Error updating referrer data:', referrerUpdateError.message, referrerUpdateError.details);
             return res.status(500).json({ message: 'Error updating referrer data' });
           }
         }
@@ -130,7 +130,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         uniqueId: uniqueId 
       });
     } catch (error) {
-      console.error('Unexpected error occurred:', error);
+      //console.error('Unexpected error occurred:', error);
       return res.status(500).json({ message: 'Unexpected error occurred' });
     }
   } else {

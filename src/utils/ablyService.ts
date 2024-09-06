@@ -28,7 +28,6 @@ class AblyService {
       const result = await channel.history({ limit: 100 });
       return result.items;
     } catch (error) {
-      console.error('Error fetching channel history:', error);
       return [];
     }
   }

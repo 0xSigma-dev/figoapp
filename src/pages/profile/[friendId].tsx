@@ -257,7 +257,7 @@ const ProfilePage: React.FC = () => {
       .then(() => console.log('Successful share'))
       .catch((error) => console.error('Error sharing:', error));
     } else {
-      console.warn('Web Share API is not supported in this browser.');
+      //console.warn('Web Share API is not supported in this browser.');
       // Fallback code can be added here to handle cases where the Web Share API is not supported
     }
   };
@@ -288,7 +288,7 @@ const ProfilePage: React.FC = () => {
       setIsEditing(false);
       setSuccessMessage('Profile updated successfully!');
     } catch (err) {
-      console.error('Error updating profile:', err);
+      //console.error('Error updating profile:', err);
       setErrorMessage('Failed to update profile.');
     }
   };

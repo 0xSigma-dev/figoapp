@@ -16,9 +16,7 @@ const AccountSettingsPage = () => {
   };
 
   const handleSave = () => {
-    // Logic to save the updated username and avatar
-    console.log("Username:", username);
-    console.log("Avatar:", avatar);
+  
   };
 
   return (

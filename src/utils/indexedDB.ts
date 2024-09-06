@@ -267,7 +267,6 @@ export const saveMessage = async (message: any, messageId: any, channelId: any):
     const request = store.put(messageWithId);
 
     request.onsuccess = () => {
-      console.log('Message saved successfully.');
       resolve();
     };
 

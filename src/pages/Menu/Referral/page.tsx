@@ -10,6 +10,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { getUserData, updateUserDataFields } from '@/utils/indexedDB';
 import { Suspense, lazy } from 'react';
 import Cookies from 'js-cookie';
+import Confetti from 'react-confetti';
 
 const ErrorModal = lazy(() => import('../../../components/ErrorModal'));
 const SuccessModal = lazy(() => import('../../../components/SuccessModal'));
@@ -51,6 +52,12 @@ const ReferralPage = () => {
     fetchUserData();
   }, []);
 
+  const startConfetti = () => {
+    setShowConfetti(true);
+    setTimeout(() => {
+      setShowConfetti(false); // Stop confetti after 5 seconds
+    }, 5000);
+  };
 
   const fetchUserData = async () => {
     try {
@@ -137,12 +144,7 @@ const ReferralPage = () => {
       await fetchUserData();
   
       setSuccessMessage('Points claimed successfully!');
-      setShowConfetti(true);
-  
-      setTimeout(() => {
-        setShowConfetti(false);
-      }, 5000);
-  
+      startConfetti(); 
     } catch (error) {
       setErrorMessage('Failed to claim points. Please try again later.');
     }
@@ -269,6 +271,7 @@ const ReferralPage = () => {
     </div>
   </div>
 </div>
+{showConfetti && <Confetti width={window.innerWidth} height={window.innerHeight} />}
 
 <div className="flex-1 mb-4 flex justify-center">
   <div className="w-full max-w-xs p-4 border border-purple-600 rounded-lg flex items-center text-center mx-2">
@@ -298,6 +301,10 @@ const ReferralPage = () => {
       </div>
       </>
       )}
+      <Suspense fallback={<div>Loading...</div>}>
+  <ErrorModal message={errorMessage} onClose={() => setErrorMessage(null)} />
+  <SuccessModal message={successMessage} onClose={() => setSuccessMessage(null)} />
+</Suspense>
     </div>
   );
 };

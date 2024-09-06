@@ -14,7 +14,7 @@ const EnergyProgressBar: React.FC<EnergyProgressBarProps> = ({ userId }) => {
 
   const fetchEnergyData = useCallback(async () => {
     if (!userId) {
-      console.error('No userId provided');
+      //console.error('No userId provided');
       return;
     }
 
@@ -26,15 +26,18 @@ const EnergyProgressBar: React.FC<EnergyProgressBarProps> = ({ userId }) => {
         setCurrentEnergy(userData.currentEnergy || 0);
         setTotalEnergy(userData.totalEnergy || 100); // Default to 100 if totalEnergy is not set
       } else {
-        console.error('No energy data found for this user in IndexedDB');
+        //console.error('No energy data found for this user in IndexedDB');
       }
     } catch (error) {
-      console.error('Error fetching energy data from IndexedDB:', error);
+      //console.error('Error fetching energy data from IndexedDB:', error);
     }
   }, [userId]);
 
   useEffect(() => {
-    fetchEnergyData();
+    const interval = setInterval(() => {
+      fetchEnergyData();
+    }, 1000);
+    return () => clearInterval(interval);
   }, [fetchEnergyData]);
 
   const progress = totalEnergy > 0 ? (currentEnergy / totalEnergy) * 100 : 0;

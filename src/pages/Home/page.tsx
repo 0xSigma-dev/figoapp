@@ -12,12 +12,13 @@ import { useUser } from '../../context/UserContext';
 import Cookies from 'js-cookie';
 import WalletGuard from '../../components/WalletGuard';
 import ContactPage from '@/components/ContactPage';
-import { saveUserData, getUserData, getAllChannels,  getLatestMessagesForAllChannels, saveChannel, getDBInstance, saveMessage } from '../../utils/indexedDB';
+import { saveUserData, getUserData, getAllChannels,  getLatestMessagesForAllChannels, saveChannel, getDBInstance, saveMessage, updateUserDataFields } from '../../utils/indexedDB';
 import PointsDisplay from '../../components/PointsDisplay';
 import AvatarComponent from '../../components/AvatarComponent';
 import UserDetailsCard from '../../components/UserDetailsCard';
 import { supabase } from '@/lib/supabaseClient';
 import ablyService from '@/utils/ablyService';
+import Confetti from 'react-confetti';
 
 
 interface HomePageProps {
@@ -41,7 +42,8 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
   const [clickedConversationId, setClickedConversationId] = useState<string | null>(null);
   const [latestMessages, setLatestMessages] = useState<{ [key: string]: any }>({});
   const [channels, setChannels] = useState<any[]>([]);
-  const [pendingPoints, setPendingPoints] = useState<any[]>([]);
+  const [pendingPoints, setPendingPoints] = useState<any>(0);
+  const [showConfetti, setShowConfetti] = useState<boolean>(false);
 
 
   useEffect(() => {
@@ -54,6 +56,15 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
   
     initializeDB();
   }, []);
+
+  const startConfetti = () => {
+    setShowConfetti(true);
+    setTimeout(() => {
+      setShowConfetti(false); // Stop confetti after 5 seconds
+    }, 5000);
+  };
+
+
   
 
   
@@ -68,8 +79,42 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
   }, []);
 
   useEffect(() => {
+    if (!userId) return;
+
+    const storedPendingPoints = localStorage.getItem('pendingPoints');
+    if (storedPendingPoints) {
+      const parsedData = JSON.parse(storedPendingPoints);
+      if (parsedData && parsedData.userId === userId) {
+        setPendingPoints(parsedData.points);
+      } else {
+        // If data exists for a different user, reset it for this user
+        const newPendingPoints = { userId, points: 0 };
+        localStorage.setItem('pendingPoints', JSON.stringify(newPendingPoints));
+        setPendingPoints(0);
+      }
+    } else {
+      // If no pending points exist at all, initialize it
+      const newPendingPoints = { userId, points: 0 };
+      localStorage.setItem('pendingPoints', JSON.stringify(newPendingPoints));
+      setPendingPoints(0);
+    }
+  }, [userId]);
+
+  // Save pending points to localStorage
+  const savePendingPointsToLocalStorage = (points: number) => {
+    const newPendingPoints = { userId, points };
+    localStorage.setItem('pendingPoints', JSON.stringify(newPendingPoints));
+  };
+
+  // Handle point changes and save to localStorage
+  const handlePointChange = (newPoints: number) => {
+    setPendingPoints(newPoints);
+    savePendingPointsToLocalStorage(newPoints);
+  };
+
+
+  useEffect(() => {
     setIsUserDataStale(true);
-    console.log('Logged in user details:', user);
   }, [user]);
   
 
@@ -155,9 +200,39 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
   
 
   
-  function handleClaimPoints(): void {
-    throw new Error('Function not implemented.');
-  }
+  const handleClaimPoints = async () => {
+    if (!userId || !user) return;
+
+    // Step 1: Reset pending points in localStorage
+
+    try {
+      // Step 2: Update points in IndexedDB
+      const newTotalPoints = (user.points || 0) + pendingPoints;
+      await updateUserDataFields(userId, { points: newTotalPoints });
+
+      // Step 3: Update points in Supabase
+      const { error } = await supabase
+        .from('users')
+        .update({ points: newTotalPoints })
+        .eq('id', userId);
+
+      if (error) {
+        throw new Error('Error updating points in Supabase: ' + error.message);
+      }
+
+      localStorage.setItem('pendingPoints', JSON.stringify({ userId, points: 0 }));
+      setPendingPoints(0);
+
+      // Step 4: Update local user context with new points
+      setUser({
+        ...user,
+        points: newTotalPoints,
+      });
+      startConfetti();
+
+    } catch (error) {
+    }
+  };
 
 
   useEffect(() => {
@@ -264,17 +339,17 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
   <PointsDisplay points={points} />
 </div>
         <div className="flex justify-center mt-1">
-          {user && (
-            <UserDetailsCard
-              user={{
-                publicKey: user.publicKey,
-                avatar: user.avatar,
-                displayName: user.displayName,
-                pendingPoints: user.pendingpoints || 0, // Or however you are managing user points
-              }}
-              onClaimPoints={handleClaimPoints}
-            />
-          )}
+        {user && (
+              <UserDetailsCard
+                user={{
+                  publicKey: user.publicKey,
+                  avatar: user.avatar,
+                  displayName: user.displayName,
+                  pendingPoints: pendingPoints,
+                }}
+                onClaimPoints={handleClaimPoints} // Reset points on claim
+              />
+            )}
         </div>
         </div>
         <main className={`flex-1 overflow-y-auto flex ${loadingClass}`}>
@@ -307,6 +382,8 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
           <div className={`text-lg text-black dark:text-gray-500 ml-4 ${loadingClass}`}>You have no conversations</div>
         )}
       </main>
+
+      {showConfetti && <Confetti width={window.innerWidth} height={window.innerHeight} />}
   
         {showContactPage && <ContactPage  theme={theme} />}
         <EnergyProgressBar userId={userId || ''} />

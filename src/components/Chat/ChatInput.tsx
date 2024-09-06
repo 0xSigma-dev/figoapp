@@ -7,14 +7,22 @@ interface ChatInputProps {
   message: string;
   isRecording: boolean;
   onSend: () => void;
+  onKeyDown: () => void;
   onRecord: () => void;
   onStopRecording: () => void;
   setMessage: (message: string) => void;
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({ message, isRecording, onSend, onRecord, onStopRecording, setMessage }) => {
+const ChatInput: React.FC<ChatInputProps> = ({ message, isRecording, onSend, onKeyDown, onRecord, onStopRecording, setMessage}) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessage(e.target.value);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      onSend();
+    }
   };
 
   return (
@@ -44,8 +52,9 @@ const ChatInput: React.FC<ChatInputProps> = ({ message, isRecording, onSend, onR
           </button>
           <input
             type="text"
-            value={message}
+            value={message} 
             onChange={handleChange}
+            onKeyDown={handleKeyDown}
             placeholder="Message"
             className="flex-1 bg-gray-800 text-white placeholder-gray-500 h-10 outline-none border-none px-2"
             style={{ caretColor: '#7E22CE', caretShape:'bar' }}

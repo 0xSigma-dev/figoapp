@@ -37,7 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       return res.status(200).json({ message: 'Avatar updated successfully' });
     } catch (error) {
-      console.error('Unexpected error occurred:', error);
+      //console.error('Unexpected error occurred:', error);
       return res.status(500).json({ message: 'Unexpected error occurred' });
     }
   } else {
