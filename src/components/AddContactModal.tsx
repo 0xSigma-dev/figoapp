@@ -45,13 +45,6 @@ const AddContactModal: React.FC<AddContactModalProps> = ({ userDetails, onClose,
     }
 
     try {
-      // Check if contacts API is available and save to device contact list first
-      if ('contacts' in navigator && 'ContactsManager' in window) {
-        await (navigator as any).contacts.save(contact);
-        setMessageType('success');
-        setMessage('Contact saved to device contact list successfully.');
-      }
-
       // Save to IndexedDB
       await saveContact(contact);
       setMessageType('success');

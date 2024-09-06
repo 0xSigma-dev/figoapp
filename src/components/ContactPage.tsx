@@ -42,7 +42,6 @@ const ContactPage: React.FC<ContactPageProps> = ({ theme }) => {
 
   const fetchContacts = async () => {
     setLoading(true);
-    await syncContactsFromNavigator();
     const dbContacts = await getAllContacts();
     setContacts(dbContacts);
     setLoading(false);
@@ -51,7 +50,6 @@ const ContactPage: React.FC<ContactPageProps> = ({ theme }) => {
 
   useEffect(() => {
     const fetchContacts = async () => {
-      await syncContactsFromNavigator();
       const dbContacts = await getAllContacts();
       setContacts(dbContacts);
     };

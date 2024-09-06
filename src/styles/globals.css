@@ -5,12 +5,12 @@
 
 
 :root {
-  --bg-color: #ffffff;
-  --text-color: #000000;
+  --bg-color: #100113;
+  --text-color: #ffffff;
 }
 
 .dark {
-  --bg-color: #000000;
+  --bg-color: #100113;
   --text-color: #ffffff;
 }
 
@@ -21,6 +21,11 @@ body {
   margin: 0; /* Ensure no margin around the body */
   height: 100vh; /* Ensure body takes full viewport height */
   overflow: hidden; /* Prevent scrolling */
+}
+
+/* Light mode styles */
+:not(.dark) {
+  --background-color: #ffffff; /* Set your light mode background color */
 }
 
 .username {
