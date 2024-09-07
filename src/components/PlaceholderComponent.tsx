@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShareAlt, faUser, faCog, faInfoCircle, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 import AvatarComponent from './AvatarComponent';
-import Link from "next/link";
+import { useRouter } from "next/router";
 
 interface User {
   id?: string;
@@ -31,10 +31,20 @@ const PlaceholderComponent = forwardRef<HTMLDivElement, PlaceholderComponentProp
   const points = user?.points;
   const totalPointsRequired = 50000;
   const [blinkItem, setBlinkItem] = useState<string | null>(null);
+  const router = useRouter();
 
   const handleBlink = (item: string) => {
     setBlinkItem(item);
     setTimeout(() => setBlinkItem(null), 500); // Remove blink effect after 500ms
+  };
+
+
+  const navigateTo = (path: string, query?: any) => {
+    handleBlink(path);
+    router.push({
+      pathname: path,
+      query,
+    });
   };
 
   return (
@@ -84,63 +94,50 @@ const PlaceholderComponent = forwardRef<HTMLDivElement, PlaceholderComponentProp
         <hr className="w-full border-gray-600 my-4" />
 
         <div className="w-full text-left">
-          <Link 
-            href={{
-              pathname: "/profile/[userId]",
-              query: { userId: user?.id },
-            }}
+          <div
+            className={`flex items-center space-x-2 cursor-pointer p-4 rounded ${
+              blinkItem === "profile" ? "blink-effect" : ""
+            }`}
+            onClick={() => navigateTo("/profile/[friendId]", { friendId: user?.id })}
           >
-            <div
-              className={`flex items-center space-x-2 cursor-pointer p-4 rounded ${
-                blinkItem === "profile" ? "blink-effect" : ""
-              }`}
-              onClick={() => handleBlink("profile")}
-            >
-              <FontAwesomeIcon icon={faUser} className="text-gray-400 mr-2" style={{ fontSize: "24px" }} />
-              <span className="text-black dark:text-white text-lg">Profile</span>
-            </div>
-          </Link>
+            <FontAwesomeIcon icon={faUser} className="text-gray-400 mr-2" style={{ fontSize: "24px" }} />
+            <span className="text-black dark:text-white text-lg">Profile</span>
+          </div>
         </div>
 
         <div className="w-full text-left">
-          <Link href="/Menu/Referral/page">
-            <div
-              className={`flex items-center cursor-pointer p-4 rounded ${
-                blinkItem === "referral" ? "blink-effect" : ""
-              }`}
-              onClick={() => handleBlink("referral")}
-            >
-              <FontAwesomeIcon icon={faShareAlt} className="text-gray-400 mr-2" style={{ fontSize: "24px" }} />
-              <span className="text-black dark:text-white">Referral</span>
-            </div>
-          </Link>
+          <div
+            className={`flex items-center cursor-pointer p-4 rounded ${
+              blinkItem === "referral" ? "blink-effect" : ""
+            }`}
+            onClick={() => navigateTo("/Menu/Referral/page")}
+          >
+            <FontAwesomeIcon icon={faShareAlt} className="text-gray-400 mr-2" style={{ fontSize: "24px" }} />
+            <span className="text-black dark:text-white">Referral</span>
+          </div>
         </div>
       </div>
 
       <div className="w-full flex flex-col border-t border-gray-600 pt-4 mt-4">
-        <Link href="/settings">
-          <div
-            className={`flex items-center space-x-2 cursor-pointer p-4 rounded ${
-              blinkItem === "settings" ? "blink-effect" : ""
-            }`}
-            onClick={() => handleBlink("settings")}
-          >
-            <FontAwesomeIcon icon={faCog} className="text-gray-400 mr-2" style={{ fontSize: "24px" }} />
-            <span className="text-black dark:text-white">Settings</span>
-          </div>
-        </Link>
+      <div
+          className={`flex items-center space-x-2 cursor-pointer p-4 rounded ${
+            blinkItem === "settings" ? "blink-effect" : ""
+          }`}
+          onClick={() => navigateTo("/settings")}
+        >
+          <FontAwesomeIcon icon={faCog} className="text-gray-400 mr-2" style={{ fontSize: "24px" }} />
+          <span className="text-black dark:text-white">Settings</span>
+        </div>
 
-        <Link href="https://figo.gitbook.io/figo-docs">
-          <div
-            className={`flex items-center space-x-2 cursor-pointer p-4 rounded ${
-              blinkItem === "about" ? "blink-effect" : ""
-            }`}
-            onClick={() => handleBlink("about")}
-          >
-            <FontAwesomeIcon icon={faInfoCircle} className="text-gray-400 mr-2" style={{ fontSize: "24px" }} />
-            <span className="text-black dark:text-white">About</span>
-          </div>
-        </Link>
+        <div
+          className={`flex items-center space-x-2 cursor-pointer p-4 rounded ${
+            blinkItem === "about" ? "blink-effect" : ""
+          }`}
+          onClick={() => navigateTo("https://figo.gitbook.io/figo-docs")}
+        >
+          <FontAwesomeIcon icon={faInfoCircle} className="text-gray-400 mr-2" style={{ fontSize: "24px" }} />
+          <span className="text-black dark:text-white">About</span>
+        </div>
       </div>
     </motion.div>
   );

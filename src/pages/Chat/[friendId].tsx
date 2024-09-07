@@ -4,7 +4,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faBan, faEllipsisV } from '@fortawesome/free-solid-svg-icons';
 import * as Ably from 'ably';
 import Cookies from 'js-cookie';
-import ablyService from '@/utils/ablyService';
 import ChatButton from '@/components/Chat/Chatbutton';
 import ChatInput from '@/components/Chat/ChatInput';
 import { getAllChannels, getContactById, getUserData, loadMessages, saveChannel, saveMessage } from '@/utils/indexedDB';
@@ -19,12 +18,15 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import FloatingPointsAnimation from '../../components/FloatingPointsAnimation';
 import WalletGuard from '../../components/WalletGuard';
+import { useAbly } from '@/context/AblyContext';
+import { subscribeToChannel, unsubscribeFromChannel, fetchChannelHistory } from '@/utils/ablyService';
 
 
 
 const Chat: React.FC = () => {
     const router = useRouter();
     const { friendId } = router.query;
+    const { ablyClient } = useAbly();
     const [messages, setMessages] = useState<any[]>([]);
     const [messageInput, setMessageInput] = useState<string>('');
     const userId = Cookies.get('userId'); // Replace with actual user ID
@@ -54,6 +56,7 @@ const Chat: React.FC = () => {
     const [floatingPoints, setFloatingPoints] = useState<{ points: number; x: number; y: number } | null>(null);
     const inputRef = useRef<HTMLInputElement | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    
 
 
     const scrollToBottom = () => {
@@ -273,35 +276,22 @@ const Chat: React.FC = () => {
       };
     
       const subscribeToAbly = () => {
-        const ablyClient = ablyService.getClient();
-        if (!ablyClient) {
-          //console.log('Ably is not initialized');
-          return;
-        }
+        if (!ablyClient) return;
           
         //console.log('Subscribing to channel:', channelName);
         const channel = ablyClient.channels.get(newChannelName);
         channelRef.current = channel;
     
-        channel.subscribe((message) => {
-          try {
-            saveMessage(message.data, message.id, newChannelName);
-            fetchMessages(message);
-          } catch (error) {
-          }
-        });
+        subscribeToChannel(ablyClient, newChannelName, (message) => {
+          saveMessage(message.data, message.id, newChannelName);
+          fetchMessages(message);
+      });
       };
     
       createChannel();
       subscribeToAbly();
     
-      return () => {
-        if (channelRef.current) {
-          channelRef.current.unsubscribe();
-          channelRef.current.presence.unsubscribe();
-        }
-      };
-    }, [isUserDetailsFetched, userId, friendId]);
+    }, [isUserDetailsFetched, userId, friendId, ablyClient]);
     
     
     
@@ -313,7 +303,7 @@ const Chat: React.FC = () => {
     
       try {
         const message = { text: messageInput, sender: userId };
-        await ablyService.publishToChannel(channelRef.current.name, message);
+        channelRef.current.publish('message', message);
         
         // Check if currentEnergy is sufficient before adding points
         if (currentEnergy >= pointsToAdd) {
@@ -351,7 +341,7 @@ const Chat: React.FC = () => {
     
 
     const fetchMessages = async (newMessage: any = null) => {
-      if (!channelRef.current) return;
+      if (!channelRef.current || !ablyClient) return;
       try {
         // Check if there are messages already in IndexedDB
         const storedMessages = await loadMessages(channelRef.current.name);
@@ -359,7 +349,7 @@ const Chat: React.FC = () => {
     
         // If no messages are stored, fetch from Ably
         if (storedMessages.length === 0) {
-          const fetchedMessages = await ablyService.fetchChannelHistory(channelRef.current.name);
+          const fetchedMessages = await fetchChannelHistory(ablyClient, channelRef.current.name);
           if (fetchedMessages.length > 0) {
             // Save fetched messages to IndexedDB
             for (const msg of fetchedMessages) {
@@ -471,120 +461,115 @@ const Chat: React.FC = () => {
         throw new Error('Function not implemented.');
     }
 
-      return (
-        <WalletGuard>
-        <div className="flex flex-col h-screen max-w-full overflow-x-hidden overflow-y-hidden">
+    return (
+      <WalletGuard>
+        <div className="flex flex-col h-screen max-w-full overflow-x-hidden">
+          {/* Background image */}
           <div
-        style={{
-          backgroundImage: `url(${backgroundImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          zIndex: -1, // Make sure the background is behind all other elements
-        }}
-      />
-        <div className="flex sticky items-center justify-between p-1 bg-black text-white z-10">
-          <div className="flex items-center space-x-2">
-            <FontAwesomeIcon
-              icon={faArrowLeft}
-              onClick={() => router.back()}
-              className="text-xl cursor-pointer"
-            />
-            <div className="flex items-center space-x-1">
-            {loading ? (
-                <Skeleton circle={true} height={50} width={50} />
-            ) : (
-            <AvatarComponent avatarId={avatar} width={60} height={60} /> )}
-             {loading ? (
-                <Skeleton width={150} height={25} />
-            ) : (
-            <div className='mr-2 hover:bg-gray-700' onClick={handleProfileClick}>
-           
-              <h2 className="text-white font-bold">{displayName || 'User'}</h2>
-              <p className={`${statusColor} text-sm`}>{friendStatus || ''}</p> 
-            </div>
-            )}
-          </div> 
-          </div>
-          <div className="flex items-center space-x-2 ml-auto">
-            <div className="text-white font-semibold mr-3">{pendingPoints}</div>
-            <div className="relative" ref={menuRef}>
-          <div className="cursor-pointer mr-6 text-black dark:text-white" onClick={handleMenuClick}>
-            <FontAwesomeIcon icon={faEllipsisV} style={{ fontSize: '24px'}} />
-          </div>
-          {showMenu && (
-            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-900 rounded-md shadow-lg py-2 z-20">
-              <button
-                onClick={handleProfileClick}
-                className="block px-4 py-2 text-black dark:text-white hover:bg-gray-700"
-              >
-              <span>View Profile</span>
-              </button>
-              <button
-                onClick={handleOpenWarning}
-                className="block px-4 py-2 text-black dark:text-white hover:bg-gray-700"
-              >
-              <span>Backup OnChain</span>
-              </button>
-              <button
-                onClick={openWallpaperModal}
-                className="block px-4 py-2 text-black dark:text-white hover:bg-gray-700"
-              >
-              <span>Wallpaper</span>
-              </button>
-             
-              <button
-                onClick={handleOpenWarning}
-                className="block px-4 py-2 text-black dark:text-white hover:bg-gray-700"
-              >
-              <span>Clear Chat</span>
-              </button>
-              <button
-                onClick={handleOpenWarning}
-                className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-200 dark:hover:bg-gray-700"
-              >
-              <FontAwesomeIcon icon={faBan} className="text-red-600 mr-2" style={{ fontSize: "24px" }} />
-              <span className="text-red-600">Block</span>
-              </button>
-              
-            </div>
-          )}
-        </div>
-        </div>
-        </div>
-
-        {loading ? (
-                    <div>
-                        <Skeleton count={10} height={40} style={{ marginBottom: '10px' }} />
-                    </div>
+            style={{
+              backgroundImage: `url(${backgroundImage})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              zIndex: -1,
+            }}
+          />
+          
+          {/* Sticky Header */}
+          <header className="flex sticky top-0 left-0 right-0 items-center justify-between p-1 bg-black text-white z-10">
+            <div className="flex items-center space-x-2">
+              <FontAwesomeIcon
+                icon={faArrowLeft}
+                onClick={() => router.back()}
+                className="text-xl cursor-pointer"
+              />
+              <div className="flex items-center space-x-1">
+                {loading ? (
+                  <Skeleton circle={true} height={50} width={50} />
                 ) : (
-          <div className="flex-1 p-4 overflow-y-auto">
-            {messages.length === 0 ? (
-              <div className="flex-grow mt-20 flex items-center justify-center">
-              <div className="flex flex-col items-center justify-center bg-black w-40 rounded-lg p-6">
-                <div className="mb-4"><AvatarComponent avatarId={avatar} width={80} height={80} /></div>
-                <p className="text-white font-mono text-xs">Hi, Happy to meet you. Let&apos;s talk!</p>
+                  <AvatarComponent avatarId={avatar} width={60} height={60} />
+                )}
+                {loading ? (
+                  <Skeleton width={150} height={25} />
+                ) : (
+                  <div className="mr-2 hover:bg-gray-700" onClick={handleProfileClick}>
+                    <h2 className="text-white font-bold">{displayName || 'User'}</h2>
+                    <p className={`${statusColor} text-sm`}>{friendStatus || ''}</p>
+                  </div>
+                )}
               </div>
             </div>
+            <div className="flex items-center space-x-2 ml-auto">
+              <div className="text-white font-semibold mr-3">{pendingPoints}</div>
+              <div className="relative" ref={menuRef}>
+                <div className="cursor-pointer mr-6 text-black dark:text-white" onClick={handleMenuClick}>
+                  <FontAwesomeIcon icon={faEllipsisV} style={{ fontSize: '24px' }} />
+                </div>
+                {showMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-900 rounded-md shadow-lg py-2 z-20">
+                    <button
+                      onClick={handleProfileClick}
+                      className="block px-4 py-2 text-black dark:text-white hover:bg-gray-700"
+                    >
+                      View Profile
+                    </button>
+                    <button
+                      onClick={handleOpenWarning}
+                      className="block px-4 py-2 text-black dark:text-white hover:bg-gray-700"
+                    >
+                      Backup OnChain
+                    </button>
+                    <button
+                      onClick={openWallpaperModal}
+                      className="block px-4 py-2 text-black dark:text-white hover:bg-gray-700"
+                    >
+                      Wallpaper
+                    </button>
+                    <button
+                      onClick={handleOpenWarning}
+                      className="block px-4 py-2 text-black dark:text-white hover:bg-gray-700"
+                    >
+                      Clear Chat
+                    </button>
+                    <button
+                      onClick={handleOpenWarning}
+                      className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-200 dark:hover:bg-gray-700"
+                    >
+                      <FontAwesomeIcon icon={faBan} className="text-red-600 mr-2" style={{ fontSize: "24px" }} />
+                      Block
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </header>
+    
+          {/* Scrollable message area */}
+          <div className="flex-1 p-4 overflow-y-auto">
+            {loading ? (
+              <Skeleton count={10} height={40} style={{ marginBottom: '10px' }} />
+            ) : messages.length === 0 ? (
+              <div className="flex-grow mt-20 flex items-center justify-center">
+                <div className="flex flex-col items-center justify-center bg-black w-40 rounded-lg p-6">
+                  <div className="mb-4">
+                    <AvatarComponent avatarId={avatar} width={80} height={80} />
+                  </div>
+                  <p className="text-white font-mono text-xs">
+                    Hi, Happy to meet you. Let&apos;s talk!
+                  </p>
+                </div>
+              </div>
             ) : (
               messages.map((msg, index) => (
                 <div
                   key={index}
-                  className={`flex ${
-                    msg.sender === userId ? 'justify-end' : 'justify-start'
-                  } mb-2`}
+                  className={`flex ${msg.sender === userId ? 'justify-end' : 'justify-start'} mb-2`}
                 >
-                  <div
-                    className={`p-2 rounded-lg ${
-                      msg.sender === userId
-                        ? 'bg-purple-800 text-white'
-                        : 'bg-gray-800 text-white'
-                    } max-w-xs relative`}
-                  >
+                  <div className={`p-2 rounded-lg ${msg.sender === userId ? 'bg-purple-800 text-white' : 'bg-gray-800 text-white'} max-w-xs relative`}>
                     {msg.text}
                     <span className="text-xs text-gray-400 ml-4 justify-end bottom-1">
                       {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -595,51 +580,43 @@ const Chat: React.FC = () => {
             )}
             <div ref={messagesEndRef} />
           </div>
-                )}
-
-
-
-
-{floatingPoints && (
-        <FloatingPointsAnimation 
-          points={floatingPoints.points} 
-          x={floatingPoints.x} 
-          y={floatingPoints.y} 
-        />
-      )}
-      
-          {/* Adjust the bottom input section */}
-          <div className="p-2 flex items-center max-w-full">
-            <div className="flex-grow flex  items-center">
-              <ChatInput
-                message={messageInput}
-                ref={inputRef} 
-                isRecording={isRecording}
-                onSend={sendMessage}
-                onRecord={startRecording}
-                onStopRecording={stopRecording}
-                setMessage={setMessageInput}
-                onKeyDown={sendMessage}
-              />
-            </div>
-      
-            <div className="ml-2">
-              <ChatButton
-                isRecording={isRecording}
-                message={messageInput}
-                onSend={sendMessage}
-                onRecord={startRecording}
-              />
+    
+          {/* Sticky Chat Input and Buttons */}
+          <div className="sticky bottom-0 p-2 bg-opacity-50 w-full z-10">
+            <div className="flex items-center max-w-full">
+              <div className="flex-grow flex items-center">
+                <ChatInput
+                  message={messageInput}
+                  ref={inputRef}
+                  isRecording={isRecording}
+                  onSend={sendMessage}
+                  onRecord={startRecording}
+                  onStopRecording={stopRecording}
+                  setMessage={setMessageInput}
+                  onKeyDown={sendMessage}
+                />
+              </div>
+              <div className="ml-2">
+                <ChatButton
+                  isRecording={isRecording}
+                  message={messageInput}
+                  onSend={sendMessage}
+                  onRecord={startRecording}
+                />
+              </div>
             </div>
           </div>
+    
+          {/* Wallpaper Modal */}
           <WallpaperModal
-        isOpen={isWallpaperModalOpen}
-        onClose={closeWallpaperModal}
-        onSave={saveWallpaper}
-      />
+            isOpen={isWallpaperModalOpen}
+            onClose={closeWallpaperModal}
+            onSave={saveWallpaper}
+          />
         </div>
-        </WalletGuard>
-      );
+      </WalletGuard>
+    );
+    
       
 };
 

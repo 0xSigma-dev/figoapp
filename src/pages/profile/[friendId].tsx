@@ -1,25 +1,21 @@
 "use client";
 // eslint-disable-next-line react-hooks/exhaustive-deps
 
-import { faArrowLeft, faBan, faCamera, faEdit, faEllipsisV, faMessage, faShare } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft, faCamera, faEdit, faEllipsisV, faMessage, faShare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Lottie from "react-lottie-player";
-import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import bannerImage from "/public/img/boy1.png";
-import { useUser } from "@/context/UserContext"; 
 import Cookies from 'js-cookie';
 import { supabase } from '@/lib/supabaseClient';
 import { Suspense, lazy } from 'react';
 const ErrorModal = lazy(() => import('../../components/ErrorModal'));
 const SuccessModal = lazy(() => import('../../components/SuccessModal'));
 const AddContactModal = lazy(() => import ('../../components/AddContactModal'))
-import Link from "next/link";
 import { getContactById, getUserData, saveUserData, updateUserDataFields } from "@/utils/indexedDB";
 import SkeletonProfile from '../../components/Skeleton/SkeletonProfile';
 import AvatarComponent from "@/components/AvatarComponent";
 import WalletGuard from "@/components/WalletGuard";
+import { useAbly } from '@/context/AblyContext';
 
 
 const ProfilePage: React.FC = () => {
@@ -40,40 +36,59 @@ const ProfilePage: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showAddContactModal, setShowAddContactModal] = useState<boolean>(false);
   const [contactExists, setContactExists] = useState(false);
+  const { ablyClient } = useAbly();
+
+  useEffect(() => {
+    if (!ablyClient) {
+      // Handle case where Ably client is not available
+      console.error('Ably client not initialized');
+    }
+  }, [ablyClient]);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
         if (typeof window !== 'undefined') {
+          const token = isCurrentUser && userId ? userId : friendId; // Use userId if current user, otherwise use friendId
+          console.log('token', token);
+  
           if (isCurrentUser && userId) {
+            // If it's the current user, fetch user data from IndexedDB
+            console.log('userId', userId);
             const storedUser = await getUserData(userId);
+            console.log('stored', storedUser);
             if (storedUser) {
               setUserDetails(storedUser);
             }
           } else {
-            const token = friendId;
+            // Fetch friend details using the token (friendId in this case)
             const response = await fetch(`/api/user/`, {
               headers: {
                 Authorization: `Bearer ${token}`,
               },
             });
-
+  
             if (!response.ok) {
               throw new Error("Failed to fetch user details");
             }
+  
             const data = await response.json();
             setUserDetails(data.user);
+  
+            // If we have the current userId, save user data to IndexedDB
             if (userId) {
               await saveUserData({ id: userId, ...data.user });
             }
           }
+  
+          // Fetch contact details for the friendId, if available
           if (friendId && userId) {
             const contact = await getContactById(friendId as string);
             if (contact) {
               setContactExists(true);
               setUserDetails((prevDetails: any) => ({
                 ...prevDetails,
-                displayName: contact.displayName
+                displayName: contact.displayName,
               }));
             } else {
               setContactExists(false);
@@ -81,24 +96,32 @@ const ProfilePage: React.FC = () => {
           }
         }
       } catch (error) {
+        console.error('Error fetching user details:', error);
       } finally {
         setLoading(false);
       }
     };
-
+  
     fetchUserDetails();
   }, [friendId, isCurrentUser, userId]);
+  
 
   const fetchUserDetails = async () => {
     try {
       if (typeof window !== 'undefined') {
+        const token = isCurrentUser && userId ? userId : friendId; // Use userId if current user, otherwise use friendId
+        console.log('token', token);
+
         if (isCurrentUser && userId) {
+          // If it's the current user, fetch user data from IndexedDB
+          console.log('userId', userId);
           const storedUser = await getUserData(userId);
+          console.log('stored', storedUser);
           if (storedUser) {
             setUserDetails(storedUser);
           }
         } else {
-          const token = friendId;
+          // Fetch friend details using the token (friendId in this case)
           const response = await fetch(`/api/user/`, {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -108,19 +131,24 @@ const ProfilePage: React.FC = () => {
           if (!response.ok) {
             throw new Error("Failed to fetch user details");
           }
+
           const data = await response.json();
           setUserDetails(data.user);
+
+          // If we have the current userId, save user data to IndexedDB
           if (userId) {
             await saveUserData({ id: userId, ...data.user });
           }
         }
+
+        // Fetch contact details for the friendId, if available
         if (friendId && userId) {
           const contact = await getContactById(friendId as string);
           if (contact) {
             setContactExists(true);
             setUserDetails((prevDetails: any) => ({
               ...prevDetails,
-              displayName: contact.displayName
+              displayName: contact.displayName,
             }));
           } else {
             setContactExists(false);
@@ -128,6 +156,7 @@ const ProfilePage: React.FC = () => {
         }
       }
     } catch (error) {
+      console.error('Error fetching user details:', error);
     } finally {
       setLoading(false);
     }

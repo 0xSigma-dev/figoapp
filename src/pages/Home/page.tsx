@@ -17,8 +17,9 @@ import PointsDisplay from '../../components/PointsDisplay';
 import AvatarComponent from '../../components/AvatarComponent';
 import UserDetailsCard from '../../components/UserDetailsCard';
 import { supabase } from '@/lib/supabaseClient';
-import ablyService from '@/utils/ablyService';
 import Confetti from 'react-confetti';
+import { useAbly } from '@/context/AblyContext';
+import { subscribeToChannel, unsubscribeFromChannel } from '@/utils/ablyService';
 
 
 interface HomePageProps {
@@ -44,6 +45,7 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
   const [channels, setChannels] = useState<any[]>([]);
   const [pendingPoints, setPendingPoints] = useState<any>(0);
   const [showConfetti, setShowConfetti] = useState<boolean>(false);
+  const { ablyClient } = useAbly();
 
 
   useEffect(() => {
@@ -270,7 +272,8 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
     }
   };
 
-  const fetchUserChannels = async (userId: string, ablyService: any) => {
+  const fetchUserChannels = async (userId: any) => {
+    if (!ablyClient) return;
     try {
       const { data, error } = await supabase
         .from('channels')
@@ -282,7 +285,7 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
       if (data) {
         for (const channel of data) {
           const channelName = channel.name;
-          ablyService.subscribeToChannel(channelName, async (message: any) => {
+          subscribeToChannel(ablyClient, channelName, async (message: any) => {
             await saveMessage(message.data, message.id, channelName);
           });
           const exists = await checkIfChannelExists(channelName);
@@ -308,15 +311,15 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
 
   useEffect(() => {
     if (userId) {
-      fetchUserChannels(userId, ablyService);
-      const interval = setInterval(() => fetchUserChannels(userId, ablyService), 5000);
-    return () => clearInterval(interval);
+      fetchUserChannels(userId);
+      const interval = setInterval(() => fetchUserChannels(userId), 5000);
+      return () => clearInterval(interval);
     }
-  }, [userId, ablyService]);
-  
+  }, [userId, ablyClient]);
+
   const subscribeToFigoChannel = () => {
-    if (!ablyService.isSubscribed('Figo')) {
-      ablyService.subscribeToChannel('Figo', (message) => {
+    if (ablyClient) {
+      subscribeToChannel(ablyClient, 'Figo', (message: any) => {
       });
     }
   };

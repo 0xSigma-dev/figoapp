@@ -6,6 +6,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../styles/globals.css'; // Ensure this imports your CSS file with theme styles
 import { UserProvider } from '../context/UserContext'; // Adjust the import path as necessary
+import { AblyProvider } from '../context/AblyContext';
 import Head from "next/head";
 import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
@@ -93,15 +94,16 @@ function MyApp({ Component, pageProps }: AppProps) {
         <meta property="og:image" content="/ios/60.png" />
       </Head>
       <div className={montaga.className}>
-    <ThemeProvider attribute="class" enableSystem={true} defaultTheme="system">
+    <ThemeProvider attribute="class" enableSystem={true} defaultTheme="dark">
     
       <AppWalletProvider>
         <UserProvider>
-          <Component {...pageProps} />
-          <ToastContainer />
-        </UserProvider>
-      </AppWalletProvider>
-    
+          <AblyProvider>
+             <Component {...pageProps} />
+             <ToastContainer />
+          </AblyProvider>
+        </UserProvider> 
+      </AppWalletProvider> 
     </ThemeProvider>
     </div>
     
