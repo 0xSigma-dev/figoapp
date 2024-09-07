@@ -107,7 +107,6 @@ const ReferralPage = () => {
       navigator.share({
         title: 'Join me on Figo Today!',
         text: `You will get 1000 points free if Use my referral link to sign up: ${referralCode}`,
-        url: window.location.href,
       }).catch(error => console.log('Error sharing', error));
     } else {
       setErrorMessage('Sharing is not supported in this browser.');

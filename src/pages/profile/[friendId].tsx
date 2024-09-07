@@ -87,7 +87,7 @@ const ProfilePage: React.FC = () => {
     };
 
     fetchUserDetails();
-  }, [friendId, isCurrentUserg]);
+  }, [friendId, isCurrentUser, userId]);
 
   const fetchUserDetails = async () => {
     try {

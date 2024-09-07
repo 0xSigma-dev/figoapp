@@ -487,7 +487,7 @@ const Chat: React.FC = () => {
           zIndex: -1, // Make sure the background is behind all other elements
         }}
       />
-        <div className="flex left-0 right-0 top-0 items-center p-1 bg-black text-white z-10">
+        <div className="flex sticky items-center justify-between p-1 bg-black text-white z-10">
           <div className="flex items-center space-x-2">
             <FontAwesomeIcon
               icon={faArrowLeft}
