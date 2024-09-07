@@ -192,8 +192,8 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
     return (
       <AvatarComponent
         avatarId={numericAvatarId}
-        width={70}
-        height={70}
+        width={50}
+        height={50}
       />
     );
   };
@@ -369,7 +369,7 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
                   {renderFriendAvatar(channel.friendAvatar)}
                   <div className='flex-1 ml-4'>
                     <div className='font-bold text-lg text-black dark:text-white'>{channel.friendName}</div>
-                    <div className='text-sm font-mono text-black dark:text-white'>
+                    <div className='text-sm text-black dark:text-white'>
                       {latestMessage?.text && latestMessage.text.length > 40
                         ? `${latestMessage.text.substring(0, 32)}...`
                         : latestMessage?.text || 'You might Know this user, Say Hi'}

@@ -10,7 +10,6 @@ import { getAllChannels, getContactById, getUserData, loadMessages, saveChannel,
 import { supabase } from '@/lib/supabaseClient';
 import AvatarComponent from '@/components/AvatarComponent';
 import WallpaperModal from '@/components/WallpaperModal';
-import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { addPendingPoints, removePendingPoints, getPendingPoints } from '@/utils/pendingPoints';
 import { autoRefillEnergy, saveCurrentEnergy } from '@/utils/energyManager'; 
@@ -20,6 +19,7 @@ import FloatingPointsAnimation from '../../components/FloatingPointsAnimation';
 import WalletGuard from '../../components/WalletGuard';
 import { useAbly } from '@/context/AblyContext';
 import { subscribeToChannel, unsubscribeFromChannel, fetchChannelHistory } from '@/utils/ablyService';
+import ChatSkeleton from '@/components/Skeleton/ChatSkeleton';
 
 
 
@@ -177,7 +177,6 @@ const Chat: React.FC = () => {
         } catch (error) {
           //console.error("Error fetching friend details:", error);
         } finally {
-          setLoading(false);
           setIsUserDetailsFetched(true);
         }
       };
@@ -187,7 +186,7 @@ const Chat: React.FC = () => {
     
 
     useEffect(() => {
-      if (!isUserDetailsFetched || !userId || !friendId) return;
+      if (!isUserDetailsFetched || !userId || !friendId || !ablyClient) return;
     
       const sortedIds = [userId, friendId].sort().join('-');
       const newChannelName = `figofly-private-chat-${sortedIds}`;
@@ -376,7 +375,7 @@ const Chat: React.FC = () => {
     // Use effect to fetch messages when the component mounts or channelRef changes
     useEffect(() => {
       fetchMessages(); // Load old messages initially
-    }, [channelRef.current]);
+    }, [channelRef.current, ablyClient]);
     
     
     const fetchUserChannels = async (userId: string) => {
@@ -420,8 +419,6 @@ const Chat: React.FC = () => {
     };
 
 
-
-
     const startRecording = () => {
         setIsRecording(true);
         // Add your recording logic here
@@ -441,24 +438,30 @@ const Chat: React.FC = () => {
         router.push(`/profile/${friendId}`);
       };
     
-      useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-          const isClickInsideMenu = menuRef.current?.contains(event.target as Node);
-       
-          
-          if (!isClickInsideMenu) {
-            setShowMenu(false);
-          }
-        };
       
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-          document.removeEventListener('mousedown', handleClickOutside);
-        };
-      }, []);
 
       function handleOpenWarning(event: React.MouseEvent<HTMLButtonElement>): void {
         throw new Error('Function not implemented.');
+    }
+
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        const isClickInsideMenu = menuRef.current?.contains(event.target as Node);
+     
+        
+        if (!isClickInsideMenu) {
+          setShowMenu(false);
+        }
+      };
+    
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }, []);
+
+    if (loading) {
+      return <ChatSkeleton />
     }
 
     return (
@@ -488,19 +491,15 @@ const Chat: React.FC = () => {
                 className="text-xl cursor-pointer"
               />
               <div className="flex items-center space-x-1">
-                {loading ? (
-                  <Skeleton circle={true} height={50} width={50} />
-                ) : (
+                
                   <AvatarComponent avatarId={avatar} width={60} height={60} />
-                )}
-                {loading ? (
-                  <Skeleton width={150} height={25} />
-                ) : (
+               
+               
                   <div className="mr-2 hover:bg-gray-700" onClick={handleProfileClick}>
                     <h2 className="text-white font-bold">{displayName || 'User'}</h2>
                     <p className={`${statusColor} text-sm`}>{friendStatus || ''}</p>
                   </div>
-                )}
+               
               </div>
             </div>
             <div className="flex items-center space-x-2 ml-auto">
@@ -549,11 +548,9 @@ const Chat: React.FC = () => {
           </header>
     
           {/* Scrollable message area */}
-          <div className="flex-1 p-4 overflow-y-auto">
-            {loading ? (
-              <Skeleton count={10} height={40} style={{ marginBottom: '10px' }} />
-            ) : messages.length === 0 ? (
-              <div className="flex-grow mt-20 flex items-center justify-center">
+          <div className="flex-1 p-4 overflow-y-auto overflow-x-hidden">
+            {messages.length === 0 ? (
+              <div className="flex-grow mt-20 flex items-center justify-center overflow-x-hidden">
                 <div className="flex flex-col items-center justify-center bg-black w-40 rounded-lg p-6">
                   <div className="mb-4">
                     <AvatarComponent avatarId={avatar} width={80} height={80} />

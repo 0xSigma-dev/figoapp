@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, startTransition } from 'react';
 import { useRouter } from 'next/router';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faCopy, faGift, faLink, faShareAlt, faUserPlus } from '@fortawesome/free-solid-svg-icons';
@@ -39,22 +39,45 @@ const ReferralPage = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
+        // Fetch referralCode from IndexedDB
         const storedData = await getUserData(userId);
         if (storedData) {
-          console.log('Pending Referrals:', storedData);
-
-          setReferralCode(storedData?.referralLink || "ABC123");
-          setPendingPoints(storedData?.pendingref * 1000 || 0);
-          setReferralCount(storedData?.referralCount || 0);
+          startTransition(() => {
+            setReferralCode(storedData?.referralLink || "ABC123");
+          });
+        }
+  
+        // Fetch referralCount and pendingref from API
+        const token = Cookies.get('userId'); 
+        if (token) {
+          const response = await fetch('/api/user', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+  
+          if (!response.ok) {
+            throw new Error('Failed to fetch user data from API');
+          }
+  
+          const apiData = await response.json();
+          startTransition(() => {
+            setReferralCount(apiData?.referralCount || 0);
+            setPendingPoints(apiData?.pendingref * 1000 || 0); 
+          });
         }
       } catch (error) {
+        console.error('Error fetching data:', error);
+        setErrorMessage('Failed to fetch user data. Please try again later.');
       } finally {
-        setLoading(false); // Stop loading when data is fetched
+        startTransition(() => {
+          setLoading(false); // Stop loading when data is fetched
+        });
       }
     };
-
+  
     fetchUserData();
-  }, []);
+  }, [userId]);
 
   const startConfetti = () => {
     setShowConfetti(true);
@@ -65,12 +88,40 @@ const ReferralPage = () => {
 
   const fetchUserData = async () => {
     try {
+      // Fetch referralCode from IndexedDB
       const storedData = await getUserData(userId);
       if (storedData) {
-        setReferralCode(storedData?.referralLink || "ABC123");
-        setPendingPoints(storedData?.pendingref * 1000 || 0);
+        startTransition(() => {
+          setReferralCode(storedData?.referralLink || "ABC123");
+        });
+      }
+
+      // Fetch referralCount and pendingref from API
+      const token = Cookies.get('userId'); 
+      if (token) {
+        const response = await fetch('/api/user', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch user data from API');
+        }
+
+        const apiData = await response.json();
+        startTransition(() => {
+          setReferralCount(apiData?.referralCount || 0);
+          setPendingPoints(apiData?.pendingref * 1000 || 0); 
+        });
       }
     } catch (error) {
+      console.error('Error fetching data:', error);
+      setErrorMessage('Failed to fetch user data. Please try again later.');
+    } finally {
+      startTransition(() => {
+        setLoading(false); // Stop loading when data is fetched
+      });
     }
   };
 
@@ -283,7 +334,7 @@ const ReferralPage = () => {
     </div>
     <div className="flex flex-col items-start">
       <div className="font-bold text-purple-600 mb-2">Step 3</div>
-      <div>Your friend signs up</div>
+      <div>Your friend Signs Up</div>
     </div>
   </div>
 </div>
