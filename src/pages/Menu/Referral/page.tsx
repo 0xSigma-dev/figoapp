@@ -31,6 +31,7 @@ const ReferralPage = () => {
   const [loading, setLoading] = useState(true);
   const [referralCode, setReferralCode] = useState('');
   const [pendingPoints, setPendingPoints] = useState(0);
+  const [referralCount, setReferralCount] = useState(0);
   const userId = Cookies.get('userId')
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -40,8 +41,11 @@ const ReferralPage = () => {
       try {
         const storedData = await getUserData(userId);
         if (storedData) {
+          console.log('Pending Referrals:', storedData);
+
           setReferralCode(storedData?.referralLink || "ABC123");
           setPendingPoints(storedData?.pendingref * 1000 || 0);
+          setReferralCount(storedData?.referralCount || 0);
         }
       } catch (error) {
       } finally {
@@ -212,7 +216,7 @@ const ReferralPage = () => {
             Referred Users
           </div>
           <div className="text-lg text-black dark:text-white">
-            {user?.referredUsers || 0} {/* Replace with actual referred users count */}
+            {referralCount} {/* Replace with actual referred users count */}
           </div>
         </div>
 
@@ -221,12 +225,12 @@ const ReferralPage = () => {
             Points Earned
           </div>
           <div className="text-lg text-black dark:text-white">
-            {user?.referredUsers * 1000 || 0} {/* Replace with actual earned points */}
+            {referralCount * 1000 || 0} {/* Replace with actual earned points */}
           </div>
         </div>
 
         <div className="text-center text-8xl font-extrabold animate-bounce mt-5 mb-6">
-  {pendingPoints || 0}
+  {pendingPoints}
 </div>
 
 
