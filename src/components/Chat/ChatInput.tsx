@@ -1,5 +1,6 @@
 import React, { useState, forwardRef, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import debounce from 'lodash.debounce';
 import { faSmile, faClock, faFile, faCamera, faMicrophone, faPause, faTrash, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 
 interface ChatInputProps {
@@ -15,6 +16,7 @@ interface ChatInputProps {
 const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
   ({ message, isRecording, onSend, onKeyDown, onRecord, onStopRecording, setMessage }, ref) => {
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+    const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       setMessage(e.target.value);
@@ -38,6 +40,16 @@ const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
 
     useEffect(() => {
       adjustTextareaHeight(); // Adjust on initial render or when the message changes
+    }, [message]);
+
+    const debouncedFocus = debounce(() => {
+      if (inputRef.current) {
+        inputRef.current.focus({ preventScroll: true });
+      }
+    }, 10); // Adjust debounce delay if needed
+    
+    useEffect(() => {
+      debouncedFocus();
     }, [message]);
 
     return (
@@ -66,9 +78,10 @@ const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
               <FontAwesomeIcon icon={faSmile} className="text-white" />
             </button>
             <textarea
-              ref={(el) => {
+               ref={(el) => {
                 textareaRef.current = el;
                 if (typeof ref === 'function') ref(el);
+                if (inputRef.current === null) inputRef.current = el; // Ensure inputRef is set
               }}
               value={message}
               onChange={handleChange}

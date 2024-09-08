@@ -95,7 +95,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ theme }) => {
 
 
   return (
-    <div className={`flex flex-col bg-white dark:bg-deep-purple h-screen z-30`} onClick={handleCloseMenus}>
+    <div className={`flex overflow-y-auto overflow-x-hidden flex-col bg-white dark:bg-deep-purple h-screen z-30`} onClick={handleCloseMenus}>
       <header className="fixed top-0 left-0 right-0 bg-white dark:bg-black text-black dark:text-white p-4 flex items-center justify-between z-10">
         <div className="flex items-center space-x-2">
           <div className="flex flex-col">
@@ -121,7 +121,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ theme }) => {
         </div>
       </header>
 
-      <main className={`overflow-y-auto overflow-x-hidden flex`}>
+      <main className={`overflow-x-hidden`}>
         <div className="mt-5 ml-5 text-purple-800 mb-4 font-bold">Purple Family</div>
         {loading ? (
           Array.from({ length: 5 }).map((_, index) => (

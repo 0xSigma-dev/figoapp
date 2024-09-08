@@ -363,7 +363,7 @@ const Chat: React.FC = () => {
           if (inputRef.current) {
             inputRef.current.focus({ preventScroll: true });  // Re-focus to keep the keyboard open
           }
-        }, 10);
+        }, 0);
         
         resetRefillTimer.current && resetRefillTimer.current(); // Reset refill timer after sending message
       } catch (error) {
