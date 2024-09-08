@@ -39,15 +39,6 @@ const ReferralPage = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        // Fetch referralCode from IndexedDB
-        const storedData = await getUserData(userId);
-        if (storedData) {
-          startTransition(() => {
-            setReferralCode(storedData?.referralLink || "ABC123");
-          });
-        }
-  
-        // Fetch referralCount and pendingref from API
         const token = Cookies.get('userId'); 
         if (token) {
           const response = await fetch('/api/user', {
@@ -62,8 +53,9 @@ const ReferralPage = () => {
   
           const apiData = await response.json();
           startTransition(() => {
+            setReferralCode(apiData?.referralLink || "ABC123");
             setReferralCount(apiData?.referralCount || 0);
-            setPendingPoints(apiData?.pendingref * 1000 || 0); 
+            setPendingPoints(apiData?.pendingref * 3000 || 0); 
           });
         }
       } catch (error) {
@@ -88,15 +80,6 @@ const ReferralPage = () => {
 
   const fetchUserData = async () => {
     try {
-      // Fetch referralCode from IndexedDB
-      const storedData = await getUserData(userId);
-      if (storedData) {
-        startTransition(() => {
-          setReferralCode(storedData?.referralLink || "ABC123");
-        });
-      }
-
-      // Fetch referralCount and pendingref from API
       const token = Cookies.get('userId'); 
       if (token) {
         const response = await fetch('/api/user', {
@@ -110,9 +93,10 @@ const ReferralPage = () => {
         }
 
         const apiData = await response.json();
+        console.log('apiData', apiData)
         startTransition(() => {
           setReferralCount(apiData?.referralCount || 0);
-          setPendingPoints(apiData?.pendingref * 1000 || 0); 
+          setPendingPoints(apiData?.pendingref * 3000 || 0); 
         });
       }
     } catch (error) {
@@ -161,7 +145,7 @@ const ReferralPage = () => {
     if (navigator.share) {
       navigator.share({
         title: 'Join me on Figo Today!',
-        text: `You will get 1000 points free if Use my referral link to sign up: ${referralCode}`,
+        text: `Join me on Figo Chat and Earn App today. Figo is changing the Social Media Industry. Don't miss. You earn 3000 points immediately you Signup with my referral link: ${referralCode}`,
       }).catch(error => console.log('Error sharing', error));
     } else {
       setErrorMessage('Sharing is not supported in this browser.');
@@ -195,10 +179,12 @@ const ReferralPage = () => {
         points: updatedPoints,
         pendingref: 0,
       });
+      startConfetti();
+      const messageSound = new Audio('/sounds/clapping.wav'); // Path to your sound file
+      messageSound.play();
       await fetchUserData();
   
       setSuccessMessage('Points claimed successfully!');
-      startConfetti(); 
     } catch (error) {
       setErrorMessage('Failed to claim points. Please try again later.');
     }
@@ -237,7 +223,7 @@ const ReferralPage = () => {
       </div>
 
       <h1 className="text-2xl text-purple-600 font-semibold mb-6">
-        Invite friends, get rewards
+        Invite friends, Get rewarded
       </h1>
 
       <div className="w-full max-w-md p-4 border rounded-lg flex items-center justify-between mb-4">
@@ -273,10 +259,10 @@ const ReferralPage = () => {
 
         <div className="flex justify-between mb-4">
           <div className="text-lg font-bold text-black dark:text-white">
-            Points Earned
+            Total Points Earned
           </div>
           <div className="text-lg text-black dark:text-white">
-            {referralCount * 1000 || 0} {/* Replace with actual earned points */}
+            {referralCount * 3000 || 0} {/* Replace with actual earned points */}
           </div>
         </div>
 

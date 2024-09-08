@@ -58,7 +58,11 @@ const UserDetailsCard: React.FC<UserDetailsCardProps> = ({ user, onClaimPoints }
           </div>
           <div className="mt-2">
             <span className="text-white">Pending Points: {user.pendingPoints}</span>
-            <button onClick={onClaimPoints} className="ml-4 bg-purple-600 text-white px-3 py-1 rounded">
+            <button onClick={onClaimPoints} disabled={user?.pendingPoints <= 0} className={`${
+            user?.pendingPoints > 0
+              ? "bg-purple-500 hover:bg-purple-600"
+              : "bg-gray-400 cursor-not-allowed"
+          } text-white ml-4 px-3 py-1 rounded-full w-full`}>
               Claim
             </button>
           </div>

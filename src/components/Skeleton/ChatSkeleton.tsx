@@ -35,8 +35,23 @@ const ChatSkeleton = () => {
           <div className="flex justify-end">
             <div className="bg-gray-300 dark:bg-gray-700 p-4 rounded-lg max-w-xs w-1/4"></div>
           </div>
-        </div>
+        </div> 
       </div>
+
+      <div className="space-y-6">
+        {/* Received messages on the left */}
+        <div className="flex flex-col space-y-4">
+          <div className="flex justify-start">
+            <div className="bg-gray-300 dark:bg-gray-700 p-4 rounded-lg max-w-xs w-1/2"></div>
+          </div>
+          <div className="flex justify-start">
+            <div className="bg-gray-300 dark:bg-gray-700 p-4 rounded-lg max-w-xs w-1/3"></div>
+          </div>
+          <div className="flex justify-start">
+            <div className="bg-gray-300 dark:bg-gray-700 p-4 rounded-lg max-w-xs w-1/4"></div>
+          </div>
+        </div>
+       </div>
     </div>
   );
 };

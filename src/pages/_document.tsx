@@ -6,12 +6,13 @@ class MyDocument extends Document {
       <Html>
         <Head>
           <link rel="manifest" href="/manifest.json" />
-          <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: dark)" />
-          <meta name="theme-color" content="#100113" media="(prefers-color-scheme: light)" />
+          <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+          <meta name="theme-color" content="#100113" media="(prefers-color-scheme: dark)" />
+          <meta name="full-screen" content="yes"/>
           <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
           <meta name="mobile-web-app-capable" content="yes" />
         </Head>
-        <body className="bg-white dark:bg-black">
+       <body className="bg-white dark:bg-black">
           <Main />
           <NextScript />
         </body>

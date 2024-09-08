@@ -54,7 +54,7 @@ const Chat: React.FC = () => {
     const resetRefillTimer = useRef<(() => void) | null>(null);
     const startRefill = useRef<(() => void) | null>(null);
     const [floatingPoints, setFloatingPoints] = useState<{ points: number; x: number; y: number } | null>(null);
-    const inputRef = useRef<HTMLInputElement | null>(null);
+    const inputRef = useRef<HTMLTextAreaElement | null>(null); 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     
 
@@ -280,8 +280,33 @@ const Chat: React.FC = () => {
         //console.log('Subscribing to channel:', channelName);
         const channel = ablyClient.channels.get(newChannelName);
         channelRef.current = channel;
+        const pointsToAdd = 20;
     
         subscribeToChannel(ablyClient, newChannelName, (message) => {
+          if (currentEnergy >= pointsToAdd) {
+            const updatedEnergy = Math.max(currentEnergy - pointsToAdd, 0); // Ensure energy doesn't go below 0
+            
+            setFloatingPoints({ points: pointsToAdd, x: 300, y: 500 });
+    
+              setTimeout(() => {
+                setFloatingPoints(null);
+              }, 1000);
+            addPendingPoints(userId, pointsToAdd);
+            setPendingPoints(getPendingPoints(userId));
+      
+            setCurrentEnergy(updatedEnergy);
+            saveCurrentEnergy(userId, updatedEnergy); // Save updated currentEnergy to IndexedDB
+          } else {
+            toast.warn('Not enough energy to add points!', {
+              position: "top-right",
+              autoClose: 3000, // Toast will automatically close in 3 seconds
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+            });
+          }
           saveMessage(message.data, message.id, newChannelName);
           fetchMessages(message);
       });
@@ -298,7 +323,7 @@ const Chat: React.FC = () => {
     const sendMessage = async () => {
       if (!messageInput.trim() || !channelRef.current) return;
     
-      const pointsToAdd = 20; // Points added to pendingPoints
+      const pointsToAdd = 30; // Points added to pendingPoints
     
       try {
         const message = { text: messageInput, sender: userId };
@@ -320,7 +345,7 @@ const Chat: React.FC = () => {
           await saveCurrentEnergy(userId, updatedEnergy); // Save updated currentEnergy to IndexedDB
         } else {
           toast.warn('Not enough energy to add points!', {
-            position: "bottom-right",
+            position: "top-right",
             autoClose: 3000, // Toast will automatically close in 3 seconds
             hideProgressBar: false,
             closeOnClick: true,
@@ -329,9 +354,17 @@ const Chat: React.FC = () => {
             progress: undefined,
           });
         }
+
+        const messageSound = new Audio('/sounds/longpop.wav'); // Path to your sound file
+        messageSound.play();
     
-        setMessageInput('');
-        inputRef.current?.focus();
+        setTimeout(() => {
+          setMessageInput('');  // Clear the message input
+          if (inputRef.current) {
+            inputRef.current.focus({ preventScroll: true });  // Re-focus to keep the keyboard open
+          }
+        }, 10);
+        
         resetRefillTimer.current && resetRefillTimer.current(); // Reset refill timer after sending message
       } catch (error) {
       }
@@ -342,15 +375,10 @@ const Chat: React.FC = () => {
     const fetchMessages = async (newMessage: any = null) => {
       if (!channelRef.current || !ablyClient) return;
       try {
-        // Check if there are messages already in IndexedDB
         const storedMessages = await loadMessages(channelRef.current.name);
-        //console.log('channelref',channelRef.current)
-    
-        // If no messages are stored, fetch from Ably
         if (storedMessages.length === 0) {
           const fetchedMessages = await fetchChannelHistory(ablyClient, channelRef.current.name);
           if (fetchedMessages.length > 0) {
-            // Save fetched messages to IndexedDB
             for (const msg of fetchedMessages) {
               await saveMessage(msg.data, msg.id, channelRef.current.name);
             }
@@ -359,22 +387,19 @@ const Chat: React.FC = () => {
             setMessages(storedMessages);
           }
         } else {
-          // If there's a new message, add it to the list of stored messages
           const updatedMessages = newMessage ? [...storedMessages, newMessage] : storedMessages;
           setMessages(updatedMessages);
           scrollToBottom();
-          inputRef.current?.focus();
+          //inputRef.current?.focus();
         }
       } catch (error) {
-        //console.error('Error loading messages:', error);
       } finally {
         setLoading(false);
       }
     };
     
-    // Use effect to fetch messages when the component mounts or channelRef changes
     useEffect(() => {
-      fetchMessages(); // Load old messages initially
+      fetchMessages();
     }, [channelRef.current, ablyClient]);
     
     
@@ -383,17 +408,13 @@ const Chat: React.FC = () => {
         const { data, error } = await supabase
           .from('channels')
           .select('*')
-          .ilike('name', `%${userId}%`); // Use ilike for case-insensitive pattern matching
+          .ilike('name', `%${userId}%`);
     
         if (error) {
-          //console.error('Error fetching channels from Supabase:', error);
           return [];
         }
-    
-        //console.log('Fetched channels:', data);
         return data;
       } catch (error) {
-        //console.error('Unexpected error fetching channels:', error);
         return [];
       }
     };
@@ -401,32 +422,17 @@ const Chat: React.FC = () => {
     useEffect(() => {
       if (userId) {
         fetchUserChannels(userId).then(channels => {
-          //console.log('User channels:', channels);
         });
       }
     }, [userId]);
-    
-    
-    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        sendMessage();
-      }
-    };
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setMessageInput(e.target.value);
-    };
 
 
     const startRecording = () => {
         setIsRecording(true);
-        // Add your recording logic here
       };
     
       const stopRecording = () => {
         setIsRecording(false);
-        // Add your logic to send the recorded audio message here
       };
 
 
@@ -446,9 +452,7 @@ const Chat: React.FC = () => {
 
     useEffect(() => {
       const handleClickOutside = (event: MouseEvent) => {
-        const isClickInsideMenu = menuRef.current?.contains(event.target as Node);
-     
-        
+        const isClickInsideMenu = menuRef.current?.contains(event.target as Node); 
         if (!isClickInsideMenu) {
           setShowMenu(false);
         }

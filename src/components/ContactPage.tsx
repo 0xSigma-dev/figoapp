@@ -121,7 +121,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ theme }) => {
         </div>
       </header>
 
-      <main className={`flex-1 overflow-y-auto`}>
+      <main className={`flex-1 overflow-y-auto flex`}>
         <div className="mt-5 ml-5 text-purple-800 mb-4 font-bold">Purple Family</div>
         {loading ? (
           Array.from({ length: 5 }).map((_, index) => (
@@ -132,7 +132,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ theme }) => {
             contacts.map((contact: any) => (
               <div
                 key={contact.id}
-                className="flex items-center justify-between p-4 ml-3 cursor-pointer hover:bg-gray-800"
+                className="flex items-center justify-between p-2 ml-4 cursor-pointer hover:bg-gray-800"
                 onClick={() => handleMessage2Click(contact.id)}
               >
                 <div className="flex items-center">

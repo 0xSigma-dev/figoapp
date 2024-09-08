@@ -209,6 +209,9 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
       // Step 2: Update points in IndexedDB
       const newTotalPoints = (user.points || 0) + pendingPoints;
       await updateUserDataFields(userId, { points: newTotalPoints });
+      startConfetti();
+      const messageSound = new Audio('/sounds/clapping.wav'); // Path to your sound file
+      messageSound.play();
 
       // Step 3: Update points in Supabase
       const { error } = await supabase
@@ -228,7 +231,7 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
         ...user,
         points: newTotalPoints,
       });
-      startConfetti();
+      
 
     } catch (error) {
     }

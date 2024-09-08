@@ -45,7 +45,7 @@ const WallpaperModal: React.FC<WallpaperModalProps> = ({ isOpen, onClose, onSave
   if (!isOpen) return null;
 
   return (
-    <div className="fixed bottom-0 top bg-opacity-50 flex justify-end">
+    <div className="fixed bottom-0 top bg-opacity-50 flex justify-end z-50">
       <div className="bg-black w-full h-52 p-4 relative">
         <h2 className="text-left text-lg font-semibold">Set Wallpaper</h2>
         <div className="flex space-x-4 mt-4 overflow-x-auto">

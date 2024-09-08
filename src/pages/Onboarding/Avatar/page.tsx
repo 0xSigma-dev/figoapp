@@ -85,7 +85,7 @@ const AvatarSelection: React.FC = () => {
       <div className="fixed top-0 left-0 right-0 flex flex-col items-center justify-center bg-white dark:bg-black p-4 z-10">
         <h1 className="text-2xl font-bold text-white">Pick Your Avatar</h1>
         <p className="text-l font-bold text-black dark:text-white text-center">
-          Soon your NFT will be your identity on Figo. No more useless NFTs. But before then, choose an avatar for your account.
+          Soon your NFT will be your identity on Figo. No more useless, Inactive or Dormant NFTs. But before then, choose an avatar for your account.
         </p>
       </div>
 
