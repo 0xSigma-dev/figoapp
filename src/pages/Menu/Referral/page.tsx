@@ -55,7 +55,7 @@ const ReferralPage = () => {
         startTransition(() => {
           setReferralCode(apiData?.user.referralLink || "ABC123");
           setReferralCount(apiData?.user.referralCount || 0);
-          setPendingPoints(apiData?.user.pendingref ? apiData.pendingref * 3000 : 0);
+          setPendingPoints(apiData?.user.pendingref * 3000 || 0);
         });
       }
     } catch (error) {
