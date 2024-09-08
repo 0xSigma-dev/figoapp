@@ -32,7 +32,7 @@ const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
     const adjustTextareaHeight = () => {
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto'; // Reset height
-        textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 160)}px`; // 8 lines max (approx. 160px)
+        textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 100)}px`; // 8 lines max (approx. 160px)
       }
     };
 

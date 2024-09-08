@@ -62,7 +62,7 @@ const UserDetailsCard: React.FC<UserDetailsCardProps> = ({ user, onClaimPoints }
             user?.pendingPoints > 0
               ? "bg-purple-500 hover:bg-purple-600"
               : "bg-gray-400 cursor-not-allowed"
-          } text-white ml-4 px-3 py-1 rounded-full w-full`}>
+          } text-white ml-4 px-3 py-1 rounded-full`}>
               Claim
             </button>
           </div>

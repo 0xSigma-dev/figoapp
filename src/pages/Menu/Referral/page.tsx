@@ -36,55 +36,12 @@ const ReferralPage = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const token = Cookies.get('userId'); 
-        if (token) {
-          const response = await fetch('/api/user', {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-  
-          if (!response.ok) {
-            throw new Error('Failed to fetch user data from API');
-          }
-  
-          const apiData = await response.json();
-          startTransition(() => {
-            setReferralCode(apiData?.referralLink || "ABC123");
-            setReferralCount(apiData?.referralCount || 0);
-            setPendingPoints(apiData?.pendingref * 3000 || 0); 
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        setErrorMessage('Failed to fetch user data. Please try again later.');
-      } finally {
-        startTransition(() => {
-          setLoading(false); // Stop loading when data is fetched
-        });
-      }
-    };
-  
-    fetchUserData();
-  }, [userId]);
-
-  const startConfetti = () => {
-    setShowConfetti(true);
-    setTimeout(() => {
-      setShowConfetti(false); // Stop confetti after 5 seconds
-    }, 5000);
-  };
-
   const fetchUserData = async () => {
     try {
-      const token = Cookies.get('userId'); 
-      if (token) {
+      if (userId) {
         const response = await fetch('/api/user', {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${userId}`,
           },
         });
 
@@ -93,10 +50,12 @@ const ReferralPage = () => {
         }
 
         const apiData = await response.json();
-        console.log('apiData', apiData)
+        console.log('apiData', apiData); // Make sure you see this in the console
+
         startTransition(() => {
-          setReferralCount(apiData?.referralCount || 0);
-          setPendingPoints(apiData?.pendingref * 3000 || 0); 
+          setReferralCode(apiData?.user.referralLink || "ABC123");
+          setReferralCount(apiData?.user.referralCount || 0);
+          setPendingPoints(apiData?.user.pendingref ? apiData.pendingref * 3000 : 0);
         });
       }
     } catch (error) {
@@ -104,9 +63,21 @@ const ReferralPage = () => {
       setErrorMessage('Failed to fetch user data. Please try again later.');
     } finally {
       startTransition(() => {
-        setLoading(false); // Stop loading when data is fetched
+        setLoading(false);
       });
     }
+  };
+
+  // UseEffect to call fetchUserData initially
+  useEffect(() => {
+    fetchUserData();
+  }, [userId]);
+
+  const startConfetti = () => {
+    setShowConfetti(true);
+    setTimeout(() => {
+      setShowConfetti(false); // Stop confetti after 5 seconds
+    }, 5000);
   };
 
   const handleCopy = () => {
