@@ -121,7 +121,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ theme }) => {
         </div>
       </header>
 
-      <main className={`flex-1 overflow-y-auto flex`}>
+      <main className={`overflow-y-auto overflow-x-hidden flex`}>
         <div className="mt-5 ml-5 text-purple-800 mb-4 font-bold">Purple Family</div>
         {loading ? (
           Array.from({ length: 5 }).map((_, index) => (
