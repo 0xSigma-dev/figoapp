@@ -177,6 +177,12 @@ const Chat: React.FC = () => {
         setStatusColor("text-gray-500");
       }
     }, [isFriendOnline]);
+
+    useEffect(() => {
+      if ('virtualKeyboard' in navigator) {
+        (navigator as any).virtualKeyboard.overlaysContent = true;
+      }
+    }, []);
     
 
     if (loading) {
@@ -191,6 +197,10 @@ const Chat: React.FC = () => {
   function handlerecord(): void {
     throw new Error('Function not implemented.');
   }
+
+
+  
+  
 
     return (
       <WalletGuard>
