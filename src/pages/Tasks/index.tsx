@@ -1,14 +1,12 @@
-"use client"
-
 import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Cookies from 'js-cookie';
 import Confetti from 'react-confetti';
-import Footer from '@/components/Footer'; // Import the confetti library
+import Footer from '@/components/Footer'; 
 import { addPendingPoints } from '@/utils/pendingPoints';
 import SubHeader from '@/components/SubHeader';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {  faTimesCircle } from "@fortawesome/free-solid-svg-icons";
+import { faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 import { Suspense, lazy } from 'react';
 const ErrorModal = lazy(() => import('@/components/ErrorModal'));
 const SuccessModal = lazy(() => import('@/components/SuccessModal'));
@@ -35,14 +33,13 @@ const TaskList: React.FC<TaskPageProps> = ({ theme }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [enteredCode, setEnteredCode] = useState('');
   const [taskStarted, setTaskStarted] = useState(false);
-  const [showConfetti, setShowConfetti] = useState(false); // New state for confetti
+  const [showConfetti, setShowConfetti] = useState(false); 
   const userId = Cookies.get('userId');
   const [isVerifying, setIsVerifying] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Fetch uncompleted tasks from the backend
-  const fetchUncompletedTasks = useCallback( async () => {
+  const fetchUncompletedTasks = useCallback(async () => {
     try {
       const response = await fetch(`${apiUrl}/api/tasks/uncompleted?userId=${userId}`);
       const data: Task[] = await response.json();
@@ -52,46 +49,38 @@ const TaskList: React.FC<TaskPageProps> = ({ theme }) => {
   }, [userId]);
 
   useEffect(() => {
-    const fetchInterval = setInterval(fetchUncompletedTasks, 100000); // Fetch tasks every 10 seconds
-
-    // Initial fetch when the component mounts
+    const fetchInterval = setInterval(fetchUncompletedTasks, 100000); 
     fetchUncompletedTasks();
-
-    // Cleanup the interval on component unmount
     return () => clearInterval(fetchInterval);
   }, [userId, fetchUncompletedTasks]);
 
   const openModal = (task: Task) => {
     setSelectedTask(task);
-    setTaskStarted(false); // Reset the taskStarted state when opening a modal
+    setTaskStarted(false);
     setIsModalOpen(true);
-    setEnteredCode(''); // Clear the entered code when opening a new task
-    setIsVerifying(false); // Reset verifying state
+    setEnteredCode('');
+    setIsVerifying(false);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedTask(null);
-    setShowConfetti(false); // Hide confetti when closing the modal
-    setIsVerifying(false); // Reset verifying state
+    setShowConfetti(false);
+    setIsVerifying(false);
   };
 
   const startTask = (taskUrl: string) => {
     window.open(taskUrl, '_blank');
-    setTaskStarted(true); // Mark task as started
+    setTaskStarted(true);
   };
 
   const verifyTask = async () => {
     if (selectedTask && enteredCode.trim().toLowerCase() === selectedTask.verification_code.trim().toLowerCase()) {
-      setIsVerifying(true); // Start the verification process
+      setIsVerifying(true);
       try {
-        // Add points to local storage
         addPendingPoints(userId, selectedTask.points);
-
-        // Display confetti
         setShowConfetti(true);
 
-        // Call the API to mark the task as complete
         const response = await fetch(`${apiUrl}/api/tasks/complete`, {
           method: 'POST',
           headers: {
@@ -105,16 +94,15 @@ const TaskList: React.FC<TaskPageProps> = ({ theme }) => {
 
         if (response.ok) {
           setSuccessMessage('Task verified! Points added.');
-          // Update task list
           fetchUncompletedTasks();
-          closeModal(); // Close the modal on success
+          closeModal();
         } else {
-          //console.error('Error completing task:', response.statusText);
+          // handle error
         }
       } catch (error) {
-        //console.error('Error completing task:', error);
+        // handle error
       } finally {
-        setIsVerifying(false); // End the verification process
+        setIsVerifying(false);
       }
     } else {
       setErrorMessage('Incorrect verification code. Please try again.');
@@ -122,98 +110,66 @@ const TaskList: React.FC<TaskPageProps> = ({ theme }) => {
   };
 
   return (
-    <div className={`container mx-auto p-4 ${isModalOpen ? 'blur-background' : ''}`}>
-      <div>
-         <SubHeader title="Figo Tasks" />
-      </div>
-     
-      {tasks.map((task) => (
-        <div key={task.id} className="overflow-y-scroll overflow-x-hidden">
-        <div  className="flex items-center justify-between p-4 mb-4 mt-10 bg-gray-800 rounded-full shadow-md">
-          {/* Task Source Icon */}
-          <div className="flex items-center space-x-4">
-            <Image src={`/icons/${task.task_source}.png`} alt={task.task_source} width={40} height={40} />
+    <div className="container mx-auto p-4">
+      <div className={`${isModalOpen ? 'blur-background' : ''}`}>
+        <SubHeader title="Figo Tasks" />
 
-            {/* Task Title & Points */}
-            <div>
-              <h2 className="text-lg font-semibold">{task.title}</h2>
-              <p className="text-sm font-bold text-purple-500">+{task.points} FP</p>
+        <div className="overflow-y-auto"> 
+        {tasks.map((task) => (
+          <div key={task.id} className="flex items-center justify-between p-4 mb-4 bg-gray-800 rounded-full shadow-md">
+            <div className="flex items-center space-x-4">
+              <Image src={`/icons/${task.task_source}.png`} alt={task.task_source} width={40} height={40} />
+              <div>
+                <h2 className="text-lg font-semibold">{task.title}</h2>
+                <p className="text-sm font-bold text-purple-500">+{task.points} FP</p>
+              </div>
+            </div>
+            <button onClick={() => openModal(task)} className="bg-purple-500 text-white px-4 py-2 rounded-full hover:bg-green-600">
+              Open
+            </button>
+          </div>
+        ))}
+        </div>
+      </div>
+
+      {/* Modal */}
+      {isModalOpen && selectedTask && (
+        <div className="fixed inset-0 z-30 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-black p-6 rounded-lg w-full max-w-lg shadow-lg">
+            <button onClick={closeModal} className="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
+              <FontAwesomeIcon icon={faTimesCircle} className="text-red-600" style={{ fontSize: '36px' }} />
+            </button>
+            <div className="flex flex-col items-center justify-center">
+              <Image src={`/icons/${selectedTask.task_source}.png`} alt={selectedTask.task_source} width={90} height={90} />
+              <h3 className="text-3xl font-bold mb-4 text-purple-500 mt-8">{selectedTask.title}</h3>
+              <p className="mb-8 text-white">{selectedTask.description}</p>
+              <div className="mb-8 text-5xl text-purple-500 font-extrabold">{selectedTask.points} FP</div>
+              {!taskStarted ? (
+                <button onClick={() => startTask(selectedTask.task_link)} className="w-3/4 bg-purple-500 text-white px-6 py-3 rounded-full hover:bg-green-600 mb-16">
+                  Start Task
+                </button>
+              ) : (
+                <>
+                  <input
+                    type="text"
+                    value={enteredCode}
+                    onChange={(e) => setEnteredCode(e.target.value)}
+                    placeholder="Enter Verification Code"
+                    className="border p-2 w-full mb-4 text-center"
+                  />
+                  <button onClick={verifyTask} className="w-full bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600" disabled={isVerifying}>
+                    {isVerifying ? 'Verifying...' : 'Verify Task'}
+                  </button>
+                </>
+              )}
             </div>
           </div>
-
-          {/* Open/Verify Button */}
-          <button
-            onClick={() => openModal(task)}
-            className="bg-purple-500 text-white px-4 py-2 rounded-full hover:bg-green-600"
-          >
-            Open
-          </button>
         </div>
-        </div>
-      ))}
-
-      {/* Modal for Task Details & Verification */}
-      {isModalOpen && selectedTask && (
-  <div className="fixed bottom-0 left-0 w-full shadow-lg rounded-t-3xl p-6 bg-gradient-to-t from-bg-black to-yellow-500 h-5/6 z-30 text-center flex flex-col justify-between items-center">
-    <div className="relative w-full h-4/5 mb-10 bg-white dark:bg-black rounded-t-3xl p-6 flex flex-col items-center">
-      {/* Close Modal Button */}
-      <button
-        onClick={closeModal}
-        className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
-      >
-        <FontAwesomeIcon icon={faTimesCircle} className="text-red-600" style={{ fontSize: "36px" }} />
-      </button>
-
-      {/* Centered Content */}
-      <div className="flex flex-col items-center justify-center flex-grow w-full">
-        <Image src={`/icons/${selectedTask.task_source}.png`} alt={selectedTask.task_source} width={90} height={90} />
-        <h3 className="text-3xl font-bold mb-4 text-purple-500 mt-8">{selectedTask.title}</h3>
-        <p className="mb-8 text-white">{selectedTask.description}</p>
-      </div>
-
-
-      <div className="mb-8 text-5xl text-purple-500 font-extrabold from-gradient-start font-mono">
-        +{selectedTask.points}
-      </div>
-
-      {/* Buttons at the Bottom */}
-      <div className="w-full mt-auto">
-        {!taskStarted ? (
-          <button
-            onClick={() => startTask(selectedTask.task_link)}
-            className="w-3/4 bg-purple-500 text-white font-mono px-6 py-3 rounded-full hover:bg-green-600 mb-16"
-          >
-            Start Task
-          </button>
-        ) : (
-          <>
-            <input
-              type="text"
-              value={enteredCode}
-              onChange={(e) => setEnteredCode(e.target.value)}
-              placeholder="Enter Verification Code"
-              className="border p-2 w-full mb-4 text-center"
-            />
-            <button
-              onClick={verifyTask}
-              className="w-full bg-green-500 mb-16 text-white px-4 py-2 rounded-lg hover:bg-green-600"
-              disabled={isVerifying}
-            >
-              {isVerifying ? 'Verifying...' : 'Verify Task'}
-            </button>
-          </>
-        )}
-      </div>
-
-      {/* Confetti Effect */}
-      
+      )}
       <Suspense fallback={<div>Loading...</div>}>
   <ErrorModal message={errorMessage} onClose={() => setErrorMessage(null)} />
   <SuccessModal message={successMessage} onClose={() => setSuccessMessage(null)} />
-</Suspense>
-    </div>
-  </div>
-)}
+  </Suspense>
       {showConfetti && <Confetti />}
       <Footer theme={theme} />
     </div>
@@ -221,5 +177,6 @@ const TaskList: React.FC<TaskPageProps> = ({ theme }) => {
 };
 
 export default TaskList;
+
 
 
