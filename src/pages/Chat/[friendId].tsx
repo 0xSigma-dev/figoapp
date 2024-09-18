@@ -194,7 +194,7 @@ const Chat: React.FC = () => {
 
     return (
       <WalletGuard>
-        <div className="flex flex-col h-screen max-w-full overflow-x-hidden" >
+        <div className="relative flex flex-col h-screen max-w-full overflow-x-hidden" >
         
 
           {/* Background image */}
@@ -203,7 +203,7 @@ const Chat: React.FC = () => {
               backgroundImage: `url(${backgroundImage})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
-              position: 'absolute',
+              position: 'fixed',
               top: 0,
               left: 0,
               width: '100%',
@@ -213,74 +213,74 @@ const Chat: React.FC = () => {
           />
           
           {/* Sticky Header */}
-          <header className="flex sticky top-0 left-0 right-0 items-center justify-between p-1 bg-black text-white z-10">
-            <div className="flex items-center space-x-2">
-              <FontAwesomeIcon
-                icon={faArrowLeft}
-                onClick={() => router.back()}
-                className="text-xl cursor-pointer"
-              />
-              <div className="flex items-center space-x-1">
-                
-                  <AvatarComponent avatarId={avatar} width={60} height={60} />
-               
-               
-                  <div className="mr-2 hover:bg-gray-700" onClick={handleProfileClick}>
-  <h2 className="text-white font-bold">{displayName || 'User'}</h2>
-  <p className={`${statusColor} text-sm`}>
-  {typingUsers.includes(friendIdStr) ? 'typing...' : friendStatus || 'Away'}
-</p>
+          <header className="sticky top-0 left-0 right-0 bg-black text-white z-20 p-2 flex items-center justify-between">
+  <div className="flex items-center space-x-2">
+    <FontAwesomeIcon
+      icon={faArrowLeft}
+      onClick={() => router.back()}
+      className="text-xl cursor-pointer"
+    />
+    <div className="flex items-center space-x-1">
+      <AvatarComponent avatarId={avatar} width={50} height={50} />
+      <div className="ml-2 hover:bg-gray-700" onClick={handleProfileClick}>
+        <h2 className="text-white font-bold">{displayName || 'User'}</h2>
+        <p className={`${statusColor} text-sm`}>
+          {typingUsers.includes(friendIdStr) ? 'typing...' : friendStatus || 'Away'}
+        </p>
+      </div>
+    </div>
+  </div>
 
-</div>   
-              </div>
-            </div>
-            <div className="flex items-center space-x-2 ml-auto">
-              <div className="text-white font-semibold mr-3">{pendingPoints}</div>
-              <div className="relative" ref={menuRef}>
-                <div className="cursor-pointer mr-6 text-black dark:text-white" onClick={handleMenuClick}>
-                  <FontAwesomeIcon icon={faEllipsisV} style={{ fontSize: '24px' }} />
-                </div>
-                {showMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-900 rounded-md shadow-lg py-2 z-20">
-                    <button
-                      onClick={handleProfileClick}
-                      className="block px-4 py-2 text-black dark:text-white hover:bg-gray-700"
-                    >
-                      View Profile
-                    </button>
-                    <button
-                      onClick={handleOpenWarning}
-                      className="block px-4 py-2 text-black dark:text-white hover:bg-gray-700"
-                    >
-                      Backup OnChain
-                    </button>
-                    <button
-                       onClick={openWallpaperModal}
-                       className="block px-4 py-2 text-black dark:text-white hover:bg-gray-700"
-                    >
-                      Wallpaper
-                    </button>
+  <div className="flex items-center space-x-4">
+    <div className="text-white font-semibold">{pendingPoints}</div>
+    <div className="relative">
+      <FontAwesomeIcon
+        icon={faEllipsisV}
+        className="text-xl cursor-pointer mr-4"
+        onClick={handleMenuClick}
+      />
+      {showMenu && (
+        <div ref={menuRef} className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-900 rounded-md shadow-lg py-2">
+          <button
+            onClick={handleProfileClick}
+            className="block px-4 py-2 text-black dark:text-white hover:bg-gray-700"
+          >
+            View Profile
+          </button>
+          <button
+            onClick={handleOpenWarning}
+            className="block px-4 py-2 text-black dark:text-white hover:bg-gray-700"
+          >
+            Backup OnChain
+          </button>
+          <button
+            onClick={openWallpaperModal}
+            className="block px-4 py-2 text-black dark:text-white hover:bg-gray-700"
+          >
+            Wallpaper
+          </button>
+          <button
+            onClick={handleOpenWarning}
+            className="block px-4 py-2 text-black dark:text-white hover:bg-gray-700"
+          >
+            Clear Chat
+          </button>
+          <button
+            onClick={handleOpenWarning}
+            className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-200 dark:hover:bg-gray-700"
+          >
+            <FontAwesomeIcon icon={faBan} className="text-red-600 mr-2" />
+            Block
+          </button>
+        </div>
+      )}
+    </div>
+  </div>
+</header>
 
-                    <button
-                      onClick={handleOpenWarning}
-                      className="block px-4 py-2 text-black dark:text-white hover:bg-gray-700"
-                    >
-                      Clear Chat
-                    </button>
-                    <button
-                      onClick={handleOpenWarning}
-                      className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-200 dark:hover:bg-gray-700"
-                    >
-                      <FontAwesomeIcon icon={faBan} className="text-red-600 mr-2" style={{ fontSize: "24px" }} />
-                      Block
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </header>
     
           {/* Scrollable message area */}
+          <div className='flex-1 flex flex-col'>
           <div className="flex-1 p-4 overflow-y-auto overflow-x-hidden">
             {messages.length === 0 ? (
               <div className="flex-grow mt-20 flex items-center justify-center overflow-x-hidden">
@@ -306,6 +306,7 @@ const Chat: React.FC = () => {
               ))
             )}
             <div ref={messagesEndRef} />
+          </div>
           </div>
     
           {/* Sticky Chat Input and Buttons */}

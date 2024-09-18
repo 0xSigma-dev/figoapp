@@ -164,12 +164,7 @@ const useChatChannel = (userId: any, friendId: any, ablyClient: any, friendAvata
     createChannel();
     subscribeToAbly();
 
-    const pollMessageStatus = setInterval(async () => {
-      const storedMessages = await loadMessages(newChannelName);
-      setMessages(storedMessages); // Update state if there are changes in the status
-    }, 1000);
-
-    return () => clearInterval(pollMessageStatus); 
+   
   }, [userId, friendId, ablyClient, friendAvatar, friendName, senderName, senderAvatar, isFriendDetailsFetched, fetchMessages]);
 
   return { messages, channelRef, channelName, fetchMessages };

@@ -551,6 +551,12 @@ body {
   pointer-events: none; /* To prevent interactions with the blurred background */
 }
 
+.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
 
 
 
