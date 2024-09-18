@@ -38,6 +38,7 @@ const Chat: React.FC = () => {
     const isCurrentUser = String(friendId) === String(userId);
     const { senderAvatar, senderName, loading: userLoading } = useFetchUserData(userId);
     const [isWallpaperModalOpen, setIsWallpaperModalOpen] = useState(false);
+    const [viewportHeight, setViewportHeight] = useState(0);
     const [backgroundImage, setBackgroundImage] = useState('/img/wallpaper1.jpg');
     const [friendStatus, setFriendStatus] = useState<string>('Away'); // Initialize status
     const [statusColor, setStatusColor] = useState<string>('text-gray-500');
@@ -52,6 +53,24 @@ const Chat: React.FC = () => {
     const { currentEnergy, totalEnergy, setCurrentEnergy, resetRefillTimer, startRefill } = useEnergyManagement(userId);
     const isFriendOnline = usePresentStatus(channelRef.current, userId, friendId);
     const { sendMessage, floatingPoints } = useSendMessage(channelRef, userId, currentEnergy, setCurrentEnergy, resetRefillTimer);
+
+   
+
+    useEffect(() => {
+      if (typeof window !== 'undefined') { // Ensure this code only runs on the client
+        setViewportHeight(window.innerHeight);
+    
+        const handleResize = () => {
+          setViewportHeight(window.innerHeight);
+        };
+    
+        window.addEventListener('resize', handleResize);
+    
+        return () => {
+          window.removeEventListener('resize', handleResize);
+        };
+      }
+    }, []);
 
 
     const scrollToBottom = () => {
@@ -204,7 +223,7 @@ const Chat: React.FC = () => {
 
     return (
       <WalletGuard>
-        <div className="relative flex flex-col max-w-full overflow-x-hidden" >
+        <div className="relative flex flex-col  max-w-full overflow-x-hidden" style={{ height: viewportHeight }}>
         
 
           {/* Background image */}
@@ -290,8 +309,8 @@ const Chat: React.FC = () => {
 
     
           {/* Scrollable message area */}
-          <div className='flex-1 flex flex-col'>
-          <div className="flex-1 p-4 overflow-y-auto overflow-x-hidden">
+          <div className='flex-1 flex overflow-y-scroll mb-14 flex-col'>
+          <div className="flex-1 p-4 overflow-x-hidden">
             {messages.length === 0 ? (
               <div className="flex-grow mt-20 flex items-center justify-center overflow-x-hidden">
                 <div className="flex flex-col items-center justify-center bg-black w-40 rounded-lg p-6">
@@ -320,9 +339,7 @@ const Chat: React.FC = () => {
           </div>
     
           {/* Sticky Chat Input and Buttons */}
-          <div className="bottom-0 p-2 bg-opacity-50 w-full z-10">
-            
-            <div className="flex items-center max-w-full">
+          <footer className="fixed bottom-0 left-0 right-0 p-4 flex w-full z-10 mt-10 items-center space-x-6">
               <div className="flex-grow flex items-center">
                 <ChatInput
                   message={messageInput}
@@ -344,8 +361,8 @@ const Chat: React.FC = () => {
                   onRecord={handlerecord}
                 />
               </div>
-            </div>
-          </div>
+          
+          </footer>
     
           <WallpaperManager
              backgroundImage={backgroundImage}
