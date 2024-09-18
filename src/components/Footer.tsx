@@ -16,13 +16,12 @@ const Footer: React.FC<FooterProps> = ({ theme }) => {
   const icons = [
     { icon: faComments, link: '/Home/page' },
     //{ icon: faCameraRetro, link: '/Home/Status' },
-   // { icon: faTasks, link: '/Home/Tasks/page' },
+    { icon: faTasks, link: '/Tasks' },
   ];
 
   const callIcon = { icon: faPhoneAlt, link: '#' }; // Disabled call icon
   const community = { icon: faUserFriends, link: '#' }
   const camera = { icon: faCameraRetro, link: '#' }
-  const tasks = { icon: faTasks, link: '#' }
   const swap = { icon: faExchangeAlt, link: '#' }
 
   return (
@@ -81,24 +80,7 @@ const Footer: React.FC<FooterProps> = ({ theme }) => {
 
             </motion.div>
           </div>
-          <div className="relative flex flex-col items-center">
-            <motion.div
-              whileTap={{ scale: 1.4 }}
-              className="relative flex items-center justify-center w-16 h-16 rounded-full bg-transparent cursor-not-allowed"
-            >
-
-              <FontAwesomeIcon
-                icon={tasks.icon}
-                className="text-gray-500"
-                style={{ fontSize: '24px' }}
-              />
-              <span className="absolute top-0 right-0 bg-green-500 text-white text-xs rounded-full px-1 ">
-                Soon
-              </span>
-
-
-            </motion.div>
-          </div>
+          
           <div className="relative flex flex-col items-center">
             <motion.div
               whileTap={{ scale: 1.4 }}

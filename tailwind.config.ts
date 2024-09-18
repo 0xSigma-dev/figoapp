@@ -19,8 +19,8 @@ const config: Config = {
       },
       backgroundColor: {
         'white':'#F7F7F7',
-        'black': '#100113',
-        'deep-purple': '#100113'
+        'black': '#290131',
+        'deep-purple': '#290131'
       },
     },
   },

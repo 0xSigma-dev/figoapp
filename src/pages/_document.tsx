@@ -6,8 +6,9 @@ class MyDocument extends Document {
       <Html>
         <Head>
           <link rel="manifest" href="/manifest.json" />
-          <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-          <meta name="theme-color" content="#100113" media="(prefers-color-scheme: dark)" />
+          <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
+          <meta name="theme-color" content="#F7F7F7" media="(prefers-color-scheme: light)" />
+          <meta name="theme-color" content="#3E0349" media="(prefers-color-scheme: dark)" />
           <meta name="full-screen" content="yes"/>
           <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
           <meta name="mobile-web-app-capable" content="yes" />

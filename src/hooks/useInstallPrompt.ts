@@ -1,35 +1,16 @@
-"use client"
-import { useEffect } from 'react';
+"use client";
+
+import { useEffect, useState } from 'react';
 
 const useInstallPrompt = () => {
-  useEffect(() => {
-    let deferredPrompt: any;
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isInstallable, setIsInstallable] = useState(false);
 
+  useEffect(() => {
     const handleBeforeInstallPrompt = (e: any) => {
       e.preventDefault();
-      deferredPrompt = e;
-
-      // Show your own install button
-      const installButton = document.getElementById('install-button');
-
-      if (installButton) {
-        installButton.style.display = 'block';
-
-        installButton.addEventListener('click', () => {
-          if (installButton) {
-            installButton.style.display = 'none';
-            deferredPrompt.prompt();
-            deferredPrompt.userChoice.then((choiceResult: any) => {
-              if (choiceResult.outcome === 'accepted') {
-                console.log('User accepted the install prompt');
-              } else {
-                console.log('User dismissed the install prompt');
-              }
-              deferredPrompt = null;
-            });
-          }
-        });
-      }
+      setDeferredPrompt(e); // Save the event to trigger later
+      setIsInstallable(true); // Show the install button
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -38,7 +19,25 @@ const useInstallPrompt = () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
   }, []);
+
+  const promptInstall = () => {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt(); // Show the install prompt
+    deferredPrompt.userChoice.then((choiceResult: any) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+      } else {
+        console.log('User dismissed the install prompt');
+      }
+      setDeferredPrompt(null); // Reset the prompt
+      setIsInstallable(false); // Hide the install button
+    });
+  };
+
+  return { isInstallable, promptInstall };
 };
 
 export default useInstallPrompt;
+
 

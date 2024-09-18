@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie';
 
-const dbVersion = 7; // Increment this version if you need to update the schema
+const dbVersion = 10; // Increment this version if you need to update the schema
 let dbInstance: IDBDatabase | null = null;
 const openConnections: Set<IDBDatabase> = new Set();
 const isLongEmail = (email: string): boolean => email.length > 35;
@@ -46,9 +46,11 @@ export const initDB = (userId: string): Promise<IDBDatabase> => {
         messageStore.createIndex('channelId', 'channelId', { unique: false });
         messageStore.createIndex('timestamp', 'timestamp', { unique: false });
         messageStore.createIndex('messageId', 'messageId', { unique: true });
+        messageStore.createIndex('status', 'status', { unique: false }); // Add this index
         messageStore.createIndex('timestampDesc', 'timestamp', { unique: false });
       }
     };
+    
 
     request.onsuccess = () => {
       dbInstance = request.result;
@@ -257,16 +259,19 @@ export const getAllChannels = async (): Promise<any[]> => {
   });
 };
 
-export const saveMessage = async (message: any, messageId: any, channelId: any): Promise<void> => {
+export const saveMessage = async (message: any, id: any, status: any, channelId: any): Promise<void> => {
+  console.log('message index', message)
   const db = await getDBInstance();
   const transaction = db.transaction('messages', 'readwrite');
   const store = transaction.objectStore('messages');
 
   return new Promise<void>((resolve, reject) => {
-    const messageWithId = { ...message, id: messageId, channelId, timestamp: new Date().toISOString() };
+    const messageWithId = { ...message, id,  status, channelId, timestamp: new Date().toISOString() };
+    console.log('Saving message:', messageWithId);
     const request = store.put(messageWithId);
 
     request.onsuccess = () => {
+      console.log('message saved', message)
       resolve();
     };
 
@@ -276,20 +281,23 @@ export const saveMessage = async (message: any, messageId: any, channelId: any):
   });
 };
 
-export const loadMessages = async (channelId: any): Promise<any[]> => {
+export const loadMessages = async (channelId: any, status?: string): Promise<any[]> => {
   const db = await getDBInstance();
   const transaction = db.transaction('messages', 'readonly');
   const store = transaction.objectStore('messages');
-  const index = store.index('timestamp');
 
   return new Promise<any[]>((resolve, reject) => {
-    const request = index.openCursor();
+    const index = store.index('timestampDesc'); // Using timestamp index to get messages in descending order
+
     const messages: any[] = [];
+    const range = status ? IDBKeyRange.only(status) : null; // Optional status filter
+
+    const request = index.openCursor(range);
 
     request.onsuccess = (event) => {
       const cursor = (event.target as IDBRequest).result;
       if (cursor) {
-        if (cursor.value && cursor.value.channelId === channelId) {
+        if (cursor.value.channelId === channelId) {
           messages.push(cursor.value);
         }
         cursor.continue();
@@ -301,6 +309,7 @@ export const loadMessages = async (channelId: any): Promise<any[]> => {
     request.onerror = () => reject(`Failed to retrieve messages: ${request.error}`);
   });
 };
+
 
 export const getLatestMessageForChannel = async (channelId: any): Promise<any | null> => {
   const db = await getDBInstance();
@@ -365,5 +374,149 @@ export const deleteDatabase = async (userId: string): Promise<void> => {
     request.onblocked = () => reject('Database deletion blocked due to active connections.');
   });
 };
+
+
+export const deleteChannel = async (channelId: string): Promise<void> => {
+  const db = await getDBInstance();
+
+  return new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction(['channels', 'messages'], 'readwrite');
+    const channelStore = transaction.objectStore('channels');
+    const messageStore = transaction.objectStore('messages');
+
+    // Delete the channel
+    const deleteChannelRequest = channelStore.delete(channelId);
+    deleteChannelRequest.onerror = () => {
+      reject(`Failed to delete channel: ${deleteChannelRequest.error}`);
+    };
+
+    // Delete associated messages
+    const index = messageStore.index('channelId');
+    const messagesToDelete: IDBRequest[] = [];
+    const deleteMessages = index.openCursor(IDBKeyRange.only(channelId));
+
+    deleteMessages.onsuccess = (event) => {
+      const cursor = (event.target as IDBRequest).result;
+      if (cursor) {
+        const messageRequest = messageStore.delete(cursor.primaryKey);
+        messageRequest.onsuccess = () => {
+          messagesToDelete.push(messageRequest);
+        };
+        messageRequest.onerror = () => {
+          reject(`Failed to delete message: ${messageRequest.error}`);
+        };
+        cursor.continue();
+      } else {
+        // Wait for all messages to be deleted
+        Promise.all(messagesToDelete.map(request => {
+          return new Promise<void>((resolve, reject) => {
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(`Failed to delete message: ${request.error}`);
+          });
+        })).then(() => resolve()).catch(reject);
+      }
+    };
+
+    deleteMessages.onerror = () => {
+      reject(`Failed to retrieve messages for deletion: ${deleteMessages.error}`);
+    };
+  });
+};
+
+export const updateMessageStatus = async (messageId: string, status: string, channelName: string): Promise<void> => {
+  try {
+    // Get database instance
+    const db = await getDBInstance();
+
+    // Start a transaction on the 'messages' object store
+    const transaction = db.transaction('messages', 'readwrite');
+    const store = transaction.objectStore('messages');
+
+    // Get the message by messageId
+    const getRequest = store.get(messageId);
+    
+    getRequest.onsuccess = () => {
+      const message = getRequest.result;
+
+      // If the message with the provided ID exists, update its status
+      if (message) {
+        message.status = status;
+        message.channelName = channelName;
+
+        // Save the updated message back to the store
+        const updateRequest = store.put(message);
+
+        updateRequest.onsuccess = () => {
+          console.log(`Message status updated to '${status}' for message ID: ${messageId}`);
+        };
+
+        updateRequest.onerror = () => {
+          console.error(`Failed to update message status: ${updateRequest.error}`);
+        };
+      } else {
+        console.warn(`Message with ID '${messageId}' not found in the store.`);
+      }
+    };
+
+    getRequest.onerror = () => {
+      console.error(`Failed to retrieve message with ID '${messageId}': ${getRequest.error}`);
+    };
+
+    // Wait for the transaction to complete
+    await new Promise<void>((resolve, reject) => {
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(`Transaction failed: ${transaction.error}`);
+    });
+
+  } catch (error) {
+    console.error(`Error updating message status: ${error}`);
+  }
+};
+
+export const updateMessagesToRead = async (channelId: string): Promise<void> => {
+  try {
+    const db = await getDBInstance();
+    const transaction = db.transaction('messages', 'readwrite');
+    const store = transaction.objectStore('messages');
+    const index = store.index('status');  // Access the 'status' index
+
+    // Open cursor to retrieve messages with status 'delivered'
+    const request = index.openCursor(IDBKeyRange.only('delivered'));
+
+    request.onsuccess = async (event) => {
+      const cursor = (event.target as IDBRequest).result;
+      if (cursor) {
+        const message = cursor.value;
+
+        // Check if the message belongs to the current channel
+        if (message.channelId === channelId) {
+          // Update the status to 'read'
+          message.status = 'read';
+          const updateRequest = store.put(message);
+
+          updateRequest.onsuccess = () => {
+            console.log(`Message ID ${message.id} updated to 'read'`);
+          };
+          updateRequest.onerror = () => {
+            console.error(`Error updating message ID ${message.id}: ${updateRequest.error}`);
+          };
+        }
+        cursor.continue();  // Move to the next record
+      }
+    };
+
+    request.onerror = () => {
+      console.error('Failed to retrieve messages for updating to read.');
+    };
+
+    await new Promise<void>((resolve, reject) => {
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(`Transaction failed: ${transaction.error}`);
+    });
+  } catch (error) {
+    console.error('Error updating messages to read:', error);
+  }
+};
+
 
 

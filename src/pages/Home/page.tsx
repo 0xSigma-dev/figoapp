@@ -1,4 +1,5 @@
-import React, { useEffect, useState} from 'react';
+"use client"
+import React, { useEffect, useState, useCallback} from 'react';
 import { useRouter } from 'next/router';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
@@ -12,7 +13,7 @@ import { useUser } from '../../context/UserContext';
 import Cookies from 'js-cookie';
 import WalletGuard from '../../components/WalletGuard';
 import ContactPage from '@/components/ContactPage';
-import { saveUserData, getUserData, getAllChannels,  getLatestMessagesForAllChannels, saveChannel, getDBInstance, saveMessage, updateUserDataFields } from '../../utils/indexedDB';
+import { saveUserData, getUserData, getAllChannels,  getLatestMessagesForAllChannels, saveChannel, getDBInstance, saveMessage, updateUserDataFields, deleteChannel } from '../../utils/indexedDB';
 import PointsDisplay from '../../components/PointsDisplay';
 import AvatarComponent from '../../components/AvatarComponent';
 import UserDetailsCard from '../../components/UserDetailsCard';
@@ -20,6 +21,9 @@ import { supabase } from '@/lib/supabaseClient';
 import Confetti from 'react-confetti';
 import { useAbly } from '@/context/AblyContext';
 import { subscribeToChannel, unsubscribeFromChannel } from '@/utils/ablyService';
+import { format } from 'date-fns'; 
+import ChannelItem from '@/components/ChannelItem';
+
 
 
 interface HomePageProps {
@@ -120,7 +124,7 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
   }, [user]);
   
 
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback ( async () => {
     try {
       const token = userId;
       const storedData = await getUserData(userId || '');
@@ -142,7 +146,7 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
       fetchUserPoints(token);
     } catch (error) {
     }
-  };
+  }, [userId]);
   
   
 
@@ -151,7 +155,7 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
       fetchUserData();
       fetchUserPoints(userId);
     }
-  }, [userId]);
+  }, [userId, fetchUserData, fetchUserPoints]);
   
   
 
@@ -192,8 +196,8 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
     return (
       <AvatarComponent
         avatarId={numericAvatarId}
-        width={50}
-        height={50}
+        width={70}
+        height={70}
       />
     );
   };
@@ -243,23 +247,24 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
       try {
         const channelsData = await getAllChannels();
         const latestMessagesData = await getLatestMessagesForAllChannels();
+
         const validMessages = latestMessagesData.filter((message) => message !== null);
         const messagesByChannel = validMessages.reduce((acc, message) => {
-          if (message && message.channelId) {
+          if (message?.channelId) {
             acc[message.channelId] = message;
           }
           return acc;
         }, {});
-        const sortedChannels = channelsData.sort((a, b) => {
-          const timestampA = messagesByChannel[a.id] ? new Date(messagesByChannel[a.id].timestamp).getTime() : 0;
-          const timestampB = messagesByChannel[b.id] ? new Date(messagesByChannel[b.id].timestamp).getTime() : 0;
-          return timestampB - timestampA;
-        });
-        setChannels(sortedChannels);
-        setLatestMessages(validMessages);
+
+        const filteredChannels = channelsData.filter(channel => messagesByChannel[channel.id]);
+
+        setChannels(filteredChannels);
+        setLatestMessages(messagesByChannel);
       } catch (error) {
+        
       }
     };
+
     fetchChannelsAndMessages();
     const interval = setInterval(fetchChannelsAndMessages, 1000);
     return () => clearInterval(interval);
@@ -275,7 +280,7 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
     }
   };
 
-  const fetchUserChannels = async (userId: any) => {
+  const fetchUserChannels = useCallback( async (userId: any) => {
     if (!ablyClient) return;
     try {
       const { data, error } = await supabase
@@ -289,7 +294,7 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
         for (const channel of data) {
           const channelName = channel.name;
           subscribeToChannel(ablyClient, channelName, async (message: any) => {
-            await saveMessage(message.data, message.id, channelName);
+            await saveMessage(message.data, message.data.id, message.data.status, message.data.channelName);
           });
           const exists = await checkIfChannelExists(channelName);
           if (!exists) {
@@ -298,8 +303,8 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
               id: channelName,
               name: channelName,
               friendId: isFriend ? channel.friend_id : channel.sender_id,
-              friendName: isFriend ? channel.friend_name : channel.sender_name,
               friendAvatar: isFriend ? channel.friend_avatar : channel.sender_avatar,
+              friendName: isFriend ? channel.friend_name : channel.sender_name,
             };
             await saveChannel(newChannel);
           }
@@ -309,7 +314,7 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
     } catch (error) {
       return [];
     }
-  };
+  }, [ablyClient]);
   
 
   useEffect(() => {
@@ -318,20 +323,29 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
       const interval = setInterval(() => fetchUserChannels(userId), 5000);
       return () => clearInterval(interval);
     }
-  }, [userId, ablyClient]);
+  }, [userId, ablyClient, fetchUserChannels]);
 
-  const subscribeToFigoChannel = () => {
+  const subscribeToFigoChannel = useCallback( () => {
     if (ablyClient) {
       subscribeToChannel(ablyClient, 'Figo', (message: any) => {
       });
     }
-  };
+  }, [ablyClient]);
 
   useEffect(() => {
     if (userId) {
       subscribeToFigoChannel();
     }
   }, [userId]);
+
+  const handleDeleteConversation = async (channelId: string) => {
+    try {
+      await deleteChannel(channelId); // Remove from IndexedDB
+      setChannels((prevChannels) => prevChannels.filter((channel) => channel.id !== channelId)); // Update state
+    } catch (error) {
+      //console.error('Failed to delete channel', error);
+    }
+  };
 
   return (
     <WalletGuard>
@@ -356,34 +370,30 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
             )}
         </div>
         </div>
-        <main className={`flex-1 overflow-y-auto flex ${loadingClass}`}>
+        <main className="flex-1 overflow-y-auto flex">
         {channels.length > 0 ? (
-          <div className={`w-full max-w-4xl p-4 ${loadingClass}`}>
+          <div className="w-full max-w-4xl p-4">
             {channels.map((channel) => {
-              const latestMessage = latestMessages.find((msg: any) => msg.channelId === channel.id);
-              return (
-                <div
-                  key={channel.id}
-                  className={`flex items-center p-2 cursor-pointer ${
-                    clickedConversationId === channel.id ? 'bg-gray-700' : ''
-                  }`}
-                  onClick={() => handleNavigate2(channel.friendId, channel.id)}
-                >
-                  {renderFriendAvatar(channel.friendAvatar)}
-                  <div className='flex-1 ml-4'>
-                    <div className='font-bold text-lg text-black dark:text-white'>{channel.friendName}</div>
-                    <div className='text-sm text-black dark:text-white'>
-                      {latestMessage?.text && latestMessage.text.length > 40
-                        ? `${latestMessage.text.substring(0, 32)}...`
-                        : latestMessage?.text || 'You might Know this user, Say Hi'}
-                    </div>
-                  </div>
-                </div>
-              );
+              const latestMessage = latestMessages[channel.id];
+              const formattedTime = latestMessage
+                ? format(new Date(latestMessage.timestamp), 'hh:mm a') // Format the timestamp (12-hour time)
+                : '';
+
+                return (
+                  <ChannelItem
+                    key={channel.id}
+                    channel={channel}
+                    latestMessage={latestMessage}
+                    formattedTime={formattedTime}
+                    onDelete={handleDeleteConversation}
+                    onClick={handleNavigate2}
+                    renderFriendAvatar={renderFriendAvatar}
+                  />
+                );
             })}
           </div>
         ) : (
-          <div className={`text-lg text-black dark:text-gray-500 ml-4 ${loadingClass}`}>You have no conversations</div>
+          <div className="text-lg text-black dark:text-gray-500 ml-4">You have no conversations</div>
         )}
       </main>
 

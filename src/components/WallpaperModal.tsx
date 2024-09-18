@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 
 const wallpapers = [
   '/img/wallpaper1.jpg',
@@ -57,7 +58,7 @@ const WallpaperModal: React.FC<WallpaperModalProps> = ({ isOpen, onClose, onSave
               }`}
               onClick={() => handleWallpaperSelect(wallpaper)}
             >
-              <img src={wallpaper} alt="wallpaper" className="w-40 h-24 object-cover" />
+              <Image src={wallpaper} alt="wallpaper" className="w-40 h-24 object-cover" />
             </div>
           ))}
         </div>

@@ -1,4 +1,4 @@
-import React, { useRef, useState, forwardRef } from "react";
+import React, { useRef, useState, forwardRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShareAlt, faUser, faCog, faInfoCircle, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
@@ -27,11 +27,42 @@ interface PlaceholderComponentProps {
   onClose: () => void;
 }
 
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
 const PlaceholderComponent = forwardRef<HTMLDivElement, PlaceholderComponentProps>(({ user, onClose }, ref) => {
   const points = user?.points;
-  const totalPointsRequired = 50000;
+  const [totalPointsRequired, setTotalPointsRequired] = useState<number>(1000000);
   const [blinkItem, setBlinkItem] = useState<string | null>(null);
   const router = useRouter();
+
+  const fetchLevelDetails = async (level: number) => {
+    try {
+      const response = await fetch(`${apiUrl}/api/levels/${level}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch level details");
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching level details:", error);
+      return null;
+    }
+  };
+  
+
+
+  useEffect(() => {
+    const fetchUserLevelDetails = async () => {
+      if (user?.level) {
+        const levelDetails = await fetchLevelDetails(user.level);
+        if (levelDetails) {
+          setTotalPointsRequired(levelDetails.max_points); // Set total points required based on the level
+        }
+      }
+    };
+
+    fetchUserLevelDetails();
+  }, [user?.level]);
 
   const handleBlink = (item: string) => {
     setBlinkItem(item);
@@ -76,6 +107,10 @@ const PlaceholderComponent = forwardRef<HTMLDivElement, PlaceholderComponentProp
 
         <div className="flex items-center space-x-2">
           <span className="text-black dark:text-white font-semibold mb-3">{user.bio}</span>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <span className="text-black dark:text-white font-semibold mb-3">{user.level}</span>
         </div>
 
         <div className="w-full text-center space-y-2">

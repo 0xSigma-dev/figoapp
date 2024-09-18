@@ -10,6 +10,7 @@ const fetchChannelHistory = async (ablyClient: Ably.Realtime, channelName: strin
   const channel = ablyClient.channels.get(channelName);
   try {
     const result = await channel.history({ limit: 100 });
+    console.log('message history', result)
     return result.items;
   } catch (error) {
     return [];

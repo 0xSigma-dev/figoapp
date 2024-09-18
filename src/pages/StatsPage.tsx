@@ -1,11 +1,10 @@
+"use client"
+
 import React, { useEffect, useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
-import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
+import SubHeader from '@/components/SubHeader';
 
 const StatsPage: React.FC = () => {
-  const router = useRouter();
   const [userCount, setUserCount] = useState<number>(0);
   const [totalPoints, setTotalPoints] = useState<number>(0);
 
@@ -35,11 +34,8 @@ const StatsPage: React.FC = () => {
 
   return (
     <div className="bg-white dark:bg-black text-white h-screen flex flex-col items-center justify-center p-4">
-      <div className="absolute top-4 left-4 flex items-center space-x-4">
-        <button onClick={() => router.push('/Home/page')} className="text-black dark:text-white text-3xl">
-          <FontAwesomeIcon icon={faArrowLeft} />
-        </button>
-        <h1 className="text-4xl text-black dark:text-white font-bold">Statistics</h1>
+      <div className="absolute top-4 left-4 flex ml-20 items-center space-x-4">
+        <SubHeader title="Statistics" />
       </div>
       <div className="text-center mt-16">
         <div className="mb-8">

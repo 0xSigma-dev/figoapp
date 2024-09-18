@@ -11,6 +11,8 @@ import Head from "next/head";
 import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { Montaga } from '@next/font/google';
+import { UserStatusProvider } from '../context/UserStatusContext';
+import Cookies from 'js-cookie';
 
 
 const montaga = Montaga({
@@ -59,10 +61,13 @@ function MyApp({ Component, pageProps }: AppProps) {
       <Head>
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <title>Figo - Next Gen Social App</title>
-        <meta name="description" content="Best Web3 Social Gamified App!" />
+        <meta name="description" content="Best Web3 Gamified Social App!" />
         <link rel="shortcut icon" href="/favicon.ico" />
         <link rel="mask-icon" href="/icons/mask-icon.svg" color="#FFFFFF" />
-        <meta name="theme-color" content="#ffffff" />
+        <meta name="theme-color" content="#F7F7F7" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#290131" media="(prefers-color-scheme: dark)" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="mobile-web-app-capable" content="yes" />
         <link rel="apple-touch-icon" href="/ios/50.png" />
         <link
           rel="apple-touch-icon"
@@ -83,12 +88,12 @@ function MyApp({ Component, pageProps }: AppProps) {
         <meta name="twitter:card" content="summary" />
         <meta name="twitter:url" content="https://app.figoapp.xyz" />
         <meta name="twitter:title" content="Figo" />
-        <meta name="twitter:description" content="First Multidimensional Gamified Web App!" />
+        <meta name="twitter:description" content="First Gamified Social Web App!" />
         <meta name="twitter:image" content="/icons/twitter.png" />
         <meta name="twitter:creator" content="@DavidWShadow" />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Figo" />
-        <meta property="og:description" content="First Multidimensional Gamified Web App!" />
+        <meta property="og:description" content="First Gamified Scial Web App!" />
         <meta property="og:site_name" content="Figo" />
         <meta property="og:url" content="https://app.figoapp.xyz" />
         <meta property="og:image" content="/ios/60.png" />
@@ -98,10 +103,12 @@ function MyApp({ Component, pageProps }: AppProps) {
     
       <AppWalletProvider>
         <UserProvider>
+        <UserStatusProvider userId={Cookies.get('userId') || ''}>
           <AblyProvider>
              <Component {...pageProps} />
              <ToastContainer />
           </AblyProvider>
+        </UserStatusProvider>
         </UserProvider> 
       </AppWalletProvider> 
     </ThemeProvider>

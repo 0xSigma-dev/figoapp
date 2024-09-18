@@ -16,6 +16,8 @@ import SkeletonProfile from '../../components/Skeleton/SkeletonProfile';
 import AvatarComponent from "@/components/AvatarComponent";
 import WalletGuard from "@/components/WalletGuard";
 import { useAbly } from '@/context/AblyContext';
+import Image from 'next/image';
+
 
 
 const ProfilePage: React.FC = () => {
@@ -478,7 +480,7 @@ const ProfilePage: React.FC = () => {
       </h2>
       {fileUrl && (
         <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 p-4">
-          <img src={fileUrl} alt="Uploaded file" className="w-32 h-32 object-cover rounded-lg" />
+          <Image src={fileUrl} alt="Uploaded file" className="w-32 h-32 object-cover rounded-lg" />
           <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
             <div
               className="bg-blue-500 h-2 rounded-full"

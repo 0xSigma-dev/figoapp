@@ -4,7 +4,7 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { useTheme } from 'next-themes';
 import { useRouter } from 'next/router';
-import { useEffect, useState, useRef, useMemo } from 'react';
+import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { Suspense, lazy } from 'react';
 import Lottie from 'react-lottie-player';
 import Welcome from '../../components/lottie/welcome.json';
@@ -13,6 +13,7 @@ import { useUser } from '../../context/UserContext';
 import IsLoading from '../../components/isLoading';
 import { supabase } from '@/lib/supabaseClient';
 import { Gajraj_One } from '@next/font/google';
+import useInstallPrompt from '@/hooks/useInstallPrompt';
 
 
 const gajrajOne = Gajraj_One({
@@ -59,6 +60,7 @@ const SignUp = () => {
   const [hasModalBeenShown, setHasModalBeenShown] = useState<boolean>(false);
   const { referralId } = router.query;
   const userId = Cookies.get('userId');
+  const { isInstallable, promptInstall } = useInstallPrompt();
 
     
 
@@ -66,17 +68,17 @@ const SignUp = () => {
   useEffect(() => {
     AOS.init({ duration: 1200 });
     router.prefetch('/Home/page')
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     // Check if the user is already connected
     if (connected && userId ) {
       router.push('/Home/page');
     }
-  }, [connected]);
+  }, [connected, userId, router]);
   
 
-  const checkUserByPublicKey = async () => {
+  const checkUserByPublicKey = useCallback ( async () => {
     if (!wallet.publicKey) {
         return;
     }
@@ -105,7 +107,7 @@ const SignUp = () => {
     } catch (error: any) {
         setErrorMessage('Error checking user: ' + error.message);
     }
-};
+}, []);
 
 const checkUserOnceRef = useRef(false);
 
@@ -118,7 +120,7 @@ useEffect(() => {
         setHasModalBeenShown(false);
         setIsModalOpen(false);
     }
-}, [connected]);
+}, [connected, checkUserByPublicKey]);
 
   
   
@@ -294,6 +296,14 @@ useEffect(() => {
         ) : (
           <WalletMultiButton style={{}} />
         )}
+      </div>
+
+      <div className="mt-10 ml-4 text-center" data-aos="fade-up">
+      {isInstallable && (
+        <button id="install-button" onClick={promptInstall}>
+          Install Figo
+        </button>
+      )}
       </div>
       <Suspense fallback={<div>Loading...</div>}>
   <ErrorModal message={errorMessage} onClose={() => setErrorMessage(null)} />

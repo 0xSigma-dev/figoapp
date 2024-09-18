@@ -58,7 +58,7 @@ const useUserPoints = () => {
       } catch (error) {
       }
     }
-  }, [user, setUser]);
+  }, []);
 
   useEffect(() => {
     if (user?.id) {
