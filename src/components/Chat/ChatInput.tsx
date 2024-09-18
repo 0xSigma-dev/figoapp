@@ -201,7 +201,7 @@ const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
           </div>
         ) : (
           <>
-            <div className="flex items-center w-full p-2 bg-gray-800 rounded-full">
+            <div className="flex items-center w-full p-2 bg-gray-800 rounded-lg">
               {/* Sentiment (Emoji) Picker button */}
               <button className="px-2" onClick={toggleEmojiPicker}>
                 <FontAwesomeIcon icon={faSmile} className="text-white" />
@@ -218,7 +218,7 @@ const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
                 onChange={handleChange} // Handle change here
                 onKeyDown={handleKeyDown}
                 placeholder="Message"
-                className="flex-1 bg-gray-800 text-white placeholder-gray-500 h-10 max-h-40 outline-none border-none resize-none overflow-y-auto px-2"
+                className="flex-1 bg-gray-800 text-white placeholder-gray-500 h-20 max-h-40 outline-none border-none resize-none overflow-y-auto px-2"
                 rows={1}
                 style={{ caretColor: '#7E22CE' }}
               />

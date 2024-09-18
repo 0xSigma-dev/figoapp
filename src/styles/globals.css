@@ -557,6 +557,12 @@ body {
   z-index: 20;
 }
 
+
+#messages {
+  grid-area: messages;
+  overflow-y: auto;
+}
+
 .chat-input-container {
   grid-area: input;
   display: flex;
