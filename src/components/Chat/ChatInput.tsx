@@ -218,7 +218,7 @@ const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
                 onChange={handleChange} // Handle change here
                 onKeyDown={handleKeyDown}
                 placeholder="Message"
-                className="flex-1 bg-gray-800 text-white placeholder-gray-500 h-20 max-h-40 outline-none border-none resize-none overflow-y-auto px-2"
+                className="flex-1 bg-gray-800 text-white text-base placeholder-gray-500 h-24 max-h-40 outline-none border-none resize-none overflow-y-auto px-2"
                 rows={1}
                 style={{ caretColor: '#7E22CE' }}
               />
