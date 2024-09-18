@@ -51,15 +51,8 @@ const Chat: React.FC = () => {
     const { onType, whoIsCurrentlyTyping: typingUsers, markMessageAsRead } = useTypingStatus(channelRef.current, userId);
     const { currentEnergy, totalEnergy, setCurrentEnergy, resetRefillTimer, startRefill } = useEnergyManagement(userId);
     const isFriendOnline = usePresentStatus(channelRef.current, userId, friendId);
-    const [RecordRTC, setRecordRTC] = useState<any>(null);
-    const [recorder, setRecorder] = useState<null | typeof RecordRTC>(null);
     const { sendMessage, floatingPoints } = useSendMessage(channelRef, userId, currentEnergy, setCurrentEnergy, resetRefillTimer);
 
-    useEffect(() => {
-      import('recordrtc').then(mod => {
-        setRecordRTC(mod.default);
-      });
-    }, []);
 
     const scrollToBottom = () => {
       if (messagesEndRef.current) {
@@ -125,25 +118,9 @@ const Chat: React.FC = () => {
     
 
 
-    const startRecording = () => {
-      navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(stream => {
-          const newRecorder = new RecordRTC(stream, { type: 'audio' });
-          newRecorder.startRecording();
-          setRecorder(newRecorder);
-          setIsRecording(true);
-      });
-  };
+
   
-  const stopRecording = () => {
-      if (recorder) {
-          recorder.stopRecording(() => {
-              const audioBlob = recorder.getBlob();
-              sendRecording(audioBlob);
-          });
-          setIsRecording(false);
-      }
-  };
+
 
   const sendRecording = (blob: Blob) => {
       const reader = new FileReader();
@@ -154,22 +131,7 @@ const Chat: React.FC = () => {
       reader.readAsDataURL(blob);
   };
 
-  const handleStopRecording = () => {
-      if (recorder) {
-          recorder.stopRecording(() => {
-              const audioBlob = recorder.getBlob();
-              sendRecording(audioBlob);
-              const wavesurfer = WaveSurfer.create({
-                  container: '#waveform',
-                  waveColor: 'violet',
-                  progressColor: 'purple',
-              });
-              const url = URL.createObjectURL(audioBlob);
-              wavesurfer.load(url);
-          });
-          setIsRecording(false);
-      }
-  };
+
     
 
 
@@ -226,6 +188,10 @@ const Chat: React.FC = () => {
     }
     
   
+  function handlerecord(): void {
+    throw new Error('Function not implemented.');
+  }
+
     return (
       <WalletGuard>
         <div className="flex flex-col h-screen max-w-full overflow-x-hidden" >
@@ -351,8 +317,8 @@ const Chat: React.FC = () => {
                   ref={inputRef}
                   isRecording={isRecording}
                   onSend={() => sendMessage(messageInput, onType, setMessageInput, inputRef, channelName)}
-                  onRecord={startRecording}
-                  onStopRecording={stopRecording}
+                  onRecord={handlerecord}
+                  onStopRecording={handlerecord}
                   setMessage={setMessageInput}
                   onKeyDown={() => sendMessage(messageInput, onType, setMessageInput, inputRef, channelName)}
                   onType={onType}
@@ -363,7 +329,7 @@ const Chat: React.FC = () => {
                   isRecording={isRecording}
                   message={messageInput}
                   onSend={() => sendMessage(messageInput, onType, setMessageInput, inputRef, channelName)}
-                  onRecord={startRecording}
+                  onRecord={handlerecord}
                 />
               </div>
             </div>
