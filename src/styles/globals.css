@@ -566,7 +566,7 @@ body {
 .chat-input-container {
   grid-area: input;
   display: flex;
-  padding-bottom: env(keyboard-inset-bottom, 0px); /* Reserve space for virtual keyboard */
+  padding-bottom: calc(env(keyboard-inset-bottom, 0px) - 20px);/* Reserve space for virtual keyboard */
 }
 
 

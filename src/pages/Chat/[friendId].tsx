@@ -309,7 +309,7 @@ const Chat: React.FC = () => {
 
     
           {/* Scrollable message area */}
-          <div id="messages"  className='flex-1 flex overflow-y-scroll mb-24 flex-col'>
+          <div id="messages"  className='flex-1 flex overflow-y-scroll mt-28 mb-24 flex-col'>
           <div className="flex-1 p-4 overflow-x-hidden">
             {messages.length === 0 ? (
               <div className="flex-grow mt-20 flex items-center justify-center overflow-x-hidden">
