@@ -194,7 +194,7 @@ const Chat: React.FC = () => {
 
     return (
       <WalletGuard>
-        <div className="relative flex flex-col h-screen max-w-full overflow-x-hidden" >
+        <div className="relative flex flex-col min-h-screen max-w-full overflow-x-hidden" >
         
 
           {/* Background image */}
