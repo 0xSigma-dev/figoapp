@@ -14,15 +14,15 @@ const Footer: React.FC<FooterProps> = ({ theme }) => {
   const router = useRouter();
 
   const icons = [
-    { icon: faComments, link: '/Home/page' },
+    { icon: faComments, link: '/Home/page', label: "Chats" },
     //{ icon: faCameraRetro, link: '/Home/Status' },
-    { icon: faTasks, link: '/Tasks' },
+    { icon: faTasks, link: '/Tasks', label: "Tasks" },
   ];
 
-  const callIcon = { icon: faPhoneAlt, link: '#' }; // Disabled call icon
-  const community = { icon: faUserFriends, link: '#' }
-  const camera = { icon: faCameraRetro, link: '#' }
-  const swap = { icon: faExchangeAlt, link: '#' }
+  const callIcon = { icon: faPhoneAlt, link: '#', label: "Call" }; // Disabled call icon
+  const community = { icon: faUserFriends, link: '#', label: "Rooms" }
+  const camera = { icon: faCameraRetro, link: '#', label: "Stories" }
+  const swap = { icon: faExchangeAlt, link: '#', label: "Transfer" }
 
   const triggerVibration = () => {
     if (navigator.vibrate) {
@@ -47,6 +47,7 @@ const Footer: React.FC<FooterProps> = ({ theme }) => {
                     className={`${router.pathname === item.link ? 'text-purple-500' : 'text-black dark:text-white'}`}
                     style={{ fontSize: '24px' }}
                   />
+                  <span className={`${router.pathname === item.link ? 'text-purple-500' : 'text-black dark:text-white'} mt-1 text-xs text-center`}>{item.label}</span>
                 </motion.div>
               </a>
             </Link>

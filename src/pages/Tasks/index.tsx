@@ -114,7 +114,7 @@ const TaskList: React.FC<TaskPageProps> = ({ theme }) => {
       <div className={`${isModalOpen ? 'blur-background' : ''}`}>
         <SubHeader title="Figo Tasks" />
 
-        <div className="overflow-y-auto"> 
+        <div className="overflow-y-auto mt-6"> 
         {tasks.map((task) => (
           <div key={task.id} className="flex items-center justify-between p-4 mb-4 bg-gray-800 rounded-full shadow-md">
             <div className="flex items-center space-x-4">
@@ -143,7 +143,7 @@ const TaskList: React.FC<TaskPageProps> = ({ theme }) => {
               <Image src={`/icons/${selectedTask.task_source}.png`} alt={selectedTask.task_source} width={90} height={90} />
               <h3 className="text-3xl font-bold mb-4 text-purple-500 mt-8">{selectedTask.title}</h3>
               <p className="mb-8 text-white">{selectedTask.description}</p>
-              <div className="mb-8 text-5xl text-purple-500 font-extrabold">{selectedTask.points} FP</div>
+              <div className="mb-8 text-5xl text-purple-500 font-extrabold"> +{selectedTask.points} FP</div>
               {!taskStarted ? (
                 <button onClick={() => startTask(selectedTask.task_link)} className="w-3/4 bg-purple-500 text-white px-6 py-3 rounded-full hover:bg-green-600 mb-16">
                   Start Task

@@ -236,6 +236,8 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
         points: newTotalPoints,
       });
       
+      fetchUserPoints(userId);
+      
 
     } catch (error) {
     }
