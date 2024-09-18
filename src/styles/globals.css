@@ -557,6 +557,12 @@ body {
   z-index: 20;
 }
 
+.chat-input-container {
+  grid-area: input;
+  display: flex;
+  padding-bottom: env(keyboard-inset-bottom, 0px); /* Reserve space for virtual keyboard */
+}
+
 
 
 

@@ -339,8 +339,8 @@ const Chat: React.FC = () => {
           </div>
     
           {/* Sticky Chat Input and Buttons */}
-          <footer className="fixed bottom-0 left-0 right-0 p-4 flex w-full z-10 mt-10 items-center space-x-6">
-              <div className="flex-grow flex items-center">
+          <footer className="fixed chat-input-container bottom-0 left-0 right-0 p-4 flex w-full z-10 mt-10 items-center space-x-6">
+              <div className="flex-grow  flex items-center">
                 <ChatInput
                   message={messageInput}
                   ref={inputRef}
