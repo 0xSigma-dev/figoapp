@@ -204,7 +204,7 @@ const Chat: React.FC = () => {
 
     return (
       <WalletGuard>
-        <div className="relative flex flex-col min-h-screen max-w-full overflow-x-hidden" >
+        <div className="relative flex flex-col max-w-full overflow-x-hidden" >
         
 
           {/* Background image */}
@@ -320,7 +320,8 @@ const Chat: React.FC = () => {
           </div>
     
           {/* Sticky Chat Input and Buttons */}
-          <div className="sticky bottom-0 p-2 bg-opacity-50 w-full z-10">
+          <div className="bottom-0 p-2 bg-opacity-50 w-full z-10">
+            
             <div className="flex items-center max-w-full">
               <div className="flex-grow flex items-center">
                 <ChatInput
