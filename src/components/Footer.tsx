@@ -40,7 +40,7 @@ const Footer: React.FC<FooterProps> = ({ theme }) => {
                 <motion.div
                   whileTap={{ scale: 1.4 }}
                   onTap={() => triggerVibration()}
-                  className={`relative flex items-center justify-center w-16 h-16 rounded-full bg-transparent`}
+                  className={`relative flex flex-col items-center justify-center w-16 h-16 rounded-full bg-transparent`}
                 >
                   <FontAwesomeIcon
                     icon={item.icon}
