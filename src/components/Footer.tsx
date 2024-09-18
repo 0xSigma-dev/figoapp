@@ -24,6 +24,12 @@ const Footer: React.FC<FooterProps> = ({ theme }) => {
   const camera = { icon: faCameraRetro, link: '#' }
   const swap = { icon: faExchangeAlt, link: '#' }
 
+  const triggerVibration = () => {
+    if (navigator.vibrate) {
+      navigator.vibrate(200); // Vibrate for 200ms
+    }
+  };
+
   return (
     <>
       <footer className="fixed bottom-0 top border-t border-gray-900 left-0 right-0 bg-white dark:bg-deep-purple text-black dark:text-white p-1 flex items-center justify-between z-10">
@@ -33,6 +39,7 @@ const Footer: React.FC<FooterProps> = ({ theme }) => {
               <a className="flex flex-col items-center">
                 <motion.div
                   whileTap={{ scale: 1.4 }}
+                  onTap={() => triggerVibration()}
                   className={`relative flex items-center justify-center w-16 h-16 rounded-full bg-transparent`}
                 >
                   <FontAwesomeIcon

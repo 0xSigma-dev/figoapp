@@ -110,7 +110,7 @@ const PlaceholderComponent = forwardRef<HTMLDivElement, PlaceholderComponentProp
         </div>
 
         <div className="flex items-center space-x-2">
-          <span className="text-black dark:text-white font-semibold mb-3">{user.level}</span>
+          <span className="text-black dark:text-white font-semibold mb-3">Level: {user.level} ({totalPointsRequired})</span>
         </div>
 
         <div className="w-full text-center space-y-2">

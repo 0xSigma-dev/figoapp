@@ -109,7 +109,7 @@ const Header: React.FC<HeaderProps> = ({ user, points }) => {
   return (
     <>
       <header className="fixed top-0 w-screen left-0 right-0 bg-white dark:bg-deep-purple text-black dark:text-white  flex items-center justify-between z-10 border-b border-gray-900">
-        <div className="flex items-center">
+        <div className="flex items-center ml-4">
         {user?.avatar ? (
             <AvatarComponent avatarId={user.avatar} onClick={handleImageClick} />
           ) : (
@@ -129,7 +129,7 @@ const Header: React.FC<HeaderProps> = ({ user, points }) => {
         </div>
       </div>
         <div className="relative" ref={menuRef}>
-          <div className="cursor-pointer mr-6 text-black dark:text-white" onClick={handleMenuClick}>
+          <div className="cursor-pointer mr-4 text-black dark:text-white" onClick={handleMenuClick}>
             <FontAwesomeIcon icon={faEllipsisV} style={{ fontSize: '24px'}} />
           </div>
           {showMenu && (

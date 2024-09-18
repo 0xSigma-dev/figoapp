@@ -124,7 +124,7 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
   }, [user]);
   
 
-  const fetchUserData = useCallback ( async () => {
+  const fetchUserData =  async () => {
     try {
       const token = userId;
       const storedData = await getUserData(userId || '');
@@ -146,7 +146,7 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
       fetchUserPoints(token);
     } catch (error) {
     }
-  }, [userId]);
+  };
   
   
 
@@ -155,7 +155,7 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
       fetchUserData();
       fetchUserPoints(userId);
     }
-  }, [userId, fetchUserData, fetchUserPoints]);
+  }, [userId]);
   
   
 
@@ -370,7 +370,7 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
             )}
         </div>
         </div>
-        <main className="flex-1 overflow-y-auto flex">
+        <main className="flex-1 overflow-y-auto scroll-smooth">
         {channels.length > 0 ? (
           <div className="w-full max-w-4xl p-4">
             {channels.map((channel) => {

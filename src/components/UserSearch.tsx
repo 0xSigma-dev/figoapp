@@ -48,7 +48,7 @@ const UserSearch: React.FC<UserSearchProps> = ({ onClose }) => {
         const { data, error } = await supabase
           .from('users')
           .select('id, displayName, username, bio, avatar')
-          .or(`username.ilike.%${searchTerm}%, publicKey.ilike.%${searchTerm}%`);
+          .or(`username.ilike.${searchTerm}%, publicKey.ilike.${searchTerm}%`);
 
         if (error) {
           //console.error("Error searching users:", error.message);
@@ -121,7 +121,7 @@ const UserSearch: React.FC<UserSearchProps> = ({ onClose }) => {
             <div 
               key={user.id} 
               id={user.id}
-              className="flex items-center justify-between p-2"
+              className="flex items-center justify-between p-2 overflow-y-auto overflow-x-hidden"
               onClick={() => handleUserClick(user.id)}
             >
               <div className="flex items-center cursor-pointer">

@@ -136,16 +136,16 @@ const ContactPage: React.FC<ContactPageProps> = ({ theme }) => {
                 onClick={() => handleMessage2Click(contact.id)}
               >
                 <div className="flex items-center">
-                  <AvatarComponent avatarId={contact.avatar} width={50} height={50} />
+                  <AvatarComponent avatarId={contact.avatar} width={60} height={60} />
                   <div className="ml-4">
-                    <p className="text-black dark:text-white font-bold">{contact.displayName}</p>
+                    <p className="text-black text-base dark:text-white font-bold">{contact.displayName}</p>
                     <p className="text-gray-400 text-sm">{contact.bio}</p>
                   </div>
                 </div>
               </div>
             ))
           ) : (
-            <p className="text-gray-500 text-center mt-5">You don&apos;t have any contacts yet.</p>
+            <p className="text-gray-500 text-base text-center mt-5">You don&apos;t have any contacts yet.</p>
           )
         )}
       </main>

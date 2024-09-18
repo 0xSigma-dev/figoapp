@@ -546,6 +546,12 @@ body {
   color: white; 
 }
 
+.blur-background {
+  filter: blur(8px);
+  pointer-events: none; /* To prevent interactions with the blurred background */
+}
+
+
 
 
 

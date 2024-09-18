@@ -122,13 +122,14 @@ const TaskList: React.FC<TaskPageProps> = ({ theme }) => {
   };
 
   return (
-    <div className="container mx-auto p-4">
+    <div className={`container mx-auto p-4 ${isModalOpen ? 'blur-background' : ''}`}>
       <div>
          <SubHeader title="Figo Tasks" />
       </div>
      
       {tasks.map((task) => (
-        <div key={task.id} className="flex items-center justify-between p-4 mb-4 bg-gray-800 rounded-full shadow-md">
+        <div key={task.id} className="overflow-y-scroll overflow-x-hidden">
+        <div  className="flex items-center justify-between p-4 mb-4 mt-10 bg-gray-800 rounded-full shadow-md">
           {/* Task Source Icon */}
           <div className="flex items-center space-x-4">
             <Image src={`/icons/${task.task_source}.png`} alt={task.task_source} width={40} height={40} />
@@ -148,12 +149,13 @@ const TaskList: React.FC<TaskPageProps> = ({ theme }) => {
             Open
           </button>
         </div>
+        </div>
       ))}
 
       {/* Modal for Task Details & Verification */}
       {isModalOpen && selectedTask && (
-  <div className="fixed bottom-0 left-0 w-full shadow-lg rounded-t-3xl p-6 bg-gradient-to-t from-bg-black to-yellow-500 h-4/6 z-30 text-center flex flex-col justify-between items-center">
-    <div className="relative w-full h-full bg-white dark:bg-black rounded-t-3xl p-6 flex flex-col items-center">
+  <div className="fixed bottom-0 left-0 w-full shadow-lg rounded-t-3xl p-6 bg-gradient-to-t from-bg-black to-yellow-500 h-5/6 z-30 text-center flex flex-col justify-between items-center">
+    <div className="relative w-full h-4/5 mb-10 bg-white dark:bg-black rounded-t-3xl p-6 flex flex-col items-center">
       {/* Close Modal Button */}
       <button
         onClick={closeModal}
@@ -170,7 +172,7 @@ const TaskList: React.FC<TaskPageProps> = ({ theme }) => {
       </div>
 
 
-      <div className="mb-8 text-6xl text-purple-500 font-extrabold from-gradient-start font-mono">
+      <div className="mb-8 text-5xl text-purple-500 font-extrabold from-gradient-start font-mono">
         +{selectedTask.points}
       </div>
 
@@ -179,7 +181,7 @@ const TaskList: React.FC<TaskPageProps> = ({ theme }) => {
         {!taskStarted ? (
           <button
             onClick={() => startTask(selectedTask.task_link)}
-            className="w-3/4 bg-purple-500 text-white font-mono px-6 py-3 rounded-full hover:bg-green-600 mb-4"
+            className="w-3/4 bg-purple-500 text-white font-mono px-6 py-3 rounded-full hover:bg-green-600 mb-16"
           >
             Start Task
           </button>
@@ -194,7 +196,7 @@ const TaskList: React.FC<TaskPageProps> = ({ theme }) => {
             />
             <button
               onClick={verifyTask}
-              className="w-full bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+              className="w-full bg-green-500 mb-16 text-white px-4 py-2 rounded-lg hover:bg-green-600"
               disabled={isVerifying}
             >
               {isVerifying ? 'Verifying...' : 'Verify Task'}
@@ -204,7 +206,7 @@ const TaskList: React.FC<TaskPageProps> = ({ theme }) => {
       </div>
 
       {/* Confetti Effect */}
-      {showConfetti && <Confetti />}
+      
       <Suspense fallback={<div>Loading...</div>}>
   <ErrorModal message={errorMessage} onClose={() => setErrorMessage(null)} />
   <SuccessModal message={successMessage} onClose={() => setSuccessMessage(null)} />
@@ -212,7 +214,7 @@ const TaskList: React.FC<TaskPageProps> = ({ theme }) => {
     </div>
   </div>
 )}
-
+      {showConfetti && <Confetti />}
       <Footer theme={theme} />
     </div>
   );
