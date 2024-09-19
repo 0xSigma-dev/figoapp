@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useState, useCallback} from 'react';
+import React, { useEffect, useState, } from 'react';
 import { useRouter } from 'next/router';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
@@ -296,7 +296,7 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
     }
   };
 
-  const fetchUserChannels = useCallback( async (userId: any) => {
+  const fetchUserChannels = async (userId: any) => {
     if (!ablyClient) return;
     try {
       const { data, error } = await supabase
@@ -330,7 +330,7 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
     } catch (error) {
       return [];
     }
-  }, [ablyClient]);
+  };
   
 
   useEffect(() => {
@@ -341,12 +341,12 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
     }
   }, [userId, ablyClient, fetchUserChannels]);
 
-  const subscribeToFigoChannel = useCallback( () => {
+  const subscribeToFigoChannel = () => {
     if (ablyClient) {
       subscribeToChannel(ablyClient, 'Figo', (message: any) => {
       });
     }
-  }, [ablyClient]);
+  };
 
   useEffect(() => {
     if (userId) {

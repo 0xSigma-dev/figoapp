@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, } from 'react';
 import AvatarComponent from '@/components/AvatarComponent';
 import ChatButton from '@/components/Chat/Chatbutton';
 import ChatInput from '@/components/Chat/ChatInput';
@@ -91,7 +91,7 @@ const Chat: React.FC = () => {
     }, [channelRef,  fetchMessages ]);
     
     
-    const fetchUserChannels = useCallback( async (userId: string) => {
+    const fetchUserChannels = async (userId: string) => {
       try {
         const { data, error } = await supabase
           .from('channels')
@@ -105,7 +105,7 @@ const Chat: React.FC = () => {
       } catch (error) {
         return [];
       }
-    }, [userId]);
+    };
   
     useEffect(() => {
       if (userId) {

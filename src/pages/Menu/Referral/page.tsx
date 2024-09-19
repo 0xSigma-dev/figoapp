@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, startTransition, useCallback } from 'react';
+import React, { useState, useEffect, startTransition } from 'react';
 import { useRouter } from 'next/router';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faCopy, faGift, faLink, faShareAlt, faUserPlus } from '@fortawesome/free-solid-svg-icons';
@@ -37,7 +37,7 @@ const ReferralPage = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isClaiming, setIsClaiming] = useState(false); 
 
-  const fetchUserData = useCallback(async () => {
+  const fetchUserData = async () => {
     try {
       if (userId) {
         const response = await fetch('/api/user', {
@@ -67,7 +67,7 @@ const ReferralPage = () => {
         setLoading(false);
       });
     }
-  }, [userId]);
+  };
 
   // UseEffect to call fetchUserData initially
   useEffect(() => {

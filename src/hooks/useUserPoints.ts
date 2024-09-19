@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect } from 'react';
+import {  useState, useEffect } from 'react';
 import { useUser } from '@/context/UserContext';
 import { supabase } from '@/lib/supabaseClient';
 import { getUserData, saveUserData } from '@/utils/indexedDB'; // Import the IndexedDB utility function
@@ -24,7 +24,7 @@ const useUserPoints = () => {
   const [currentEnergy, setCurrentEnergy] = useState<number>(0);
   const { user, setUser } = useUser();
 
-  const fetchUserPoints = useCallback(async (userId: string | undefined) => {
+  const fetchUserPoints = async (userId: string | undefined) => {
     if (!userId) {
       return;
     }
@@ -58,7 +58,7 @@ const useUserPoints = () => {
       } catch (error) {
       }
     }
-  }, []);
+  };
 
   useEffect(() => {
     if (user?.id) {

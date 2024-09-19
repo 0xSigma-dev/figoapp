@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { subscribeToChannel, fetchChannelHistory } from '@/utils/ablyService';
 import { getAllChannels, saveChannel, saveMessage, loadMessages, updateMessageStatus } from '@/utils/indexedDB';
@@ -9,7 +9,7 @@ const useChatChannel = (userId: any, friendId: any, ablyClient: any, friendAvata
   const [channelName, setChannelName] = useState<string>('');
   const channelRef = useRef<Ably.RealtimeChannel | null>(null);
 
-  const fetchMessages = useCallback( async (newMessage: any) => {
+  const fetchMessages = async (newMessage: any) => {
     if (!channelRef.current || !ablyClient) return;
   
     try {
@@ -46,7 +46,7 @@ const useChatChannel = (userId: any, friendId: any, ablyClient: any, friendAvata
     } catch (error) {
      // console.error('Error fetching messages:', error);
     }
-  }, [ablyClient]);;
+  };
   
   
 
