@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     // Fetch users with the given public key
-    //console.log('Fetching user with public key:', publicKey);
+    console.log('Fetching user with public key:', publicKey);
     const { data: users, error: fetchError } = await supabase
       .from('users')
       .select('id, username, publicKey')
@@ -27,27 +27,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .single(); // Assuming public_key is a unique field
 
     if (fetchError || !users) {
-      //console.log('User fetch error:', fetchError);
+      console.log('User fetch error:', fetchError);
       return res.status(400).json({ message: 'User not found' });
     }
 
     const { username } = users;
-    //console.log('Fetched user:', users);
+    console.log('Fetched user:', users);
 
     if (!username) {
-      //console.log('Username not found for the provided public key');
+      console.log('Username not found for the provided public key');
       return res.status(400).json({ message: 'Username not found for the provided public key' });
     }
 
     // Sign in with Supabase Auth
-    //console.log('Signing in with email:', `${username}@figoapp.xyz`);
+    console.log('Signing in with email:', `${username}@figoapp.xyz`);
     const { data: { session }, error: authError } = await supabase.auth.signInWithPassword({
       email: `${username}@figoapp.xyz`,
       password: publicKey
     });
 
     if (authError || !session) {
-      //console.log('Auth error:', authError);
+      console.log('Auth error:', authError);
       return res.status(500).json({ 
         message: 'Error during sign in', 
         error: authError ? authError.message : 'Unknown error' 
@@ -56,7 +56,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Retrieve access token
     const accessToken = session.access_token;
-    //console.log('Successfully signed in. Access token:', accessToken);
+    console.log('Successfully signed in. Access token:', accessToken);
 
     return res.status(200).json({ 
       message: 'Signed in successfully', 
@@ -65,7 +65,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
   } catch (error) {
-    //console.error('Error checking credentials:', error);
+    console.error('Error checking credentials:', error);
     if (error instanceof Error) {
       return res.status(500).json({ message: 'Error checking credentials: ' + error.message });
     }

@@ -52,9 +52,11 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
   const [showConfetti, setShowConfetti] = useState<boolean>(false);
   const { ablyClient } = useAbly();
   const { setUserId } = useUserStatus();
+  const userId = Cookies.get('userId');
+  const [isClaiming, setIsClaiming] = useState(false);
 
   useEffect(() => {
-    const userId = Cookies.get('userId'); // Get userId from cookies or wherever you store it
+     // Get userId from cookies or wherever you store it
     if (userId) {
       setUserId(userId); // Set userId when available (after login or wallet connection)
     }
@@ -62,7 +64,7 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
 
   useEffect(() => {
     const initializeDB = async () => {
-      const userId = Cookies.get('userId');
+      //const userId = Cookies.get('userId');
       if (userId) {
         await getDBInstance();
       }
@@ -75,7 +77,7 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
     setShowConfetti(true);
     setTimeout(() => {
       setShowConfetti(false); // Stop confetti after 5 seconds
-    }, 5000);
+    }, 10000);
   };
 
 
@@ -86,7 +88,7 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
   const router = useRouter();
   
   const { user, setUser } = useUser();
-  const userId = Cookies.get('userId');
+  
 
   useEffect(() => {
     AOS.init({ duration: 1000 });
@@ -212,44 +214,48 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
   
 
   
-  const handleClaimPoints = async () => {
-    if (!userId || !user) return;
-
-    // Step 1: Reset pending points in localStorage
-
-    try {
-      // Step 2: Update points in IndexedDB
-      const newTotalPoints = (user.points || 0) + pendingPoints;
-      await updateUserDataFields(userId, { points: newTotalPoints });
-      startConfetti();
-      const messageSound = new Audio('/sounds/clapping.wav'); // Path to your sound file
-      messageSound.play();
-
-      // Step 3: Update points in Supabase
-      const { error } = await supabase
-        .from('users')
-        .update({ points: newTotalPoints })
-        .eq('id', userId);
-
-      if (error) {
-        throw new Error('Error updating points in Supabase: ' + error.message);
+    const handleClaimPoints = async () => {
+      if (!userId || !user || isClaiming) return; // Prevent function from running if already claiming
+  
+      setIsClaiming(true); // Lock function from being called again
+  
+      try {
+        // Reset pending points in localStorage
+        const newTotalPoints = (user.points || 0) + pendingPoints;
+        
+        // Update points in IndexedDB
+        await updateUserDataFields(userId, { points: newTotalPoints });
+        startConfetti();
+        
+        const messageSound = new Audio('/sounds/clapping.wav');
+        messageSound.play();
+  
+        // Update points in Supabase
+        const { error } = await supabase
+          .from('users')
+          .update({ points: newTotalPoints })
+          .eq('id', userId);
+  
+        if (error) {
+          throw new Error('Error updating points in Supabase: ' + error.message);
+        }
+  
+        // Update localStorage and user state
+        localStorage.setItem('pendingPoints', JSON.stringify({ userId, points: 0 }));
+        setPendingPoints(0);
+  
+        setUser({
+          ...user,
+          points: newTotalPoints,
+        });
+  
+        fetchUserPoints(userId);
+      } catch (error) {
+        //console.error('Error claiming points:', error);
+      } finally {
+        setIsClaiming(false); // Unlock the function after the process is completed
       }
-
-      localStorage.setItem('pendingPoints', JSON.stringify({ userId, points: 0 }));
-      setPendingPoints(0);
-
-      // Step 4: Update local user context with new points
-      setUser({
-        ...user,
-        points: newTotalPoints,
-      });
-      
-      fetchUserPoints(userId);
-      
-
-    } catch (error) {
-    }
-  };
+    };
 
 
   useEffect(() => {

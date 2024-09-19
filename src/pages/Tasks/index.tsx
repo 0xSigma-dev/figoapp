@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Cookies from 'js-cookie';
 import Confetti from 'react-confetti';
@@ -39,14 +39,14 @@ const TaskList: React.FC<TaskPageProps> = ({ theme }) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const fetchUncompletedTasks = useCallback(async () => {
+  const fetchUncompletedTasks = async () => {
     try {
       const response = await fetch(`${apiUrl}/api/tasks/uncompleted?userId=${userId}`);
       const data: Task[] = await response.json();
       setTasks(data);
     } catch (error) {
     }
-  }, [userId]);
+  };
 
   useEffect(() => {
     const fetchInterval = setInterval(fetchUncompletedTasks, 100000); 
@@ -75,6 +75,7 @@ const TaskList: React.FC<TaskPageProps> = ({ theme }) => {
   };
 
   const verifyTask = async () => {
+    if (isVerifying) return;
     if (selectedTask && enteredCode.trim().toLowerCase() === selectedTask.verification_code.trim().toLowerCase()) {
       setIsVerifying(true);
       try {

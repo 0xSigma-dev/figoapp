@@ -4,7 +4,7 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { useTheme } from 'next-themes';
 import { useRouter } from 'next/router';
-import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
+import { useEffect, useState, useRef, useMemo} from 'react';
 import { Suspense, lazy } from 'react';
 import Lottie from 'react-lottie-player';
 import Welcome from '../../components/lottie/welcome.json';
@@ -78,7 +78,7 @@ const SignUp = () => {
   }, [connected, userId, router]);
   
 
-  const checkUserByPublicKey = useCallback ( async () => {
+  const checkUserByPublicKey = async () => {
     if (!wallet.publicKey) {
         return;
     }
@@ -92,6 +92,7 @@ const SignUp = () => {
             .eq('publicKey', publicKeyStr); 
 
         if (error) {
+         // console.log("rror",error)
             throw error;
         }
 
@@ -107,7 +108,7 @@ const SignUp = () => {
     } catch (error: any) {
         setErrorMessage('Error checking user: ' + error.message);
     }
-}, []);
+};
 
 const checkUserOnceRef = useRef(false);
 
@@ -127,6 +128,7 @@ useEffect(() => {
   
 
   const loginUser = async () => {
+    //console.log('logging in')
     setIsLoading(true);
     if (!wallet.publicKey) return;
 
@@ -139,6 +141,8 @@ useEffect(() => {
         body: JSON.stringify({publicKey: wallet.publicKey.toBase58() })
       });
       const data = await response.json();
+
+      //console.log('data', data)
 
       if (response.ok) {
         setSuccessMessage("Welcome Back");
