@@ -309,7 +309,7 @@ const Chat: React.FC = () => {
 
     
           {/* Scrollable message area */}
-          <div id="messages"  className='flex-1 flex overflow-y-scroll mt-28 mb-24 flex-col'>
+          <div id="messages"  className='flex-1 flex overflow-y-scroll mt-16 mb-16 flex-col'>
           <div className="flex-1 p-4 overflow-x-hidden">
             {messages.length === 0 ? (
               <div className="flex-grow mt-20 flex items-center justify-center overflow-x-hidden">
@@ -339,7 +339,7 @@ const Chat: React.FC = () => {
           </div>
     
           {/* Sticky Chat Input and Buttons */}
-          <footer className="fixed chat-input-container bottom-0 left-0 right-0 p-4 flex w-full z-10 mt-10 mb-2 items-center space-x-6">
+          <footer className="fixed chat-input-container bottom-0 left-0 right-0 p-4 flex w-full z-10 mt-6 mb-2 items-center space-x-6">
               <div className="flex-grow  flex items-center">
                 <ChatInput
                   message={messageInput}

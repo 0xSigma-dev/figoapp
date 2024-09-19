@@ -561,6 +561,7 @@ body {
 #messages {
   grid-area: messages;
   overflow-y: auto;
+  padding-bottom: calc(env(keyboard-inset-bottom, 0px));
 }
 
 .chat-input-container {

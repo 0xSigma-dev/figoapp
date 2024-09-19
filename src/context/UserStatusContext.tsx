@@ -1,64 +1,66 @@
-import React, { createContext, useContext, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
 interface UserStatusContextProps {
-  // Add any values you want to expose from the context, or leave as an empty object
+  setUserId: (id: string) => void; // Provide a function to update userId
 }
 
 interface UserStatusProviderProps {
-  userId: string;
   children: ReactNode;
 }
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 const UserStatusContext = createContext<UserStatusContextProps | undefined>(undefined);
 
-export const UserStatusProvider: React.FC<UserStatusProviderProps> = ({ userId, children }) => {
-  
+export const UserStatusProvider: React.FC<UserStatusProviderProps> = ({ children }) => {
+  const [userId, setUserId] = useState<string | null>(null); // Track userId in state
+
   useEffect(() => {
-    // Only run if window (and thus navigator) is defined, i.e., in the browser
-    if (typeof window !== 'undefined') {
-      const sendHeartbeat = async (online: boolean) => {
-        try {
-          await fetch(`${apiUrl}/api/heartbeat`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ userId, online }),
-          });
-        } catch (error) {
-          //console.error('Error sending heartbeat:', error);
-        }
-      };
+    if (!userId || typeof window === 'undefined') return; // Only send heartbeat if userId is defined
 
-      const handleOnlineStatusChange = (online: boolean) => {
-        sendHeartbeat(online);
-      };
+    const sendHeartbeat = async (online: boolean) => {
+      if (!online) return;
+      try {
+        await fetch(`${apiUrl}/api/heartbeat`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userId, online }),
+        });
+      } catch (error) {
+        // Optionally log the error
+        // console.error('Error sending heartbeat:', error);
+      }
+    };
 
-      handleOnlineStatusChange(navigator.onLine);
+    const handleOnlineStatusChange = (online: boolean) => {
+      sendHeartbeat(online);
+    };
 
-      window.addEventListener('online', () => handleOnlineStatusChange(true));
-      window.addEventListener('offline', () => handleOnlineStatusChange(false));
+    handleOnlineStatusChange(navigator.onLine);
 
-      const heartbeatInterval = setInterval(() => {
-        sendHeartbeat(navigator.onLine);
-      }, 5000); // Send heartbeat every 5 seconds
+    window.addEventListener('online', () => handleOnlineStatusChange(true));
+    window.addEventListener('offline', () => handleOnlineStatusChange(false));
 
-      return () => {
-        window.removeEventListener('online', () => handleOnlineStatusChange(true));
-        window.removeEventListener('offline', () => handleOnlineStatusChange(false));
-        clearInterval(heartbeatInterval);
-      };
-    }
-  }, [userId]);
+    const heartbeatInterval = setInterval(() => {
+      sendHeartbeat(navigator.onLine);
+    }, 5000); // Send heartbeat every 5 seconds
+
+    return () => {
+      window.removeEventListener('online', () => handleOnlineStatusChange(true));
+      window.removeEventListener('offline', () => handleOnlineStatusChange(false));
+      clearInterval(heartbeatInterval);
+    };
+  }, [userId]); // Effect will run only when userId changes
 
   return (
-    <UserStatusContext.Provider value={{}}>
+    <UserStatusContext.Provider value={{ setUserId }}>
       {children}
     </UserStatusContext.Provider>
   );
 };
 
+// Custom hook to use the UserStatus context
 export const useUserStatus = (): UserStatusContextProps => {
   const context = useContext(UserStatusContext);
   if (context === undefined) {

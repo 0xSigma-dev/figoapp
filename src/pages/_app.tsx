@@ -12,7 +12,6 @@ import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { Montaga } from '@next/font/google';
 import { UserStatusProvider } from '../context/UserStatusContext';
-import Cookies from 'js-cookie';
 
 
 const montaga = Montaga({
@@ -103,7 +102,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     
       <AppWalletProvider>
         <UserProvider>
-        <UserStatusProvider userId={Cookies.get('userId') || ''}>
+        <UserStatusProvider>
           <AblyProvider>
              <Component {...pageProps} />
              <ToastContainer />

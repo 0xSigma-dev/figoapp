@@ -23,6 +23,7 @@ import { useAbly } from '@/context/AblyContext';
 import { subscribeToChannel, unsubscribeFromChannel } from '@/utils/ablyService';
 import { format } from 'date-fns'; 
 import ChannelItem from '@/components/ChannelItem';
+import { useUserStatus } from '@/context/UserStatusContext';
 
 
 
@@ -50,7 +51,14 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
   const [pendingPoints, setPendingPoints] = useState<any>(0);
   const [showConfetti, setShowConfetti] = useState<boolean>(false);
   const { ablyClient } = useAbly();
+  const { setUserId } = useUserStatus();
 
+  useEffect(() => {
+    const userId = Cookies.get('userId'); // Get userId from cookies or wherever you store it
+    if (userId) {
+      setUserId(userId); // Set userId when available (after login or wallet connection)
+    }
+  }, [setUserId]);
 
   useEffect(() => {
     const initializeDB = async () => {
