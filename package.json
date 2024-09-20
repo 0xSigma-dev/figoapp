@@ -60,7 +60,8 @@
     "twemoji": "^14.0.2",
     "url-loader": "^4.1.1",
     "uuid": "^10.0.0",
-    "wavesurfer.js": "^7.8.5"
+    "wavesurfer.js": "^7.8.5",
+    "workbox-core": "^7.1.0"
   },
   "devDependencies": {
     "@types/ably": "^1.0.0",

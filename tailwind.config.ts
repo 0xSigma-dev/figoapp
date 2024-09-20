@@ -11,6 +11,9 @@ const config: Config = {
   darkMode: 'class',
   theme: {
     extend: {
+      fontSize: {
+        'xxs': '0.3rem',
+      },
       colors: {
         'primary': '#8c52ff',
         'secondary': '#D602F0',

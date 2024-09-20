@@ -48,11 +48,13 @@ const Chat: React.FC = () => {
     const inputRef = useRef<HTMLTextAreaElement | null>(null); 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const { avatar, displayName, isUserDetailsFetched } = useFriendDetails(friendId);
-    const { messages, channelRef, channelName, fetchMessages } = useChatChannel(userId, friendId, ablyClient, avatar, displayName, senderName, senderAvatar, isUserDetailsFetched);
+    const [messagesFetched, setMessagesFetched] = useState(false);
+    const { messages, channelRef, channelName, fetchMessages, setMessages } = useChatChannel(userId, friendId, ablyClient, avatar, displayName, senderName, senderAvatar, isUserDetailsFetched, messagesFetched);
     const { onType, whoIsCurrentlyTyping: typingUsers, markMessageAsRead } = useTypingStatus(channelRef.current, userId);
     const { currentEnergy, totalEnergy, setCurrentEnergy, resetRefillTimer, startRefill } = useEnergyManagement(userId);
     const isFriendOnline = usePresentStatus(channelRef.current, userId, friendId);
-    const { sendMessage, floatingPoints } = useSendMessage(channelRef, userId, currentEnergy, setCurrentEnergy, resetRefillTimer);
+    const { sendMessage, floatingPoints } = useSendMessage(channelRef, userId, currentEnergy, setCurrentEnergy, resetRefillTimer, setMessages);
+    
 
    
 
@@ -85,10 +87,18 @@ const Chat: React.FC = () => {
 
     
     useEffect(() => {
-      if (channelRef.current) {
-        fetchMessages(null);  
+      if (isUserDetailsFetched && channelRef.current) {
+        fetchMessages(); // Fetch messages when friend details are fetched
+        setMessagesFetched(true); // Set flag to true after fetching messages
       }
-    }, [channelRef,  fetchMessages ]);
+    }, [isUserDetailsFetched, channelRef.current]);
+    
+    
+    const handleSendMessage = async () => {
+      if (messageInput.trim()) {
+        await sendMessage(messageInput, onType, setMessageInput, inputRef, channelName);
+      }
+    };
     
     
     const fetchUserChannels = async (userId: string) => {

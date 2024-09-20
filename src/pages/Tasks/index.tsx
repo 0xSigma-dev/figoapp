@@ -115,7 +115,7 @@ const TaskList: React.FC<TaskPageProps> = ({ theme }) => {
       <div className={`${isModalOpen ? 'blur-background' : ''}`}>
         <SubHeader title="Figo Tasks" />
 
-        <div className="overflow-y-auto mt-6"> 
+        <div className="overflow-y-auto max-h-80 mt-6"> 
         {tasks.map((task) => (
           <div key={task.id} className="flex items-center justify-between p-4 mb-4 bg-gray-800 rounded-full shadow-md">
             <div className="flex items-center space-x-4">

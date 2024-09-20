@@ -260,18 +260,16 @@ export const getAllChannels = async (): Promise<any[]> => {
 };
 
 export const saveMessage = async (message: any, id: any, status: any, channelId: any): Promise<void> => {
-  console.log('message index', message)
   const db = await getDBInstance();
   const transaction = db.transaction('messages', 'readwrite');
   const store = transaction.objectStore('messages');
-
   return new Promise<void>((resolve, reject) => {
     const messageWithId = { ...message, id,  status, channelId, timestamp: new Date().toISOString() };
-    console.log('Saving message:', messageWithId);
+   
     const request = store.put(messageWithId);
 
     request.onsuccess = () => {
-      console.log('message saved', message)
+     
       resolve();
     };
 
@@ -447,19 +445,19 @@ export const updateMessageStatus = async (messageId: string, status: string, cha
         const updateRequest = store.put(message);
 
         updateRequest.onsuccess = () => {
-          console.log(`Message status updated to '${status}' for message ID: ${messageId}`);
+         
         };
 
         updateRequest.onerror = () => {
-          console.error(`Failed to update message status: ${updateRequest.error}`);
+          
         };
       } else {
-        console.warn(`Message with ID '${messageId}' not found in the store.`);
+      
       }
     };
 
     getRequest.onerror = () => {
-      console.error(`Failed to retrieve message with ID '${messageId}': ${getRequest.error}`);
+      
     };
 
     // Wait for the transaction to complete
@@ -469,7 +467,7 @@ export const updateMessageStatus = async (messageId: string, status: string, cha
     });
 
   } catch (error) {
-    console.error(`Error updating message status: ${error}`);
+   
   }
 };
 
@@ -495,10 +493,10 @@ export const updateMessagesToRead = async (channelId: string): Promise<void> => 
           const updateRequest = store.put(message);
 
           updateRequest.onsuccess = () => {
-            console.log(`Message ID ${message.id} updated to 'read'`);
+           
           };
           updateRequest.onerror = () => {
-            console.error(`Error updating message ID ${message.id}: ${updateRequest.error}`);
+           
           };
         }
         cursor.continue();  // Move to the next record
@@ -506,7 +504,7 @@ export const updateMessagesToRead = async (channelId: string): Promise<void> => 
     };
 
     request.onerror = () => {
-      console.error('Failed to retrieve messages for updating to read.');
+     
     };
 
     await new Promise<void>((resolve, reject) => {
@@ -514,7 +512,7 @@ export const updateMessagesToRead = async (channelId: string): Promise<void> => 
       transaction.onerror = () => reject(`Transaction failed: ${transaction.error}`);
     });
   } catch (error) {
-    console.error('Error updating messages to read:', error);
+    //console.error('Error updating messages to read:', error);
   }
 };
 

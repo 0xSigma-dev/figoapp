@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getUserData } from '@/utils/indexedDB';
 
 const useFetchUserData = (userId: string | undefined) => {
@@ -6,7 +6,7 @@ const useFetchUserData = (userId: string | undefined) => {
   const [senderName, setSenderName] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const fetchUserData =  async () => {
+  const fetchUserData =  useCallback (async () => {
     try {
       if (!userId) return;
 
@@ -33,7 +33,7 @@ const useFetchUserData = (userId: string | undefined) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
 
   useEffect(() => {
     if (userId) {

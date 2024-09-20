@@ -336,8 +336,6 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
   useEffect(() => {
     if (userId) {
       fetchUserChannels(userId);
-      const interval = setInterval(() => fetchUserChannels(userId), 5000);
-      return () => clearInterval(interval);
     }
   }, [userId, ablyClient, fetchUserChannels]);
 

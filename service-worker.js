@@ -1,5 +1,8 @@
 const CACHE_NAME = 'loader-cache-v1';
 const LOTTIE_FOLDER = '/lottie/'; // Updated path for public directory
+import { setLogLevel } from 'workbox-core';
+
+setLogLevel('error');
 
 // Cache Lottie files during installation
 self.addEventListener('install', (event) => {

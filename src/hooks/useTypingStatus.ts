@@ -73,7 +73,9 @@ const useTypingStatus = (
     if (!channel) return;
 
     const handlePresenceUpdate = (update: Ably.PresenceMessage) => {
+      if (!update) return;
       const { data, clientId } = update;
+
 
       // Typing status updates
       if (data.typing && clientId !== userId) {
