@@ -4,7 +4,7 @@ import Confetti from 'react-confetti';
 import Footer from '@/components/Footer';
 import SubHeader from '@/components/SubHeader';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTimesCircle } from "@fortawesome/free-solid-svg-icons";
+import { faTimesCircle, faArrowDown, faArrowUp } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from 'next/router';
 
 // Lazy load modals
@@ -90,52 +90,101 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
     router.push(`/match/${matchId}`);
   };
 
+
+  const handleBullClick = async (matchId: string) => {
+    try {
+      await fetch(`${apiUrl}/api/increase`, {
+        method: 'POST',
+        body: JSON.stringify({ matchId }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+      setSuccessMessage('Bull bet placed!');
+    } catch (error) {
+      setErrorMessage('Error placing Bull bet.');
+    }
+  };
+
+  const handleBearClick = async (matchId: string) => {
+    try {
+      await fetch(`${apiUrl}/api/decrease`, {
+        method: 'POST',
+        body: JSON.stringify({ matchId }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+      setSuccessMessage('Bear bet placed!');
+    } catch (error) {
+      setErrorMessage('Error placing Bear bet.');
+    }
+  };
+
   return (
     <div className="container mx-auto h-screen p-4">
       <div className="">
         <SubHeader title="Bet, Predict & Win" />
 
         <div className="grid grid-cols-1 gap-1 h-50 overflow-y-auto my-1">
-      {loading
-        ? Array(10)  // Show up to 10 skeletons while loading
-            .fill(0)
-            .map((_, index) => <MatchSkeleton key={index} />)
-        : matches.map((match) => (
-            <div
-              key={match.id}
-              className="flex justify-between items-center border-b border-t p-2 shadow-md cursor-pointer hover:bg-gray-800"
-              onClick={() => handleMatchClick(match.id)}
-              style={{ minHeight: '50px' }}
-            >
-              {/* Token 1 */}
-              <div className="flex items-center space-x-2">
-                <img
-                  src={match.token1.logo}
-                  alt={match.token1.symbol}
-                  className="w-8 h-8"
-                />
-                <span className="font-bold text-sm w-16 truncate">
-                  {match.token1.symbol}
-                </span>
-              </div>
+          {loading
+            ? Array(10)
+                .fill(0)
+                .map((_, index) => <MatchSkeleton key={index} />)
+            : matches.map((match) => (
+                <div
+                  key={match.id}
+                  className="flex justify-between items-center border-b border-t p-2 shadow-md cursor-pointer hover:bg-gray-800"
+                  onClick={() => handleMatchClick(match.id)}
+                  style={{ minHeight: '50px' }}
+                >
+                  {/* Tokens */}
+                  <div className="flex items-center space-x-2 w-2/3">
+                    <div className="flex items-center space-x-2">
+                      <img
+                        src={match.token1.logo}
+                        alt={match.token1.symbol}
+                        className="w-8 h-8"
+                      />
+                      <span className="font-bold text-sm truncate">
+                        {match.token1.symbol}
+                      </span>
+                    </div>
+                    <div className="text-xs font-bold mx-4">VS</div>
+                    <div className="flex items-center space-x-2">
+                      <img
+                        src={match.token2.logo}
+                        alt={match.token2.symbol}
+                        className="w-8 h-8"
+                      />
+                      <span className="font-bold text-sm truncate">
+                        {match.token2.symbol}
+                      </span>
+                    </div>
+                  </div>
 
-              {/* VS text */}
-              <div className="text-xs font-bold flex-shrink-0 mx-4">VS</div>
-
-              {/* Token 2 */}
-              <div className="flex items-center space-x-2">
-                <img
-                  src={match.token2.logo}
-                  alt={match.token2.symbol}
-                  className="w-8 h-8"
-                />
-                <span className="font-bold text-sm w-16 truncate">
-                  {match.token2.symbol}
-                </span>
-              </div>
-            </div>
-          ))}
-    </div>
+                  {/* Buttons */}
+                  <div className="flex space-x-4">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleBullClick(match.id);
+                      }}
+                      className="flex items-center space-x-2 px-3 py-1 border border-green-500 text-green-500 bg-transparent rounded-lg hover:bg-green-500 hover:text-white transition"
+                    >
+                      <FontAwesomeIcon icon={faArrowUp} />
+                      <span>BULL</span>
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleBearClick(match.id);
+                      }}
+                      className="flex items-center space-x-2 px-3 py-1 border border-red-500 text-red-500 bg-transparent rounded-lg hover:bg-red-500 hover:text-white transition"
+                    >
+                      <FontAwesomeIcon icon={faArrowDown} />
+                      <span>BEAR</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+        </div>
 
     <div className="flex justify-center w-full space-x-4 mt-4">
       <button
