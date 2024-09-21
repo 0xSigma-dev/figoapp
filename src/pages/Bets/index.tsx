@@ -131,7 +131,7 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
       <div className="">
         <SubHeader title="Bet, Predict & Win" />
 
-        <div className="flex-1 grid grid-cols-1 gap-1 h-50 overflow-y-auto my-1">
+        <div className="flex-1 grid grid-cols-1 gap-1 overflow-y-auto my-1" style={{ maxHeight: 'calc(100vh - 170px)' }}>
           {loading
             ? Array(10)
                 .fill(0)
@@ -197,7 +197,7 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
 
         <div className="fixed bottom-16 left-0 right-0 flex justify-center w-full space-x-4 z-50 px-4">
           {countdown > 0 ? (
-            <div className="text-center text-gray-700">{`Next round in ${Math.floor(countdown)} seconds`}</div>
+            <div className="text-center bg-gray-400 text-white cursor-not-allowed">{`Open in ${Math.floor(countdown)} seconds`}</div>
           ) : (
             <button
               className="bg-purple-600 text-white w-1/2 px-4 py-4 rounded-lg"
