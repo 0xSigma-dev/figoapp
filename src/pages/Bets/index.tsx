@@ -131,7 +131,7 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
       <div className="">
         <SubHeader title="Bet, Predict & Win" />
 
-        <div className="flex-1 grid grid-cols-1 gap-1 overflow-y-auto my-1" style={{ maxHeight: 'calc(100vh - 170px)' }}>
+        <div className="flex-1 grid grid-cols-1 gap-1 overflow-y-auto my-1" style={{ maxHeight: 'calc(100vh - 200px)' }}>
           {loading
             ? Array(10)
                 .fill(0)
