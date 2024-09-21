@@ -54,10 +54,10 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
     try {
       const response = await fetch(`${apiUrl}/api/get-matches`);
       const data = await response.json();
-      setMatches(data.matches); 
+      //console.log('bey data', data)
+      setMatches(data);
       setLoading(false); // Assuming the API returns an array of match objects
     } catch (error) {
-      setLoading(false);
       setErrorMessage('Failed to load matches. Please try again later.');
     }
   };
@@ -91,11 +91,11 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <div className={`${errorMessage || successMessage ? 'blur-background' : ''}`}>
+    <div className="container mx-auto h-screen p-4">
+      <div className="">
         <SubHeader title="Bet, Predict & Win" />
 
-        <div className="grid grid-cols-1 gap-4 my-8">
+        <div className="grid grid-cols-1 gap-1 my-1">
           {loading
             ? Array(10)  // Show up to 10 skeletons while loading
                 .fill(0)
@@ -103,17 +103,18 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
             : matches.map((match) => (
                 <div
                   key={match.id}
-                  className="flex justify-between items-center border p-4 rounded-lg shadow-lg cursor-pointer hover:bg-gray-100"
+                  className="flex justify-between items-center border p-2  shadow-md cursor-pointer hover:bg-gray-100"
                   onClick={() => handleMatchClick(match.id)}
+                  style={{ minHeight: '50px' }} 
                 >
                   <div className="flex items-center">
-                    <img src={match.token1.logo} alt={match.token1.symbol} className="w-8 h-8 mr-2" />
-                    <span className="font-bold text-xl">{match.token1.symbol}</span>
+                    <img src={match.token1.logo} alt={match.token1.symbol} className="w-2 h-2 mr-2" />
+                    <span className="font-bold text-sm">{match.token1.symbol}</span>
                   </div>
-                  <div className="text-2xl font-bold">VS</div>
+                  <div className="text-xs font-bold">VS</div>
                   <div className="flex items-center">
-                    <img src={match.token2.logo} alt={match.token2.symbol} className="w-8 h-8 mr-2" />
-                    <span className="font-bold text-xl">{match.token2.symbol}</span>
+                    <img src={match.token2.logo} alt={match.token2.symbol} className="w-2 h-2 mr-2" />
+                    <span className="font-bold text-sm">{match.token2.symbol}</span>
                   </div>
                 </div>
               ))}
