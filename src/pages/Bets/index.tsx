@@ -70,9 +70,9 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
   const handleNextRound = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${apiUrl}/api/get-matches`, { method: 'POST' });
+      const response = await fetch(`${apiUrl}/api/get-matches`);
       const data = await response.json();
-      setMatches(data.matches); // Update matches with new round data
+      setMatches(data); // Update matches with new round data
       setSuccessMessage('New matches loaded!');
       setLoading(false);
     } catch (error) {
@@ -95,45 +95,62 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
       <div className="">
         <SubHeader title="Bet, Predict & Win" />
 
-        <div className="grid grid-cols-1 gap-1 my-1">
-          {loading
-            ? Array(10)  // Show up to 10 skeletons while loading
-                .fill(0)
-                .map((_, index) => <MatchSkeleton key={index} />)
-            : matches.map((match) => (
-                <div
-                  key={match.id}
-                  className="flex justify-between items-center border-b border-t p-2  shadow-md cursor-pointer hover:bg-gray-800"
-                  onClick={() => handleMatchClick(match.id)}
-                  style={{ minHeight: '50px' }} 
-                >
-                  <div className="flex items-center">
-                    <img src={match.token1.logo} alt={match.token1.symbol} className="w-8 h-8 mr-2" />
-                    <span className="font-bold text-sm">{match.token1.symbol}</span>
-                  </div>
-                  <div className="text-xs font-bold">VS</div>
-                  <div className="flex items-center">
-                    <img src={match.token2.logo} alt={match.token2.symbol} className="w-8 h-8 mr-2" />
-                    <span className="font-bold text-sm">{match.token2.symbol}</span>
-                  </div>
-                </div>
-              ))}
-        </div>
+        <div className="grid grid-cols-1 gap-1 h-50 overflow-y-auto my-1">
+      {loading
+        ? Array(10)  // Show up to 10 skeletons while loading
+            .fill(0)
+            .map((_, index) => <MatchSkeleton key={index} />)
+        : matches.map((match) => (
+            <div
+              key={match.id}
+              className="flex justify-between items-center border-b border-t p-2 shadow-md cursor-pointer hover:bg-gray-800"
+              onClick={() => handleMatchClick(match.id)}
+              style={{ minHeight: '50px' }}
+            >
+              {/* Token 1 */}
+              <div className="flex items-center space-x-2">
+                <img
+                  src={match.token1.logo}
+                  alt={match.token1.symbol}
+                  className="w-8 h-8"
+                />
+                <span className="font-bold text-sm w-16 truncate">
+                  {match.token1.symbol}
+                </span>
+              </div>
 
-        <div className="flex justify-center space-x-4">
-          <button
-            className="bg-purple-600 text-white px-4 py-2 rounded-lg"
-            onClick={handleNextRound}
-          >
-            Next Round
-          </button>
-          <button
-            className="bg-purple-600 text-white px-4 py-2 rounded-lg"
-            onClick={handleBetSlips}
-          >
-            Bet Slips
-          </button>
-        </div>
+              {/* VS text */}
+              <div className="text-xs font-bold flex-shrink-0 mx-4">VS</div>
+
+              {/* Token 2 */}
+              <div className="flex items-center space-x-2">
+                <img
+                  src={match.token2.logo}
+                  alt={match.token2.symbol}
+                  className="w-8 h-8"
+                />
+                <span className="font-bold text-sm w-16 truncate">
+                  {match.token2.symbol}
+                </span>
+              </div>
+            </div>
+          ))}
+    </div>
+
+    <div className="flex justify-center w-full space-x-4 mt-4">
+      <button
+        className="bg-purple-600 text-white w-1/2 px-4 py-2 rounded-lg"
+        onClick={handleNextRound}
+      >
+        Next Round
+      </button>
+      <button
+        className="bg-purple-600 text-white w-1/2 px-4 py-2 rounded-lg"
+        onClick={handleBetSlips}
+      >
+        Bet Slips
+      </button>
+    </div>
 
         <Suspense fallback={<div>Loading...</div>}>
           {errorMessage && (
