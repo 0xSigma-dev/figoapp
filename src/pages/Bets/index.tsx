@@ -130,8 +130,7 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
             : matches.map((match) => (
                 <div
                   key={match.id}
-                  className="flex justify-between items-center border-b border-t p-4 shadow-md cursor-pointer hover:bg-gray-800"
-                  onClick={() => handleMatchClick(match.id)}
+                  className="flex justify-between items-center border-b p-4 shadow-md cursor-pointer hover:bg-gray-800"
                   style={{ minHeight: '50px' }}
                 >
                   {/* Tokens */}
@@ -186,20 +185,7 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
               ))}
         </div>
 
-    <div className="flex justify-center w-full space-x-4 mt-4">
-      <button
-        className="bg-purple-600 text-white w-1/2 px-4 py-2 rounded-lg"
-        onClick={handleNextRound}
-      >
-        Next Round
-      </button>
-      <button
-        className="bg-purple-600 text-white w-1/2 px-4 py-2 rounded-lg"
-        onClick={handleBetSlips}
-      >
-        Bet Slips
-      </button>
-    </div>
+  
 
         <Suspense fallback={<div>Loading...</div>}>
           {errorMessage && (
@@ -211,6 +197,21 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
         </Suspense>
 
         {showConfetti && <Confetti />}
+
+        <div className="flex justify-center w-full space-x-4 mt-8 mb-10 z-50">
+      <button
+        className="bg-purple-600 text-white w-1/2 px-4 py-4 rounded-lg"
+        onClick={handleNextRound}
+      >
+        Next Round
+      </button>
+      <button
+        className="bg-purple-600 text-white w-1/2 px-4 py-4 rounded-lg"
+        onClick={handleBetSlips}
+      >
+        Bet Slips
+      </button>
+    </div>
 
         <Footer theme={theme} />
       </div>

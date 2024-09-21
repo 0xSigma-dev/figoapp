@@ -12,7 +12,7 @@ const config: Config = {
   theme: {
     extend: {
       fontSize: {
-        'xxs': '0.3rem',
+        'xxs': '0.5rem',
       },
       colors: {
         'primary': '#8c52ff',
