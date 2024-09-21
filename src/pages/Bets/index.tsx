@@ -68,14 +68,14 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
 
   // Function to handle "Next Round" click
   const handleNextRound = async () => {
+    setLoading(true);
     try {
-      const response = await fetch(`${apiUrl}/api/next-round`, { method: 'POST' });
+      const response = await fetch(`${apiUrl}/api/get-matches`, { method: 'POST' });
       const data = await response.json();
       setMatches(data.matches); // Update matches with new round data
       setSuccessMessage('New matches loaded!');
       setLoading(false);
     } catch (error) {
-      setLoading(false);
       setErrorMessage('Error loading next round.');
     }
   };
@@ -103,17 +103,17 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
             : matches.map((match) => (
                 <div
                   key={match.id}
-                  className="flex justify-between items-center border p-2  shadow-md cursor-pointer hover:bg-gray-100"
+                  className="flex justify-between items-center border-b border-t p-2  shadow-md cursor-pointer hover:bg-gray-800"
                   onClick={() => handleMatchClick(match.id)}
                   style={{ minHeight: '50px' }} 
                 >
                   <div className="flex items-center">
-                    <img src={match.token1.logo} alt={match.token1.symbol} className="w-2 h-2 mr-2" />
+                    <img src={match.token1.logo} alt={match.token1.symbol} className="w-8 h-8 mr-2" />
                     <span className="font-bold text-sm">{match.token1.symbol}</span>
                   </div>
                   <div className="text-xs font-bold">VS</div>
                   <div className="flex items-center">
-                    <img src={match.token2.logo} alt={match.token2.symbol} className="w-2 h-2 mr-2" />
+                    <img src={match.token2.logo} alt={match.token2.symbol} className="w-8 h-8 mr-2" />
                     <span className="font-bold text-sm">{match.token2.symbol}</span>
                   </div>
                 </div>
