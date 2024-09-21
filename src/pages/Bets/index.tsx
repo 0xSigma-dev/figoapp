@@ -130,7 +130,7 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
             : matches.map((match) => (
                 <div
                   key={match.id}
-                  className="flex justify-between items-center border-b border-t p-2 shadow-md cursor-pointer hover:bg-gray-800"
+                  className="flex justify-between items-center border-b border-t p-4 shadow-md cursor-pointer hover:bg-gray-800"
                   onClick={() => handleMatchClick(match.id)}
                   style={{ minHeight: '50px' }}
                 >
@@ -140,20 +140,20 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
                       <img
                         src={match.token1.logo}
                         alt={match.token1.symbol}
-                        className="w-8 h-8"
+                        className="w-6 h-6"
                       />
-                      <span className="font-bold text-sm truncate">
+                      <span className="font-bold text-xs truncate">
                         {match.token1.symbol}
                       </span>
                     </div>
-                    <div className="text-xs font-bold mx-4">VS</div>
+                    <div className="text-xxs  mx-4">VS</div>
                     <div className="flex items-center space-x-2">
                       <img
                         src={match.token2.logo}
                         alt={match.token2.symbol}
-                        className="w-8 h-8"
+                        className="w-6 h-6"
                       />
-                      <span className="font-bold text-sm truncate">
+                      <span className="font-bold text-xs truncate">
                         {match.token2.symbol}
                       </span>
                     </div>
@@ -169,7 +169,7 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
                       className="flex items-center space-x-2 px-3 py-1 border border-green-500 text-green-500 bg-transparent rounded-lg hover:bg-green-500 hover:text-white transition"
                     >
                       <FontAwesomeIcon icon={faArrowUp} />
-                      <span>BULL</span>
+                      <span className='text-xs'>BULL</span>
                     </button>
                     <button
                       onClick={(e) => {
@@ -179,7 +179,7 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
                       className="flex items-center space-x-2 px-3 py-1 border border-red-500 text-red-500 bg-transparent rounded-lg hover:bg-red-500 hover:text-white transition"
                     >
                       <FontAwesomeIcon icon={faArrowDown} />
-                      <span>BEAR</span>
+                      <span className='text-xs'>BEAR</span>
                     </button>
                   </div>
                 </div>
