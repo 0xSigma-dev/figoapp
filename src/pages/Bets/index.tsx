@@ -7,7 +7,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimesCircle, faArrowDown, faArrowUp } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from 'next/router';
 
-// Lazy load modals
 const ErrorModal = lazy(() => import('@/components/ErrorModal'));
 const SuccessModal = lazy(() => import('@/components/SuccessModal'));
 
@@ -46,74 +45,84 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
   const [matches, setMatches] = useState<Match[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [showConfetti, setShowConfetti] = useState(false);
-  const router = useRouter();
   const [loading, setLoading] = useState(true);
-  
+  const [lastFetchTime, setLastFetchTime] = useState<number | null>(null);
+  const [countdown, setCountdown] = useState<number>(0); // Countdown timer
+  const [isNextRoundDisabled, setIsNextRoundDisabled] = useState<boolean>(true);
+  const router = useRouter();
+
+  const userId = Cookies.get('userId'); // Get the current user's ID from cookies (Assuming it's already set somewhere)
+
   const fetchMatches = async () => {
     try {
       const response = await fetch(`${apiUrl}/api/get-matches`);
       const data = await response.json();
-      //console.log('bey data', data)
       setMatches(data);
-      setLoading(false); // Assuming the API returns an array of match objects
+      setLoading(false);
     } catch (error) {
       setErrorMessage('Failed to load matches. Please try again later.');
     }
   };
 
   useEffect(() => {
-    fetchMatches();
-  }, []);
+    const storedUserId = Cookies.get('lastFetchUserId'); // Fetch stored userId with last fetch time
+    const lastFetch = Cookies.get('lastFetchTime');
 
-  // Function to handle "Next Round" click
+    // Only use the lastFetchTime if the userIds match
+    if (lastFetch && storedUserId === userId) {
+      setLastFetchTime(Number(lastFetch));
+      const currentTime = Date.now();
+      const timeDiff = 120000 - (currentTime - Number(lastFetch));
+
+      if (timeDiff > 0) {
+        setCountdown(timeDiff / 1000);
+        setIsNextRoundDisabled(true);
+      }
+    } else {
+      // Reset last fetch if userId does not match
+      Cookies.remove('lastFetchTime');
+      Cookies.remove('lastFetchUserId');
+    }
+
+    fetchMatches();
+  }, [userId]);
+
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setInterval(() => {
+        setCountdown((prevCountdown) => prevCountdown - 1);
+      }, 1000);
+
+      return () => clearInterval(timer);
+    } else {
+      setIsNextRoundDisabled(false); // Enable button once countdown reaches zero
+    }
+  }, [countdown]);
+
   const handleNextRound = async () => {
+    const currentTime = Date.now();
+    if (lastFetchTime && currentTime - lastFetchTime < 120000) {
+      setErrorMessage('Please wait 2 minutes before reshuffling matches.');
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await fetch(`${apiUrl}/api/get-matches`);
       const data = await response.json();
-      setMatches(data); // Update matches with new round data
+      setMatches(data);
       setSuccessMessage('New matches loaded!');
       setLoading(false);
+
+      // Store both lastFetchTime and userId to ensure the correct user
+      Cookies.set('lastFetchTime', currentTime.toString());
+      Cookies.set('lastFetchUserId', userId || '');
+
+      setLastFetchTime(currentTime);
+      setCountdown(120); // Reset countdown to 2 minutes (120 seconds)
+      setIsNextRoundDisabled(true);
     } catch (error) {
       setErrorMessage('Error loading next round.');
-    }
-  };
-
-  // Navigate to Bet Slips page
-  const handleBetSlips = () => {
-    router.push('/bet-slips');
-  };
-
-  // Navigate to the match details page
-  const handleMatchClick = (matchId: string) => {
-    router.push(`/match/${matchId}`);
-  };
-
-
-  const handleBullClick = async (matchId: string) => {
-    try {
-      await fetch(`${apiUrl}/api/increase`, {
-        method: 'POST',
-        body: JSON.stringify({ matchId }),
-        headers: { 'Content-Type': 'application/json' },
-      });
-      setSuccessMessage('Bull bet placed!');
-    } catch (error) {
-      setErrorMessage('Error placing Bull bet.');
-    }
-  };
-
-  const handleBearClick = async (matchId: string) => {
-    try {
-      await fetch(`${apiUrl}/api/decrease`, {
-        method: 'POST',
-        body: JSON.stringify({ matchId }),
-        headers: { 'Content-Type': 'application/json' },
-      });
-      setSuccessMessage('Bear bet placed!');
-    } catch (error) {
-      setErrorMessage('Error placing Bear bet.');
     }
   };
 
@@ -133,7 +142,6 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
                   className="flex justify-between items-center border-b p-4 shadow-md cursor-pointer hover:bg-gray-800"
                   style={{ minHeight: '50px' }}
                 >
-                  {/* Tokens */}
                   <div className="flex items-center space-x-2 w-2/3">
                     <div className="flex items-center space-x-2">
                       <img
@@ -145,7 +153,7 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
                         {match.token1.symbol}
                       </span>
                     </div>
-                    <div className="text-xxs  mx-4">VS</div>
+                    <div className="text-xxs mx-4">VS</div>
                     <div className="flex items-center space-x-2">
                       <img
                         src={match.token2.logo}
@@ -158,34 +166,25 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
                     </div>
                   </div>
 
-                  {/* Buttons */}
                   <div className="flex space-x-4">
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleBullClick(match.id);
-                      }}
+                      onClick={(e) => e.stopPropagation()}
                       className="flex items-center space-x-2 px-3 py-1 border border-green-500 text-green-500 bg-transparent rounded-lg hover:bg-green-500 hover:text-white transition"
                     >
                       <FontAwesomeIcon icon={faArrowUp} />
-                      <span className='text-xs'>BULL</span>
+                      <span className="text-xs">BULL</span>
                     </button>
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleBearClick(match.id);
-                      }}
+                      onClick={(e) => e.stopPropagation()}
                       className="flex items-center space-x-2 px-3 py-1 border border-red-500 text-red-500 bg-transparent rounded-lg hover:bg-red-500 hover:text-white transition"
                     >
                       <FontAwesomeIcon icon={faArrowDown} />
-                      <span className='text-xs'>BEAR</span>
+                      <span className="text-xs">BEAR</span>
                     </button>
                   </div>
                 </div>
               ))}
         </div>
-
-  
 
         <Suspense fallback={<div>Loading...</div>}>
           {errorMessage && (
@@ -196,22 +195,19 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
           )}
         </Suspense>
 
-        {showConfetti && <Confetti />}
-
         <div className="flex justify-center w-full space-x-4 mt-8 mb-10 z-50">
-      <button
-        className="bg-purple-600 text-white w-1/2 px-4 py-4 rounded-lg"
-        onClick={handleNextRound}
-      >
-        Next Round
-      </button>
-      <button
-        className="bg-purple-600 text-white w-1/2 px-4 py-4 rounded-lg"
-        onClick={handleBetSlips}
-      >
-        Bet Slips
-      </button>
-    </div>
+          {countdown > 0 ? (
+            <div className="text-center text-gray-700">{`Next round in ${Math.floor(countdown)} seconds`}</div>
+          ) : (
+            <button
+              className="bg-purple-600 text-white w-1/2 px-4 py-4 rounded-lg"
+              onClick={handleNextRound}
+              disabled={isNextRoundDisabled}
+            >
+              Next Round
+            </button>
+          )}
+        </div>
 
         <Footer theme={theme} />
       </div>
@@ -219,4 +215,6 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
   );
 };
 
+
 export default BetList;
+
