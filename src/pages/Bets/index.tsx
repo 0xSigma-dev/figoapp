@@ -127,11 +127,11 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
   };
 
   return (
-    <div className="container mx-auto h-screen p-4">
+    <div className="container flex flex-col mx-auto h-screen p-4">
       <div className="">
         <SubHeader title="Bet, Predict & Win" />
 
-        <div className="grid grid-cols-1 gap-1 h-50 overflow-y-auto my-1">
+        <div className="flex-1 grid grid-cols-1 gap-1 h-50 overflow-y-auto my-1">
           {loading
             ? Array(10)
                 .fill(0)
@@ -139,7 +139,7 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
             : matches.map((match) => (
                 <div
                   key={match.id}
-                  className="flex justify-between items-center border-b p-4 shadow-md cursor-pointer hover:bg-gray-800"
+                  className="flex justify-between items-center border-b p-6 shadow-md cursor-pointer hover:bg-gray-800"
                   style={{ minHeight: '50px' }}
                 >
                   <div className="flex items-center space-x-2 w-2/3">
@@ -195,7 +195,7 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
           )}
         </Suspense>
 
-        <div className="flex justify-center w-full space-x-4 mt-8 mb-10 z-50">
+        <div className="fixed bottom-16 left-0 right-0 flex justify-center w-full space-x-4 z-50 px-4">
           {countdown > 0 ? (
             <div className="text-center text-gray-700">{`Next round in ${Math.floor(countdown)} seconds`}</div>
           ) : (
@@ -207,6 +207,13 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
               Next Round
             </button>
           )}
+
+            <button
+              className="bg-green-600 text-white w-1/2 px-4 py-4 rounded-lg"
+              onClick={handleNextRound}
+            >
+             BetSlip
+            </button>
         </div>
 
         <Footer theme={theme} />
