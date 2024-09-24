@@ -65,8 +65,7 @@ self.addEventListener('push', (event) => {
   const title = data.title || 'New Message';
   const options = {
     body: data.body || 'You have received a new message.',
-    icon: '/images/icon.png',
-    badge: '/images/badge.png',
+    icon: '/icons/Figo.png',
     data: {
       url: data.url || '/',
     },
