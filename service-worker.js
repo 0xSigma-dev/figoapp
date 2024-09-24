@@ -29,7 +29,6 @@ self.addEventListener('fetch', (event) => {
         return cachedResponse; // Return cached response
       }
       return fetch(event.request).then((networkResponse) => {
-        // Cache the new response
         return caches.open(CACHE_NAME).then((cache) => {
           cache.put(event.request, networkResponse.clone());
           return networkResponse;
@@ -42,7 +41,7 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Activate the Service Worker and clean up old caches
+
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -74,7 +73,7 @@ self.addEventListener('push', (event) => {
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
-// Handle notification click to focus/open the relevant page
+
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   event.waitUntil(
