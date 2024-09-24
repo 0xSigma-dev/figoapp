@@ -354,10 +354,10 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
 
   const handleDeleteConversation = async (channelId: string) => {
     try {
-      await deleteChannel(channelId); // Remove from IndexedDB
-      setChannels((prevChannels) => prevChannels.filter((channel) => channel.id !== channelId)); // Update state
+      await deleteChannel(channelId); 
+      setChannels((prevChannels) => prevChannels.filter((channel) => channel.id !== channelId)); 
     } catch (error) {
-      //console.error('Failed to delete channel', error);
+      
     }
   };
 
