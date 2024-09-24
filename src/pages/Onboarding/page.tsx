@@ -28,26 +28,6 @@ const SuccessModal = lazy(() => import('../../components/SuccessModal'));
 const UserDetailsModal = lazy(() => import('../../components/UserDetailsModal'));
 
 
-const askNotificationPermission = async () => {
-  // Check if permission is already granted
-  if (Notification.permission === 'granted') {
-    //console.log('Notification permission already granted.');
-    return;
-  }
-
-  // Otherwise, request permission
-  const permission = await Notification.requestPermission();
-  if (permission === 'granted') {
-    //console.log('Notification permission granted.');
-  } else {
-    //console.error('Notification permission denied.');
-  }
-};
-
-// Call this function when the app is initialized
-askNotificationPermission();
-
-
 
 const PwaInstallModal = ({ onClose }: { onClose: () => void }) => {
   useEffect(() => {
