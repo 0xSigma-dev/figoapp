@@ -8,6 +8,7 @@ import SubHeader from '@/components/SubHeader';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 import { Suspense, lazy } from 'react';
+import WalletGuard from '@/components/WalletGuard';
 const ErrorModal = lazy(() => import('@/components/ErrorModal'));
 const SuccessModal = lazy(() => import('@/components/SuccessModal'));
 
@@ -111,6 +112,7 @@ const TaskList: React.FC<TaskPageProps> = ({ theme }) => {
   };
 
   return (
+    <WalletGuard>
     <div className="container mx-auto p-4">
       <div className={`${isModalOpen ? 'blur-background' : ''}`}>
         <SubHeader title="Figo Tasks" />
@@ -174,6 +176,7 @@ const TaskList: React.FC<TaskPageProps> = ({ theme }) => {
       {showConfetti && <Confetti />}
       <Footer theme={theme} />
     </div>
+    </WalletGuard>
   );
 };
 

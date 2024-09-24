@@ -4,6 +4,8 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { useTheme } from 'next-themes';
 import { useRouter } from 'next/router';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEllipsisV,faMousePointer, faDownload,  faTimesCircle } from '@fortawesome/free-solid-svg-icons';
 import { useEffect, useState, useRef, useMemo} from 'react';
 import { Suspense, lazy } from 'react';
 import Lottie from 'react-lottie-player';
@@ -24,6 +26,79 @@ const gajrajOne = Gajraj_One({
 const ErrorModal = lazy(() => import('../../components/ErrorModal'));
 const SuccessModal = lazy(() => import('../../components/SuccessModal'));
 const UserDetailsModal = lazy(() => import('../../components/UserDetailsModal'));
+
+
+const askNotificationPermission = async () => {
+  // Check if permission is already granted
+  if (Notification.permission === 'granted') {
+    //console.log('Notification permission already granted.');
+    return;
+  }
+
+  // Otherwise, request permission
+  const permission = await Notification.requestPermission();
+  if (permission === 'granted') {
+    //console.log('Notification permission granted.');
+  } else {
+    //console.error('Notification permission denied.');
+  }
+};
+
+// Call this function when the app is initialized
+askNotificationPermission();
+
+
+
+const PwaInstallModal = ({ onClose }: { onClose: () => void }) => {
+  useEffect(() => {
+    AOS.init({ duration: 1000 });
+  }, []);
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-lg w-full relative p-6" data-aos="zoom-in">
+        {/* Close Button */}
+        <button 
+          className="absolute top-4 right-4 text-gray-600 dark:text-gray-300 hover:text-red-500"
+          onClick={onClose}
+        >
+          <FontAwesomeIcon icon={faTimesCircle} size="2x" />
+        </button>
+
+        {/* Modal Content */}
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Install the Figo App!</h2>
+          <p className="text-gray-700 dark:text-gray-300 mb-4">
+            To install the Figo app on your device, follow these simple steps:
+          </p>
+
+          {/* Step 1 */}
+          <div className="flex items-center justify-start mb-2 animate-bounce">
+            <FontAwesomeIcon icon={faEllipsisV} className="text-gray-800 dark:text-white" size="lg" />
+            <span className="ml-2 text-gray-800 dark:text-white text-lg">Tap the menu icon</span>
+          </div>
+
+          {/* Step 2 */}
+          <div className="flex items-center justify-start mb-2 animate-bounce">
+            <FontAwesomeIcon icon={faMousePointer} className="text-gray-800 dark:text-white" size="lg" />
+            <span className="ml-2 text-gray-800 dark:text-white text-lg">Select <strong>Add to Home Screen</strong></span>
+          </div>
+
+          <div className="flex items-center justify-start mb-2 animate-bounce">
+            <FontAwesomeIcon icon={faDownload} className="text-gray-800 dark:text-white" size="lg" />
+            <span className="ml-2 text-gray-800 dark:text-white text-lg">Click <strong>Install Figo</strong></span>
+          </div>
+
+          {/* Animation */}
+          <div className="w-full h-32 mt-6">
+            {/* You can customize this part with a small Lottie animation */}
+            <div className="animate-bounce bg-gradient-to-r from-purple-400 to-blue-500 h-full w-full rounded-md shadow-md"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 
 // Validate username
@@ -53,6 +128,7 @@ const SignUp = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [usernameErrors, setUsernameErrors] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isPwaModalOpen, setIsPwaModalOpen] = useState(true);
   const wallet = useWallet();
   const { connect, connected, publicKey } = useWallet();
   const router = useRouter();
@@ -63,7 +139,11 @@ const SignUp = () => {
   const { isInstallable, promptInstall } = useInstallPrompt();
 
     
-
+  useEffect(() => {
+    setTimeout(() => {
+      setIsPwaModalOpen(true);
+    }, 500); // Show modal after 500ms
+  }, []);
   
   useEffect(() => {
     AOS.init({ duration: 1200 });
@@ -302,16 +382,11 @@ useEffect(() => {
         )}
       </div>
 
-      <div className="mt-10 ml-4 text-center" data-aos="fade-up">
-      {isInstallable && (
-        <button id="install-button" onClick={promptInstall}>
-          Install Figo
-        </button>
-      )}
-      </div>
+     
       <Suspense fallback={<div>Loading...</div>}>
   <ErrorModal message={errorMessage} onClose={() => setErrorMessage(null)} />
   <SuccessModal message={successMessage} onClose={() => setSuccessMessage(null)} />
+  {isPwaModalOpen && <PwaInstallModal onClose={() => setIsPwaModalOpen(false)} />}
   <UserDetailsModal
     isOpen={isModalOpen}
     onClose={() => setIsModalOpen(false)}
