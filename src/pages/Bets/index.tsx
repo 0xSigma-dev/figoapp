@@ -55,7 +55,7 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
 
   const fetchMatches = async () => {
     try {
-      const response = await fetch(`${apiUrl}/api/get-matches`);
+      const response = await fetch(`${apiUrl}/api/get-matches?userId=${userId}`);
       const data = await response.json();
       setMatches(data);
       setLoading(false);
@@ -63,6 +63,10 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
       setErrorMessage('Failed to load matches. Please try again later.');
     }
   };
+
+  useEffect(() => {
+    fetchMatches();
+  }, [userId]);
 
   useEffect(() => {
     const storedUserId = Cookies.get('lastFetchUserId'); // Fetch stored userId with last fetch time
@@ -100,31 +104,54 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
   }, [countdown]);
 
   const handleNextRound = async () => {
-    const currentTime = Date.now();
-    if (lastFetchTime && currentTime - lastFetchTime < 120000) {
-      setErrorMessage('Please wait 2 minutes before reshuffling matches.');
-      return;
-    }
-
-    setLoading(true);
     try {
-      const response = await fetch(`${apiUrl}/api/get-matches`);
+      const currentTime = Date.now();
+  
+      // Check if the user needs to wait before reshuffling matches
+      if (lastFetchTime && currentTime - lastFetchTime < 120000) {
+        setErrorMessage('Please wait 2 minutes before reshuffling matches.');
+        return;
+      }
+  
+      // Set loading state
+      setLoading(true);
+  
+      // Fetch new matches from the backend
+      const response = await fetch(`${apiUrl}/api/new-matches`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      });
+  
+      // Check if the response is okay
+      if (!response.ok) {
+        throw new Error('Failed to fetch new matches.');
+      }
+  
       const data = await response.json();
+  
+      // Update matches and display success message
       setMatches(data);
       setSuccessMessage('New matches loaded!');
-      setLoading(false);
-
-      // Store both lastFetchTime and userId to ensure the correct user
+  
+      // Store last fetch time and userId in cookies for future reference
       Cookies.set('lastFetchTime', currentTime.toString());
       Cookies.set('lastFetchUserId', userId || '');
-
+  
+      // Update state to reflect successful fetching
       setLastFetchTime(currentTime);
       setCountdown(120); // Reset countdown to 2 minutes (120 seconds)
       setIsNextRoundDisabled(true);
     } catch (error) {
+      // Catch and handle errors
+      console.error('Error loading next round:', error);
       setErrorMessage('Error loading next round.');
+    } finally {
+      // Ensure loading state is always turned off
+      setLoading(false);
     }
   };
+  
 
   return (
     <div className="container flex flex-col mx-auto h-screen p-4">
