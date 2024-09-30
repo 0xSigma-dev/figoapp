@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useEffect, Suspense, lazy, useCallback } from 'react';
 import Cookies from 'js-cookie';
 import Confetti from 'react-confetti';
 import Footer from '@/components/Footer';
@@ -49,11 +49,12 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
   const [lastFetchTime, setLastFetchTime] = useState<number | null>(null);
   const [countdown, setCountdown] = useState<number>(0); // Countdown timer
   const [isNextRoundDisabled, setIsNextRoundDisabled] = useState<boolean>(true);
+  const [fetchTimer, setFetchTimer] = useState<NodeJS.Timeout | null>(null);
   const router = useRouter();
 
   const userId = Cookies.get('userId'); // Get the current user's ID from cookies (Assuming it's already set somewhere)
 
-  const fetchMatches = async () => {
+  const fetchMatches = useCallback(async () => {
     try {
       const response = await fetch(`${apiUrl}/api/get-matches?userId=${userId}`);
       const data = await response.json();
@@ -62,11 +63,21 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
     } catch (error) {
       setErrorMessage('Failed to load matches. Please try again later.');
     }
-  };
+  }, [userId]);
+
+  const debounceFetchMatches = useCallback(() => {
+    if (fetchTimer) {
+      clearTimeout(fetchTimer); // Clear the previous timer
+    }
+    const newTimer = setTimeout(() => {
+      fetchMatches();
+    }, 500); // Delay of 500ms (adjustable based on your needs)
+    setFetchTimer(newTimer);
+  }, [fetchTimer, fetchMatches]);
 
   useEffect(() => {
-    fetchMatches();
-  }, [userId]);
+    debounceFetchMatches(); // Debounced fetch when userId changes
+  }, [userId, debounceFetchMatches]);
 
   useEffect(() => {
     const storedUserId = Cookies.get('lastFetchUserId'); // Fetch stored userId with last fetch time
@@ -88,8 +99,8 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
       Cookies.remove('lastFetchUserId');
     }
 
-    fetchMatches();
-  }, [userId]);
+    debounceFetchMatches();;
+  }, [userId, debounceFetchMatches]);
 
   useEffect(() => {
     if (countdown > 0) {
