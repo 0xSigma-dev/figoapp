@@ -56,28 +56,35 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
 
   const fetchMatches = useCallback(async () => {
     try {
+      setLoading(true); // Ensure loading state is set before fetching
       const response = await fetch(`${apiUrl}/api/get-matches?userId=${userId}`);
       const data = await response.json();
       setMatches(data);
-      setLoading(false);
+      setLoading(false); // Stop loading after fetching
     } catch (error) {
+      //console.error('Error fetching matches:', error);
       setErrorMessage('Failed to load matches. Please try again later.');
+      setLoading(false); // Stop loading even if there's an error
     }
   }, [userId]);
 
-  const debounceFetchMatches = useCallback(() => {
-    if (fetchTimer) {
-      clearTimeout(fetchTimer); // Clear the previous timer
-    }
-    const newTimer = setTimeout(() => {
-      fetchMatches();
-    }, 500); // Delay of 500ms (adjustable based on your needs)
-    setFetchTimer(newTimer);
-  }, [fetchTimer, fetchMatches]);
-
   useEffect(() => {
-    debounceFetchMatches(); // Debounced fetch when userId changes
-  }, [userId, debounceFetchMatches]);
+    const storedUserId = Cookies.get('lastFetchUserId');
+    const lastFetch = Cookies.get('lastFetchTime');
+
+    if (lastFetch && storedUserId === userId) {
+      const currentTime = Date.now();
+      const timeDiff = 120000 - (currentTime - Number(lastFetch));
+
+      if (timeDiff > 0) {
+        setCountdown(timeDiff / 1000);
+        setIsNextRoundDisabled(true);
+      }
+    }
+
+    // Fetch matches only once when component is mounted
+    fetchMatches();
+  }, [userId, fetchMatches]);
 
   useEffect(() => {
     const storedUserId = Cookies.get('lastFetchUserId'); // Fetch stored userId with last fetch time
@@ -99,8 +106,8 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
       Cookies.remove('lastFetchUserId');
     }
 
-    debounceFetchMatches();;
-  }, [userId, debounceFetchMatches]);
+    fetchMatches();;
+  }, [userId, fetchMatches]);
 
   useEffect(() => {
     if (countdown > 0) {
@@ -155,7 +162,7 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
       setIsNextRoundDisabled(true);
     } catch (error) {
       // Catch and handle errors
-      console.error('Error loading next round:', error);
+      //console.error('Error loading next round:', error);
       setErrorMessage('Error loading next round.');
     } finally {
       // Ensure loading state is always turned off
