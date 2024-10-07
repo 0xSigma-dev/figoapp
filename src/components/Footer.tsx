@@ -1,7 +1,7 @@
 "use client"
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faComments, faTasks, faUserFriends, faPhoneAlt, faCameraRetro, faExchangeAlt, faChartBar, faGamepad } from '@fortawesome/free-solid-svg-icons';
+import { faComments, faTasks, faUserFriends, faPhoneAlt, faCameraRetro, faExchangeAlt, faChartBar, faSackDollar } from '@fortawesome/free-solid-svg-icons';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -17,7 +17,7 @@ const Footer: React.FC<FooterProps> = ({ theme }) => {
     { icon: faComments, link: '/Home/page', label: "Chats" },
     //{ icon: faCameraRetro, link: '/Home/Status' },
     { icon: faTasks, link: '/Tasks', label: "Tasks" },
-    { icon: faGamepad, link: '/Bets', label: "Game" }
+    { icon: faSackDollar, link: '/Bets', label: "Bets" }
   ];
 
   const callIcon = { icon: faPhoneAlt, link: '#', label: "Call" }; // Disabled call icon
@@ -90,24 +90,7 @@ const Footer: React.FC<FooterProps> = ({ theme }) => {
 
             </motion.div>
           </div>
-          <div className="relative flex flex-col items-center">
-            <motion.div
-              whileTap={{ scale: 1.4 }}
-              className="relative flex items-center justify-center w-16 h-16 rounded-full bg-transparent cursor-not-allowed"
-            >
-
-              <FontAwesomeIcon
-                icon={callIcon.icon}
-                className="text-gray-500"
-                style={{ fontSize: '24px' }}
-              />
-              <span className="absolute top-0 right-0 bg-green-500 text-white text-xs rounded-full px-1 ">
-                Soon
-              </span>
-
-
-            </motion.div>
-          </div>
+         
         </div>
       </footer>
     </>

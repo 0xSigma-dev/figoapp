@@ -184,7 +184,7 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
 
     // Navigate to the desired page with query parameters
     router.push({
-      pathname: '/game', // Replace with your actual page path
+      pathname: '/Bets/game', // Replace with your actual page path
       query: params,
     });
   };
@@ -203,7 +203,7 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
             : matches.map((match) => (
                 <div
                   key={match.id}
-                  className="flex justify-between items-center border-b p-6 shadow-md cursor-pointer hover:bg-gray-800"
+                  className="flex justify-between items-center border-b border-gray-800 p-6 shadow-md cursor-pointer hover:bg-gray-800"
                   style={{ minHeight: '50px' }}
                 >
                   <div className="flex items-center space-x-2 w-2/3">
@@ -231,21 +231,27 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
                   </div>
 
                   <div className="flex space-x-4">
-                    <button
-                      onClick={(e) => e.stopPropagation()}
-                      className="flex items-center space-x-2 px-3 py-1 border border-green-500 text-green-500 bg-transparent rounded-lg hover:bg-green-500 hover:text-white transition"
-                    >
-                      <FontAwesomeIcon icon={faArrowUp} />
-                      <span className="text-xs">BULL</span>
-                    </button>
-                    <button
-                      onClick={(e) => e.stopPropagation()}
-                      className="flex items-center space-x-2 px-3 py-1 border border-red-500 text-red-500 bg-transparent rounded-lg hover:bg-red-500 hover:text-white transition"
-                    >
-                      <FontAwesomeIcon icon={faArrowDown} />
-                      <span className="text-xs">BEAR</span>
-                    </button>
-                  </div>
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      handleBetClick(match.id, match.token1, match.token2, 'BULL'); // Call handleBetClick for Bull action
+    }}
+    className="flex items-center space-x-2 px-3 py-1 border border-green-500 text-green-500 bg-transparent rounded-lg hover:bg-green-500 hover:text-white transition"
+  >
+    <FontAwesomeIcon icon={faArrowUp} />
+    <span className="text-xs">BULL</span>
+  </button>
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      handleBetClick(match.id, match.token1, match.token2, 'BEAR'); // Call handleBetClick for Bear action
+    }}
+    className="flex items-center space-x-2 px-3 py-1 border border-red-500 text-red-500 bg-transparent rounded-lg hover:bg-red-500 hover:text-white transition"
+  >
+    <FontAwesomeIcon icon={faArrowDown} />
+    <span className="text-xs">BEAR</span>
+  </button>
+</div>
                 </div>
               ))}
         </div>
