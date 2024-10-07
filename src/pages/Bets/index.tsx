@@ -169,6 +169,25 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
       setLoading(false);
     }
   };
+
+
+  const handleBetClick = (matchId: string, token1: Token, token2: Token, action: 'BULL' | 'BEAR') => {
+    // Construct the query parameters
+    const params = {
+      matchId,
+      token1Symbol: token1.symbol,
+      token1Logo: token1.logo,
+      token2Symbol: token2.symbol,
+      token2Logo: token2.logo,
+      action,
+    };
+
+    // Navigate to the desired page with query parameters
+    router.push({
+      pathname: '/game', // Replace with your actual page path
+      query: params,
+    });
+  };
   
 
   return (
