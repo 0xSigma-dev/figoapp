@@ -36,7 +36,7 @@ type OddsMetric = keyof Odds;
 
 const GamePage: React.FC = () => {
   const router = useRouter();
-  const { token1Symbol, token1Logo, token2Symbol, token2Logo, action, match_id } = router.query;
+  const { token1Symbol, token1Logo, token2Symbol, token2Logo, action, matchId } = router.query;
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -64,13 +64,13 @@ const GamePage: React.FC = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          match_id, 
+          match_id: matchId, 
           user_id: userId, 
           duration, 
           bull_or_bear: matchAction,
         }),
       });
-      console.log('match_id',match_id, 'user_id', userId, 'duration', duration, 'bull_or_bear', matchAction )
+      console.log('match_id',matchId, 'user_id', userId, 'duration', duration, 'bull_or_bear', matchAction )
 
       if (!response.ok) {
         throw new Error('Match not found');
@@ -85,7 +85,7 @@ const GamePage: React.FC = () => {
       setErrorMessage('Failed to load odds. Please try again later.');
       setLoading(false);
     }
-  }, [match_id, userId, duration, matchAction]);
+  }, [matchId, userId, duration, matchAction]);
 
   useEffect(() => {
     if (duration) {
@@ -97,12 +97,12 @@ const GamePage: React.FC = () => {
     <div className="flex flex-col items-center min-h-screen overflow-x-hidden">
       <div className="flex justify-center items-center space-x-4 my-8">
         <div className="flex items-center space-x-2">
-          <Image src={token1Logo as string} alt={token1Symbol as string} width={70} height={70} />
+          <Image src={token1Logo as string} alt={token1Symbol as string} width={80} height={80} />
           <span className="text-2xl font-bold">{token1Symbol}</span>
         </div>
         <span className="text-sm font-bold">VS</span>
         <div className="flex items-center space-x-2">
-          <Image src={token2Logo as string} alt={token2Symbol as string} width={70} height={70} />
+          <Image src={token2Logo as string} alt={token2Symbol as string} width={80} height={80} />
           <span className="text-2xl font-bold">{token2Symbol}</span>
         </div>
       </div>
