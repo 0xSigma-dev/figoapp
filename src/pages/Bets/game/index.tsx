@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy, useCallback } from 'react';
+import Cookies from 'js-cookie';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 
@@ -7,12 +8,38 @@ interface Token {
   logo: string;
 }
 
+interface Trade {
+  home: number;
+  away: number;
+  draw: number;
+}
+
+interface Volume {
+  home: number;
+  away: number;
+  draw: number;
+}
+
+interface Odds {
+  id: string;
+  Trade: Trade;
+  Volume: Volume;
+  Price: any;
+  Marketcap: any;
+}
+
 const GamePage: React.FC = () => {
   const router = useRouter();
-  const { token1Symbol, token1Logo, token2Symbol, token2Logo, action } = router.query;
-
+  const { token1Symbol, token1Logo, token2Symbol, token2Logo, action, match_id } = router.query;
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const [duration, setDuration] = useState('');
   const [matchAction, setMatchAction] = useState<'BULL' | 'BEAR' | null>(null);
+  const [selectedOdd, setSelectedOdd] = useState<'home' | 'draw' | 'away' | null>(null);
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const userId = Cookies.get('userId');
+  const [odds, setOdds] = useState<Odds | null>(null);
 
   // Set match action based on the query parameter
   useEffect(() => {
@@ -24,6 +51,42 @@ const GamePage: React.FC = () => {
   const handleDurationChange = (selectedDuration: string) => {
     setDuration(selectedDuration);
   };
+
+  const handleOddSelection = (oddType: 'home' | 'draw' | 'away') => {
+    setSelectedOdd(oddType);
+  };
+
+
+  // Get the current user's ID from cookies (Assuming it's already set somewhere)
+
+  const fetchOdds = useCallback(async () => {
+    try {
+      setLoading(true); // Set loading to true before fetching
+      const response = await fetch(`${apiUrl}/api/getOdds`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          match_id, 
+          user_id: userId, 
+          duration, 
+          bull_or_bear: matchAction,
+        }),
+      });
+      const data = await response.json();
+      setOdds(data); // Assume data contains odds for home, draw, away
+      setLoading(false); // Stop loading after fetching
+    } catch (error) {
+      setErrorMessage('Failed to load odds. Please try again later.');
+      setLoading(false); // Stop loading even if there's an error
+    }
+  }, [match_id, userId, duration, matchAction]);
+
+  // Call fetchOdds when duration changes
+  useEffect(() => {
+    if (duration) {
+      fetchOdds();
+    }
+  }, [duration, fetchOdds]);
 
   return (
     <div className="flex flex-col items-center min-h-screen overflow-x-hidden">
@@ -69,103 +132,73 @@ const GamePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Volume/Trade/Price Information */}
+      {/* Odds Section */}
       {duration && (
-      <div className='overflow-y-auto overflow-x-hidden'>
         <div className="mt-8 w-full px-4">
           <h3 className="text-xl font-bold">
             {matchAction === 'BULL' ? 'Volume Increase' : 'Volume Decrease'} in the next {duration}
           </h3>
-
-          {/* Odds Section */}
           <div className="mt-6 space-y-4">
             <div className="flex justify-between">
               <span className="text-sm">Home</span>
               <span className="text-sm">Draw</span>
               <span className="text-sm">Away</span>
-             
             </div>
 
-            <div className="flex justify-between">
-              <span className="text-sm text-gray-500 font-bold">Odds for Home</span>
-              <span className="text-sm text-gray-500  font-bold">Odds for Draw</span>
-              <span className="text-sm text-gray-500  font-bold">Odds for Away</span>
-             
-            </div>
+            {loading ? (
+              <div className="flex justify-between animate-pulse">
+                <div className="bg-gray-200 h-6 w-12"></div>
+                <div className="bg-gray-200 h-6 w-12"></div>
+                <div className="bg-gray-200 h-6 w-12"></div>
+              </div>
+            ) : (
+              odds && (
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500 font-bold">{odds.Volume.home}</span>
+                  <span className="text-sm text-gray-500 font-bold">{odds.Volume.draw}</span>
+                  <span className="text-sm text-gray-500 font-bold">{odds.Volume.away}</span>
+                </div>
+              )
+            )}
           </div>
-
-          {/* Trades Section */}
-          <div className="mt-6">
-            <h3 className="text-xl font-bold">
-              {matchAction === 'BULL' ? 'Number of Trades Increase' : 'Number of Trades Decrease'} in
-              the next {duration}
-            </h3>
-           {/* Odds Section */}
-          <div className="mt-6 space-y-4">
-            <div className="flex justify-between">
-              <span className="text-sm">Home</span>
-              <span className="text-sm">Draw</span>
-              <span className="text-sm">Away</span>
-             
-            </div>
-
-            <div className="flex justify-between">
-              <span className="text-sm text-gray-500  font-bold">Odds for Home</span>
-              <span className="text-sm text-gray-500  font-bold">Odds for Draw</span>
-              <span className="text-sm text-gray-500  font-bold">Odds for Away</span>
-             
-            </div>
-          </div>
-          </div>
-
-          {/* Price Section */}
-          <div className="mt-6">
-            <h3 className="text-xl font-bold">
-              {matchAction === 'BULL' ? 'Price Increase' : 'Price Decrease'} in the next {duration}
-            </h3>
-            {/* Odds Section */}
-          <div className="mt-6 space-y-4">
-            <div className="flex justify-between">
-              <span className="text-sm">Home</span>
-              <span className="text-sm">Draw</span>
-              <span className="text-sm">Away</span>
-             
-            </div>
-
-            <div className="flex justify-between">
-              <span className="text-sm text-gray-500  font-bold">Odds for Home</span>
-              <span className="text-sm text-gray-500  font-bold">Odds for Draw</span>
-              <span className="text-sm text-gray-500  font-bold">Odds for Away</span>
-             
-            </div>
-          </div>
-          </div>
-
-          {/* MarketCap Section */}
-          <div className="mt-6">
-            <h3 className="text-xl font-bold">
-              {matchAction === 'BULL' ? 'Marketcap Increase' : 'Marketcap Decrease'} in the next {duration}
-            </h3>
-            {/* Odds Section */}
-          <div className="mt-6 space-y-4">
-            <div className="flex justify-between">
-              <span className="text-sm">Home</span>
-              <span className="text-sm">Draw</span>
-              <span className="text-sm">Away</span>
-             
-            </div>
-
-            <div className="flex justify-between">
-              <span className="text-sm text-gray-500  font-bold">Odds for Home</span>
-              <span className="text-sm text-gray-500 font-bold">Odds for Draw</span>
-              <span className="text-sm text-gray-500  font-bold">Odds for Away</span>
-             
-            </div>
-          </div>
-          </div>
-        </div>
         </div>
       )}
+
+      {/* Additional Sections */}
+      {['Trade', 'Price', 'Marketcap'].map((section) => (
+  <div key={section} className="mt-6 w-full px-4">
+    <h3 className="text-xl font-bold">
+      {matchAction === 'BULL'
+        ? `${section} Increase`
+        : `${section} Decrease`} in the next {duration}
+    </h3>
+    <div className="mt-6 space-y-4">
+      <div className="flex justify-between">
+        <span className="text-sm">Home</span>
+        <span className="text-sm">Draw</span>
+        <span className="text-sm">Away</span>
+      </div>
+
+      {loading ? (
+        <div className="flex justify-between animate-pulse">
+          <div className="bg-gray-200 h-6 w-12"></div>
+          <div className="bg-gray-200 h-6 w-12"></div>
+          <div className="bg-gray-200 h-6 w-12"></div>
+        </div>
+      ) : (
+        odds && (
+          <div className="flex justify-between">
+            {/* Using keyof Odds to avoid TypeScript error */}
+            <span className="text-sm text-gray-500 font-bold">{odds[section as keyof Odds].home}</span>
+            <span className="text-sm text-gray-500 font-bold">{odds[section as keyof Odds].draw}</span>
+            <span className="text-sm text-gray-500 font-bold">{odds[section as keyof Odds].away}</span>
+          </div>
+        )
+      )}
+    </div>
+  </div>
+))}
+
     </div>
   );
 };
