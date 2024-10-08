@@ -88,9 +88,11 @@ const GamePage: React.FC = () => {
         }),
       });
       const data = await response.json();
+      console.log('odd data', data)
       setOdds(data); // Assume data contains odds for home, draw, away
       setLoading(false); // Stop loading after fetching
     } catch (error) {
+      console.log('error', error)
       setErrorMessage('Failed to load odds. Please try again later.');
       setLoading(false); // Stop loading even if there's an error
     }
@@ -108,12 +110,12 @@ const GamePage: React.FC = () => {
       {/* Match Information */}
       <div className="flex justify-center items-center space-x-4 my-8">
         <div className="flex items-center space-x-2">
-          <Image src={token1Logo as string} alt={token1Symbol as string} width={60} height={60} />
+          <Image src={token1Logo as string} alt={token1Symbol as string} width={70} height={70} />
           <span className="text-2xl font-bold">{token1Symbol}</span>
         </div>
         <span className="text-sm font-bold">VS</span>
         <div className="flex items-center space-x-2">
-          <Image src={token2Logo as string} alt={token2Symbol as string} width={80} height={80} />
+          <Image src={token2Logo as string} alt={token2Symbol as string} width={70} height={70} />
           <span className="text-2xl font-bold">{token2Symbol}</span>
         </div>
       </div>
@@ -121,7 +123,7 @@ const GamePage: React.FC = () => {
       {/* Bull/Bear Indicator */}
       {matchAction && (
         <div
-          className={`absolute top-4 right-4 px-4 py-2 rounded-lg text-white text-sm font-bold ${
+          className={`absolute top-4 right-4 px-2 py-2 rounded-lg text-white text-xs font-bold ${
             matchAction === 'BULL' ? 'bg-green-500' : 'bg-red-500'
           }`}
         >
