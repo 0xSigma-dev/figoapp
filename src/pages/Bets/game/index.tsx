@@ -31,6 +31,9 @@ interface Odds {
   };
 }
 
+
+type OddsMetric = keyof Odds;
+
 const GamePage: React.FC = () => {
   const router = useRouter();
   const { token1Symbol, token1Logo, token2Symbol, token2Logo, action, match_id } = router.query;
@@ -67,12 +70,14 @@ const GamePage: React.FC = () => {
           bull_or_bear: matchAction,
         }),
       });
+      console.log('match_id',match_id, 'user_id', userId, 'duration', duration, 'bull_or_bear', matchAction )
 
       if (!response.ok) {
         throw new Error('Match not found');
       }
 
       const data = await response.json();
+      console.log('data', data)
       setOdds(data);
       setLoading(false);
     } catch (error) {
@@ -126,7 +131,7 @@ const GamePage: React.FC = () => {
       {duration && (
         <div className="mt-8 w-full px-4">
           {odds ? (
-            ['volume', 'trades', 'price', 'marketcap'].map((metric) => (
+            (['volume', 'trades', 'price', 'marketcap'] as OddsMetric[]).map((metric) => (
               <div key={metric} className="mt-6 w-full px-4">
                 <h3 className="text-xl font-bold capitalize">
                   {matchAction === 'BULL' ? `Percentage ${metric} Increase` : `Percentage ${metric} Decrease`} in the next {duration}
@@ -145,9 +150,9 @@ const GamePage: React.FC = () => {
                     </div>
                   ) : (
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-500 font-bold">{odds[metric as keyof Odds]?.token_a_odds ?? 'No odds'}</span>
-                      <span className="text-sm text-gray-500 font-bold">{odds[metric as keyof Odds]?.draw_odds ?? 'No odds'}</span>
-                      <span className="text-sm text-gray-500 font-bold">{odds[metric as keyof Odds]?.token_b_odds ?? 'No odds'}</span>
+                      <span className="text-sm text-gray-500 font-bold">{odds[metric]?.token_a_odds ?? 'No odds'}</span>
+                      <span className="text-sm text-gray-500 font-bold">{odds[metric]?.draw_odds ?? 'No odds'}</span>
+                      <span className="text-sm text-gray-500 font-bold">{odds[metric]?.token_b_odds ?? 'No odds'}</span>
                     </div>
                   )}
                 </div>
