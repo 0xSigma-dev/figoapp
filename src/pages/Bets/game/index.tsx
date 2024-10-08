@@ -52,8 +52,8 @@ const GamePage: React.FC = () => {
   }, [action]);
 
   const handleDurationChange = (selectedDuration: string) => {
-    const formattedDuration = formatDuration(selectedDuration);
-    setDuration(formattedDuration);
+    //const formattedDuration = formatDuration(selectedDuration);
+    setDuration(selectedDuration);
   };
   
   const formatDuration = (duration: string): string => {
@@ -130,13 +130,13 @@ const GamePage: React.FC = () => {
       )}
 
       {/* Duration Selection */}
-      <div className="my-6 overflow-x-auto whitespace-nowrap w-full">
+      <div className="my-6  w-full">
         <h3 className="text-lg font-semibold">Select Duration</h3>
-        <div className="flex space-x-4 mt-4">
-          {['15 minutes', '30 minutes', '1 hour', '4 hours', '6 hours', '24 hours'].map((d) => (
+        <div className="flex space-x-4 mt-4 overflow-x-auto whitespace-nowrap">
+          {['15m', '30m', '1h', '4h', '6h', '24h'].map((d) => (
             <button
               key={d}
-              className={`px-4 py-2 border rounded-lg ${
+              className={`px-6 py-2 border rounded-lg ${
                 duration === d ? 'bg-green-500 text-white' : 'bg-gray-200 text-black'
               }`}
               onClick={() => handleDurationChange(d)}
