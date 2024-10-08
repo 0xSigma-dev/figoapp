@@ -168,9 +168,9 @@ const GamePage: React.FC<GameProps> = ({ theme }) => {
                     </div>
                   ) : (
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-500 font-bold">{odds[metric]?.token_a_odds ?? 'No odds'}</span>
-                      <span className="text-sm text-gray-500 font-bold">{odds[metric]?.draw_odds ?? 'No odds'}</span>
-                      <span className="text-sm text-gray-500 font-bold">{odds[metric]?.token_b_odds ?? 'No odds'}</span>
+                      <span className="text-lg text-gray-500 font-bold">{odds[metric]?.token_a_odds ?? 'No odds'}x</span>
+                      <span className="text-lg text-gray-500 font-bold">{odds[metric]?.draw_odds ?? 'No odds'}x</span>
+                      <span className="text-lg text-gray-500 font-bold">{odds[metric]?.token_b_odds ?? 'No odds'}x</span>
                     </div>
                   )}
                 </div>
