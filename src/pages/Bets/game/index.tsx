@@ -4,6 +4,9 @@ import { useRouter } from 'next/router';
 import Image from 'next/image';
 import SubHeader from '@/components/SubHeader';
 import Footer from '@/components/Footer';
+import { useBetSlip } from '@/context/BetSlipContext';
+import BetSlipModal from '@/components/BetSlipModal';
+
 
 interface Token {
   symbol: string;
@@ -54,6 +57,8 @@ const GamePage: React.FC<GameProps> = ({ theme }) => {
   const userId = Cookies.get('userId');
   const matchId = Cookies.get('matchId');
   const [odds, setOdds] = useState<Odds | null>(null);
+  const { addBet } = useBetSlip();
+  const [isBetSlipVisible, setIsBetSlipVisible] = useState(false);
 
   
 
@@ -151,12 +156,12 @@ const GamePage: React.FC<GameProps> = ({ theme }) => {
       </div>
 
       {duration && (
-  <div className="mt-6 w-full px-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 250px)' }}> {/* Added scroll */}
+  <div className="mt-6 mb-8 w-full px-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 250px)' }}> {/* Added scroll */}
     {odds ? (
       (['volume', 'trades', 'price', 'marketcap'] as OddsMetric[]).map((metric) => (
         <div key={metric} className="mt-6 w-full px-4">
           <h3 className="text-lg font-bold capitalize">
-            {matchAction === 'BULL' ? `Percentage ${metric} Increase` : `Percentage ${metric} Decrease`} in the next {duration}
+            {matchAction === 'BULL' ? `${metric} +` : `${metric} -`} in the next {duration}
           </h3>
           <div className="mt-4 space-y-4">
             <div className="flex justify-between">
@@ -173,7 +178,7 @@ const GamePage: React.FC<GameProps> = ({ theme }) => {
             ) : (
               <div className="flex justify-between w-full">
                 <button
-                  className={`px-4 py-2 w-1/3 rounded-lg ${
+                  className={`px-4 py-2 w-1/3 mx-2 rounded-lg ${
                     selectedOdd?.metric === metric && selectedOdd?.oddType === 'home'
                       ? 'bg-purple-500 text-white'
                       : 'bg-gray-200 text-black'
@@ -212,7 +217,7 @@ const GamePage: React.FC<GameProps> = ({ theme }) => {
     )}
   </div>
 )}
-
+      {isBetSlipVisible && <BetSlipModal />}
       <Footer theme={theme} />
     </div>
   );

@@ -6,6 +6,7 @@ import SubHeader from '@/components/SubHeader';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimesCircle, faArrowDown, faArrowUp } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from 'next/router';
+import BetSlipModal from '@/components/BetSlipModal';
 
 const ErrorModal = lazy(() => import('@/components/ErrorModal'));
 const SuccessModal = lazy(() => import('@/components/SuccessModal'));
@@ -50,6 +51,8 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
   const [countdown, setCountdown] = useState<number>(0); // Countdown timer
   const [isNextRoundDisabled, setIsNextRoundDisabled] = useState<boolean>(true);
   const [fetchTimer, setFetchTimer] = useState<NodeJS.Timeout | null>(null);
+  const [isBetSlipVisible, setIsBetSlipVisible] = useState(false);
+  const [selectedBets, setSelectedBets] = useState<{ [key: string]: 'BULL' | 'BEAR' | null }>({});
   const router = useRouter();
 
   const userId = Cookies.get('userId'); // Get the current user's ID from cookies (Assuming it's already set somewhere)
@@ -66,6 +69,7 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
       setErrorMessage('Failed to load matches. Please try again later.');
       setLoading(false); // Stop loading even if there's an error
     }
+
   }, [userId]);
 
   useEffect(() => {
@@ -82,9 +86,15 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
       }
     }
 
+    const storedBets = JSON.parse(Cookies.get('selectedBets') || '{}');
+    setSelectedBets(storedBets);
     // Fetch matches only once when component is mounted
     fetchMatches();
   }, [userId, fetchMatches]);
+
+  const handleBetSlipClick = () => {
+    setIsBetSlipVisible((prev) => !prev); // Toggle BetSlip visibility
+  };
 
   useEffect(() => {
     const storedUserId = Cookies.get('lastFetchUserId'); // Fetch stored userId with last fetch time
@@ -172,7 +182,12 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
 
 
   const handleBetClick = (matchId: any, token1: Token, token2: Token, action: 'BULL' | 'BEAR') => {
-    // Construct the query parameters
+    const updatedBets = { ...selectedBets, [matchId]: selectedBets[matchId] === action ? null : action };
+    setSelectedBets(updatedBets);
+
+    // Save to cookies
+    Cookies.set('selectedBets', JSON.stringify(updatedBets));
+
 
     Cookies.set('matchId', matchId);
     const params = {
@@ -281,11 +296,13 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
 
             <button
               className="bg-green-600 text-white w-1/2 px-4 py-4 rounded-lg"
-              onClick={handleNextRound}
+              onClick={handleBetSlipClick} 
             >
              BetSlip
             </button>
         </div>
+
+        {isBetSlipVisible && <BetSlipModal />}
 
         <Footer theme={theme} />
       </div>
