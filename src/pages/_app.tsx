@@ -12,6 +12,8 @@ import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { Montaga } from '@next/font/google';
 import { UserStatusProvider } from '../context/UserStatusContext';
+import { BetSlipProvider } from '@/context/BetSlipContext';
+import BetSlipModal from '@/components/BetSlipModal';
 
 
 const montaga = Montaga({
@@ -104,8 +106,11 @@ function MyApp({ Component, pageProps }: AppProps) {
         <UserProvider>
         <UserStatusProvider>
           <AblyProvider>
+          <BetSlipProvider>
              <Component {...pageProps} />
              <ToastContainer />
+             <BetSlipModal />
+          </BetSlipProvider>
           </AblyProvider>
         </UserStatusProvider>
         </UserProvider> 

@@ -49,7 +49,7 @@ const GamePage: React.FC<GameProps> = ({ theme }) => {
   const [loading, setLoading] = useState(false);
   const [duration, setDuration] = useState('');
   const [matchAction, setMatchAction] = useState<'BULL' | 'BEAR' | null>(null);
-  const [selectedOdd, setSelectedOdd] = useState<'home' | 'draw' | 'away' | null>(null);
+  const [selectedOdd, setSelectedOdd] = useState<{ metric: OddsMetric, oddType: 'home' | 'draw' | 'away' } | null>(null);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const userId = Cookies.get('userId');
   const matchId = Cookies.get('matchId');
@@ -65,6 +65,10 @@ const GamePage: React.FC<GameProps> = ({ theme }) => {
 
   const handleDurationChange = (selectedDuration: string) => {
     setDuration(selectedDuration);
+  };
+
+  const handleOddClick = (metric: OddsMetric, oddType: 'home' | 'draw' | 'away') => {
+    setSelectedOdd({ metric, oddType });
   };
 
   const fetchOdds = useCallback(async () => {
@@ -147,40 +151,68 @@ const GamePage: React.FC<GameProps> = ({ theme }) => {
       </div>
 
       {duration && (
-        <div className="mt-8 w-full px-4">
-          {odds ? (
-            (['volume', 'trades', 'price', 'marketcap'] as OddsMetric[]).map((metric) => (
-              <div key={metric} className="mt-6 w-full px-4">
-                <h3 className="text-xl font-bold capitalize">
-                  {matchAction === 'BULL' ? `Percentage ${metric} Increase` : `Percentage ${metric} Decrease`} in the next {duration}
-                </h3>
-                <div className="mt-6 space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-sm">Home</span>
-                    <span className="text-sm">Draw</span>
-                    <span className="text-sm">Away</span>
-                  </div>
-                  {loading ? (
-                    <div className="flex justify-between animate-pulse">
-                      <div className="bg-gray-200 h-6 w-12"></div>
-                      <div className="bg-gray-200 h-6 w-12"></div>
-                      <div className="bg-gray-200 h-6 w-12"></div>
-                    </div>
-                  ) : (
-                    <div className="flex justify-between">
-                      <span className="text-lg text-gray-500 font-bold">{odds[metric]?.token_a_odds ?? 'No odds'}x</span>
-                      <span className="text-lg text-gray-500 font-bold">{odds[metric]?.draw_odds ?? 'No odds'}x</span>
-                      <span className="text-lg text-gray-500 font-bold">{odds[metric]?.token_b_odds ?? 'No odds'}x</span>
-                    </div>
-                  )}
-                </div>
+  <div className="mt-6 w-full px-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 250px)' }}> {/* Added scroll */}
+    {odds ? (
+      (['volume', 'trades', 'price', 'marketcap'] as OddsMetric[]).map((metric) => (
+        <div key={metric} className="mt-6 w-full px-4">
+          <h3 className="text-lg font-bold capitalize">
+            {matchAction === 'BULL' ? `Percentage ${metric} Increase` : `Percentage ${metric} Decrease`} in the next {duration}
+          </h3>
+          <div className="mt-4 space-y-4">
+            <div className="flex justify-between">
+              <span className="text-sm">Home</span>
+              <span className="text-sm">Draw</span>
+              <span className="text-sm">Away</span>
+            </div>
+            {loading ? (
+              <div className="flex justify-between animate-pulse">
+                <div className="bg-gray-200 h-6 w-1/3"></div>
+                <div className="bg-gray-200 h-6 w-1/3"></div>
+                <div className="bg-gray-200 h-6 w-1/3"></div>
               </div>
-            ))
-          ) : (
-            <p>No odds available</p>
-          )}
+            ) : (
+              <div className="flex justify-between w-full">
+                <button
+                  className={`px-4 py-2 w-1/3 rounded-lg ${
+                    selectedOdd?.metric === metric && selectedOdd?.oddType === 'home'
+                      ? 'bg-purple-500 text-white'
+                      : 'bg-gray-200 text-black'
+                  }`}
+                  onClick={() => handleOddClick(metric, 'home')}
+                >
+                  {odds[metric]?.token_a_odds ?? 'No odds'}x
+                </button>
+                <button
+                  className={`px-4 py-2 w-1/3 rounded-lg ${
+                    selectedOdd?.metric === metric && selectedOdd?.oddType === 'draw'
+                      ? 'bg-purple-500 text-white'
+                      : 'bg-gray-200 text-black'
+                  }`}
+                  onClick={() => handleOddClick(metric, 'draw')}
+                >
+                  {odds[metric]?.draw_odds ?? 'No odds'}x
+                </button>
+                <button
+                  className={`px-4 py-2 w-1/3 rounded-lg ${
+                    selectedOdd?.metric === metric && selectedOdd?.oddType === 'away'
+                      ? 'bg-purple-500 text-white'
+                      : 'bg-gray-200 text-black'
+                  }`}
+                  onClick={() => handleOddClick(metric, 'away')}
+                >
+                  {odds[metric]?.token_b_odds ?? 'No odds'}x
+                </button>
+              </div>
+            )}
+          </div>
         </div>
-      )}
+      ))
+    ) : (
+      <p>No odds available</p>
+    )}
+  </div>
+)}
+
       <Footer theme={theme} />
     </div>
   );
