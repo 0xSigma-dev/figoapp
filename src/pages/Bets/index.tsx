@@ -57,6 +57,20 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
 
   const userId = Cookies.get('userId'); // Get the current user's ID from cookies (Assuming it's already set somewhere)
 
+  useEffect(() => {
+    // Fetch stored bets from cookies when component mounts
+    const storedBets = Cookies.get('selectedBets');
+    if (storedBets) {
+      try {
+        const parsedBets = JSON.parse(storedBets);
+        setSelectedBets(parsedBets);
+      } catch (error) {
+        console.error('Error parsing stored bets:', error);
+        setSelectedBets({}); // Reset to empty if parsing fails
+      }
+    }
+  }, []);
+
   const fetchMatches = useCallback(async () => {
     try {
       setLoading(true); // Ensure loading state is set before fetching
@@ -86,8 +100,6 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
       }
     }
 
-    const storedBets = JSON.parse(Cookies.get('selectedBets') || '{}');
-    setSelectedBets(storedBets);
     // Fetch matches only once when component is mounted
     fetchMatches();
   }, [userId, fetchMatches]);
@@ -181,15 +193,13 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
   };
 
 
-  const handleBetClick = (matchId: any, token1: Token, token2: Token, action: 'BULL' | 'BEAR') => {
+  const handleBetClick = (matchId: string, token1: Token, token2: Token, action: 'BULL' | 'BEAR') => {
     const updatedBets = { ...selectedBets, [matchId]: selectedBets[matchId] === action ? null : action };
     setSelectedBets(updatedBets);
-
+  
     // Save to cookies
     Cookies.set('selectedBets', JSON.stringify(updatedBets));
-
-
-    Cookies.set('matchId', matchId);
+  
     const params = {
       token1Symbol: token1.symbol,
       token1Logo: token1.logo,
@@ -197,7 +207,7 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
       token2Logo: token2.logo,
       action,
     };
-
+  
     // Navigate to the desired page with query parameters
     router.push({
       pathname: '/Bets/game', // Replace with your actual page path

@@ -85,28 +85,32 @@ const GamePage: React.FC<GameProps> = ({ theme }) => {
   };
 
   const handleOddClick = (metric: OddsMetric, oddType: 'home' | 'draw' | 'away', oddValue: number) => {
-    // Replace odd if metric is the same, otherwise add new bet
+    // Allow multiple selections as long as they are not under the same metric
     const newSelection = { ...selectedOdds, [metric]: oddType };
-
+  
     setSelectedOdds(newSelection);
+  
+    // Show bet slip if not already visible
+    setIsBetSlipVisible(true);
 
-    // Add bet to betslip (replace if exists)
+  
+    // Add bet to bet slip
     addBet({
       id: `${matchId}-${metric}-${oddType}`,
       match: matchId as string,
       odd: oddValue,
+      odd_type: oddType,
       metric_type: metric,
       user_id: userId as string,
       duration: duration,
       matchAction: matchAction!,
+      tokenPairs: `${token1Symbol} - ${token2Symbol}`
     });
-
-    // Remove previous bet under the same metric
-    const previousBetId = `${matchId}-${metric}-${selectedOdds[metric]}`;
-    if (selectedOdds[metric] && selectedOdds[metric] !== oddType) {
-      removeBet(previousBetId);
-    }
+    
+    // Update the selected odd state for the current click
+    setSelectedOdd({ metric, oddType });
   };
+  
 
 
   const fetchOdds = useCallback(async () => {
@@ -189,7 +193,8 @@ const GamePage: React.FC<GameProps> = ({ theme }) => {
       </div>
 
       {duration && (
-  <div className="mt-6 mb-8 w-full px-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 250px)' }}> {/* Added scroll */}
+  <div className="mt-6 w-full px-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 250px)' }}>
+ 
     {odds ? (
       (['volume', 'trades', 'price', 'marketcap'] as OddsMetric[]).map((metric) => (
         <div key={metric} className="mt-6 w-full px-4">

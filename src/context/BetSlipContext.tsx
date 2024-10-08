@@ -4,10 +4,12 @@ interface Bet {
     id: string;
     match: string;
     odd: number;
-    metric_type?: string; // Added metric_type
+    metric_type?: any; // Added metric_type
     user_id?: string;     // Added user_id
     duration?: string;    // Added duration
-    matchAction?: 'BULL' | 'BEAR'; 
+    matchAction?: 'BULL' | 'BEAR';
+    tokenPairs?: any; 
+    odd_type?: any;
   }
 
 interface BetSlipContextProps {
@@ -44,9 +46,10 @@ export const BetSlipProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const calculatePotentialWin = () => {
-    const totalOdds = bets.reduce((acc, bet) => acc * bet.odd, 1);
-    return stake * totalOdds;
+    const totalOdds = bets.reduce((acc, bet) => acc + bet.odd, 0); // Sum all odds
+    return stake * totalOdds; // Multiply by stake
   };
+  
 
   const clearBets = () => {
     setBets([]);
