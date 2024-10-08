@@ -2,10 +2,17 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
+import SubHeader from '@/components/SubHeader';
+import Footer from '@/components/Footer';
 
 interface Token {
   symbol: string;
   logo: string;
+}
+
+
+interface GameProps {
+  theme: 'light' | 'dark';
 }
 
 interface Odds {
@@ -34,7 +41,7 @@ interface Odds {
 
 type OddsMetric = keyof Odds;
 
-const GamePage: React.FC = () => {
+const GamePage: React.FC<GameProps> = ({ theme }) => {
   const router = useRouter();
   const { token1Symbol, token1Logo, token2Symbol, token2Logo, action } = router.query;
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -48,7 +55,7 @@ const GamePage: React.FC = () => {
   const matchId = Cookies.get('matchId');
   const [odds, setOdds] = useState<Odds | null>(null);
 
-  console.log('matchId', matchId )
+  
 
   useEffect(() => {
     if (action === 'BULL' || action === 'BEAR') {
@@ -79,7 +86,7 @@ const GamePage: React.FC = () => {
           bull_or_bear: matchAction,
         }),
       });
-      console.log('match_id',matchId, 'user_id', userId, 'duration', duration, 'bull_or_bear', matchAction )
+      
 
       if (!response.ok) {
         throw new Error('Match not found');
@@ -104,6 +111,8 @@ const GamePage: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center min-h-screen overflow-x-hidden">
+
+      <SubHeader title="Pick Your Odds" />
       <div className="flex justify-center items-center space-x-4 my-8">
         <div className="flex items-center space-x-2">
           <Image src={token1Logo as string} alt={token1Symbol as string} width={80} height={80} />
@@ -172,6 +181,7 @@ const GamePage: React.FC = () => {
           )}
         </div>
       )}
+      <Footer theme={theme} />
     </div>
   );
 };
