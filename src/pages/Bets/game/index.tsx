@@ -88,10 +88,10 @@ const GamePage: React.FC = () => {
   }, [matchId, userId, duration, matchAction]);
 
   useEffect(() => {
-    if (duration) {
+    if (duration && matchId && matchAction){
       fetchOdds();
     }
-  }, [duration, fetchOdds]);
+  }, [duration, matchId, matchAction, fetchOdds]);
 
   return (
     <div className="flex flex-col items-center min-h-screen overflow-x-hidden">
