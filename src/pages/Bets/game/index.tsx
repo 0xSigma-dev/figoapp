@@ -36,7 +36,7 @@ type OddsMetric = keyof Odds;
 
 const GamePage: React.FC = () => {
   const router = useRouter();
-  const { matchId, token1Symbol, token1Logo, token2Symbol, token2Logo, action } = router.query;
+  const { token1Symbol, token1Logo, token2Symbol, token2Logo, action } = router.query;
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -45,9 +45,10 @@ const GamePage: React.FC = () => {
   const [selectedOdd, setSelectedOdd] = useState<'home' | 'draw' | 'away' | null>(null);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const userId = Cookies.get('userId');
+  const matchId = Cookies.get('matchId');
   const [odds, setOdds] = useState<Odds | null>(null);
 
-  console.log('matchId', matchId as string )
+  console.log('matchId', matchId )
 
   useEffect(() => {
     if (action === 'BULL' || action === 'BEAR') {
@@ -65,14 +66,14 @@ const GamePage: React.FC = () => {
       console.error('matchId is not defined');
       return;
     }
-    
+
     try {
       setLoading(true); 
       const response = await fetch(`${apiUrl}/api/getOdds`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          match_id: matchId as string, 
+          match_id: matchId, 
           user_id: userId, 
           duration, 
           bull_or_bear: matchAction,
@@ -96,7 +97,7 @@ const GamePage: React.FC = () => {
   }, [matchId, userId, duration, matchAction]);
 
   useEffect(() => {
-    if (duration && matchId as string && matchAction){
+    if (duration && matchId && matchAction){
       fetchOdds();
     }
   }, [duration, matchId, matchAction, fetchOdds]);
