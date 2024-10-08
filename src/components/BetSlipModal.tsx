@@ -1,11 +1,22 @@
 import React from 'react';
 import { useBetSlip } from '@/context/BetSlipContext';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTimesCircle } from '@fortawesome/free-solid-svg-icons';
 
-const BetSlipModal: React.FC = () => {
+interface BetSlipModalProps {
+  onClose: () => void; // Function to handle modal close
+}
+
+const BetSlipModal: React.FC<BetSlipModalProps> = ({ onClose }) => {
   const { bets, stake, setStake, calculatePotentialWin, removeBet, clearBets } = useBetSlip();
 
   return (
     <div className="fixed bottom-0 w-full bg-white p-4 shadow-lg border-t z-50 overflow-x-hidden">
+      {/* Close button */}
+      <button className="absolute top-4 right-4 text-red-500" onClick={onClose}>
+        <FontAwesomeIcon icon={faTimesCircle} size="2x" />
+      </button>
+
       {bets.length === 0 ? (
         <div className="text-center">
           <h3 className="font-bold">You have no bets</h3>
@@ -47,4 +58,5 @@ const BetSlipModal: React.FC = () => {
 };
 
 export default BetSlipModal;
+
 

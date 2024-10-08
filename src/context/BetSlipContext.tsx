@@ -1,10 +1,14 @@
 import React, { createContext, useContext, useState } from 'react';
 
 interface Bet {
-  id: string;
-  match: string;
-  odd: number;
-}
+    id: string;
+    match: string;
+    odd: number;
+    metric_type?: string; // Added metric_type
+    user_id?: string;     // Added user_id
+    duration?: string;    // Added duration
+    matchAction?: 'BULL' | 'BEAR'; 
+  }
 
 interface BetSlipContextProps {
   bets: Bet[];

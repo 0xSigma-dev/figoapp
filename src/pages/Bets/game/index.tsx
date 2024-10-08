@@ -52,15 +52,27 @@ const GamePage: React.FC<GameProps> = ({ theme }) => {
   const [loading, setLoading] = useState(false);
   const [duration, setDuration] = useState('');
   const [matchAction, setMatchAction] = useState<'BULL' | 'BEAR' | null>(null);
+  const [selectedOdds, setSelectedOdds] = useState<{ [metric: string]: string }>({});
   const [selectedOdd, setSelectedOdd] = useState<{ metric: OddsMetric, oddType: 'home' | 'draw' | 'away' } | null>(null);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const userId = Cookies.get('userId');
   const matchId = Cookies.get('matchId');
   const [odds, setOdds] = useState<Odds | null>(null);
-  const { addBet } = useBetSlip();
+  const { addBet, removeBet, bets } = useBetSlip();
   const [isBetSlipVisible, setIsBetSlipVisible] = useState(false);
 
-  
+  useEffect(() => {
+    const storedBets = localStorage.getItem('bets');
+    if (storedBets) {
+      setSelectedOdds(JSON.parse(storedBets));
+    }
+  }, []);
+
+  // Persist selected odds to localStorage
+  useEffect(() => {
+    localStorage.setItem('bets', JSON.stringify(selectedOdds));
+  }, [selectedOdds]);
+
 
   useEffect(() => {
     if (action === 'BULL' || action === 'BEAR') {
@@ -72,9 +84,30 @@ const GamePage: React.FC<GameProps> = ({ theme }) => {
     setDuration(selectedDuration);
   };
 
-  const handleOddClick = (metric: OddsMetric, oddType: 'home' | 'draw' | 'away') => {
-    setSelectedOdd({ metric, oddType });
+  const handleOddClick = (metric: OddsMetric, oddType: 'home' | 'draw' | 'away', oddValue: number) => {
+    // Replace odd if metric is the same, otherwise add new bet
+    const newSelection = { ...selectedOdds, [metric]: oddType };
+
+    setSelectedOdds(newSelection);
+
+    // Add bet to betslip (replace if exists)
+    addBet({
+      id: `${matchId}-${metric}-${oddType}`,
+      match: matchId as string,
+      odd: oddValue,
+      metric_type: metric,
+      user_id: userId as string,
+      duration: duration,
+      matchAction: matchAction!,
+    });
+
+    // Remove previous bet under the same metric
+    const previousBetId = `${matchId}-${metric}-${selectedOdds[metric]}`;
+    if (selectedOdds[metric] && selectedOdds[metric] !== oddType) {
+      removeBet(previousBetId);
+    }
   };
+
 
   const fetchOdds = useCallback(async () => {
 
@@ -146,7 +179,7 @@ const GamePage: React.FC<GameProps> = ({ theme }) => {
           {['15m', '30m', '1h', '4h', '6h', '24h'].map((d) => (
             <button
               key={d}
-              className={`px-6 py-2 border rounded-lg ${duration === d ? 'bg-green-500 text-white' : 'bg-gray-200 text-black'}`}
+              className={`px-6 py-2 border rounded-lg ${duration === d ? 'bg-purple-500 text-white' : 'bg-gray-200 text-black'}`}
               onClick={() => handleDurationChange(d)}
             >
               {d}
@@ -183,27 +216,27 @@ const GamePage: React.FC<GameProps> = ({ theme }) => {
                       ? 'bg-purple-500 text-white'
                       : 'bg-gray-200 text-black'
                   }`}
-                  onClick={() => handleOddClick(metric, 'home')}
+                  onClick={() => handleOddClick(metric, 'home', odds[metric]?.token_a_odds ?? 0)}
                 >
                   {odds[metric]?.token_a_odds ?? 'No odds'}x
                 </button>
                 <button
-                  className={`px-4 py-2 w-1/3 rounded-lg ${
+                  className={`px-4 py-2 w-1/3 mx-2 rounded-lg ${
                     selectedOdd?.metric === metric && selectedOdd?.oddType === 'draw'
                       ? 'bg-purple-500 text-white'
                       : 'bg-gray-200 text-black'
                   }`}
-                  onClick={() => handleOddClick(metric, 'draw')}
+                  onClick={() => handleOddClick(metric, 'draw', odds[metric]?.token_a_odds ?? 0)}
                 >
                   {odds[metric]?.draw_odds ?? 'No odds'}x
                 </button>
                 <button
-                  className={`px-4 py-2 w-1/3 rounded-lg ${
+                  className={`px-4 py-2 w-1/3 mx-2 rounded-lg ${
                     selectedOdd?.metric === metric && selectedOdd?.oddType === 'away'
                       ? 'bg-purple-500 text-white'
                       : 'bg-gray-200 text-black'
                   }`}
-                  onClick={() => handleOddClick(metric, 'away')}
+                  onClick={() => handleOddClick(metric, 'away', odds[metric]?.token_a_odds ?? 0)}
                 >
                   {odds[metric]?.token_b_odds ?? 'No odds'}x
                 </button>
@@ -217,7 +250,9 @@ const GamePage: React.FC<GameProps> = ({ theme }) => {
     )}
   </div>
 )}
-      {isBetSlipVisible && <BetSlipModal />}
+       {isBetSlipVisible && (
+        <BetSlipModal onClose={() => setIsBetSlipVisible(false)} />
+      )}
       <Footer theme={theme} />
     </div>
   );

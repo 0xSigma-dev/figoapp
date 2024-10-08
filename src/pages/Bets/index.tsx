@@ -302,7 +302,9 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
             </button>
         </div>
 
-        {isBetSlipVisible && <BetSlipModal />}
+        {isBetSlipVisible && (
+        <BetSlipModal onClose={() => setIsBetSlipVisible(false)} />
+      )}
 
         <Footer theme={theme} />
       </div>
