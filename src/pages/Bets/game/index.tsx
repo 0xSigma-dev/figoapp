@@ -8,24 +8,27 @@ interface Token {
   logo: string;
 }
 
-interface Trade {
-  home: number;
-  away: number;
-  draw: number;
-}
-
-interface Volume {
-  home: number;
-  away: number;
-  draw: number;
-}
-
 interface Odds {
-  id: string;
-  Trade: Trade;
-  Volume: Volume;
-  Price: any;
-  Marketcap: any;
+  volume: {
+    token_a_odds: number;
+    token_b_odds: number;
+    draw_odds: number;
+  };
+  trades: {
+    token_a_odds: number;
+    token_b_odds: number;
+    draw_odds: number;
+  };
+  price: {
+    token_a_odds: number;
+    token_b_odds: number;
+    draw_odds: number;
+  };
+  marketcap: {
+    token_a_odds: number;
+    token_b_odds: number;
+    draw_odds: number;
+  };
 }
 
 const GamePage: React.FC = () => {
@@ -49,7 +52,19 @@ const GamePage: React.FC = () => {
   }, [action]);
 
   const handleDurationChange = (selectedDuration: string) => {
-    setDuration(selectedDuration);
+    const formattedDuration = formatDuration(selectedDuration);
+    setDuration(formattedDuration);
+  };
+  
+  const formatDuration = (duration: string): string => {
+    if (duration.includes('minutes')) {
+      return duration.replace(' minutes', 'm');
+    } else if (duration.includes('hour')) {
+      return duration.replace(' hour', 'h').replace('s', '');
+    } else if (duration.includes('hours')) {
+      return duration.replace(' hours', 'h');
+    }
+    return duration; // Fallback in case of other formats
   };
 
   const handleOddSelection = (oddType: 'home' | 'draw' | 'away') => {
@@ -115,9 +130,9 @@ const GamePage: React.FC = () => {
       )}
 
       {/* Duration Selection */}
-      <div className="my-6">
+      <div className="my-6 overflow-x-auto whitespace-nowrap w-full">
         <h3 className="text-lg font-semibold">Select Duration</h3>
-        <div className="flex space-x-4 mt-4 overflow-x-auto">
+        <div className="flex space-x-4 mt-4">
           {['15 minutes', '30 minutes', '1 hour', '4 hours', '6 hours', '24 hours'].map((d) => (
             <button
               key={d}
@@ -133,74 +148,43 @@ const GamePage: React.FC = () => {
       </div>
 
       {/* Odds Section */}
-      {duration && (
+      {duration && odds && (
         <div className="mt-8 w-full px-4">
-          <h3 className="text-xl font-bold">
-            {matchAction === 'BULL' ? 'Volume Increase' : 'Volume Decrease'} in the next {duration}
-          </h3>
-          <div className="mt-6 space-y-4">
-            <div className="flex justify-between">
-              <span className="text-sm">Home</span>
-              <span className="text-sm">Draw</span>
-              <span className="text-sm">Away</span>
-            </div>
-
-            {loading ? (
-              <div className="flex justify-between animate-pulse">
-                <div className="bg-gray-200 h-6 w-12"></div>
-                <div className="bg-gray-200 h-6 w-12"></div>
-                <div className="bg-gray-200 h-6 w-12"></div>
-              </div>
-            ) : (
-              odds && (
+          {['volume', 'trades', 'price', 'marketcap'].map((metric) => (
+            <div key={metric} className="mt-6 w-full px-4">
+              <h3 className="text-xl font-bold capitalize">
+                {matchAction === 'BULL'
+                  ? `Percentage ${metric} Increase`
+                  : `Percentage ${metric} Decrease`} in the next {duration}
+              </h3>
+              <div className="mt-6 space-y-4">
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-500 font-bold">{odds.Volume.home}</span>
-                  <span className="text-sm text-gray-500 font-bold">{odds.Volume.draw}</span>
-                  <span className="text-sm text-gray-500 font-bold">{odds.Volume.away}</span>
+                  <span className="text-sm">Home</span>
+                  <span className="text-sm">Draw</span>
+                  <span className="text-sm">Away</span>
                 </div>
-              )
-            )}
-          </div>
+
+                {loading ? (
+                  <div className="flex justify-between animate-pulse">
+                    <div className="bg-gray-200 h-6 w-12"></div>
+                    <div className="bg-gray-200 h-6 w-12"></div>
+                    <div className="bg-gray-200 h-6 w-12"></div>
+                  </div>
+                ) : (
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-500 font-bold">{odds[metric as keyof Odds].token_a_odds}</span>
+                    <span className="text-sm text-gray-500 font-bold">{odds[metric as keyof Odds].draw_odds}</span>
+                    <span className="text-sm text-gray-500 font-bold">{odds[metric as keyof Odds].token_b_odds}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       )}
-
-      {/* Additional Sections */}
-      {['Trade', 'Price', 'Marketcap'].map((section) => (
-  <div key={section} className="mt-6 w-full px-4">
-    <h3 className="text-xl font-bold">
-      {matchAction === 'BULL'
-        ? `${section} Increase`
-        : `${section} Decrease`} in the next {duration}
-    </h3>
-    <div className="mt-6 space-y-4">
-      <div className="flex justify-between">
-        <span className="text-sm">Home</span>
-        <span className="text-sm">Draw</span>
-        <span className="text-sm">Away</span>
-      </div>
-
-      {loading ? (
-        <div className="flex justify-between animate-pulse">
-          <div className="bg-gray-200 h-6 w-12"></div>
-          <div className="bg-gray-200 h-6 w-12"></div>
-          <div className="bg-gray-200 h-6 w-12"></div>
-        </div>
-      ) : (
-        odds && (
-          <div className="flex justify-between">
-            {/* Using keyof Odds to avoid TypeScript error */}
-            <span className="text-sm text-gray-500 font-bold">{odds[section as keyof Odds].home}</span>
-            <span className="text-sm text-gray-500 font-bold">{odds[section as keyof Odds].draw}</span>
-            <span className="text-sm text-gray-500 font-bold">{odds[section as keyof Odds].away}</span>
-          </div>
-        )
-      )}
-    </div>
-  </div>
-))}
-
     </div>
   );
 };
+
 
 export default GamePage;
