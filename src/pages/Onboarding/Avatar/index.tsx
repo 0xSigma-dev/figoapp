@@ -80,7 +80,7 @@ const AvatarSelection: React.FC = () => {
           setSuccessMessage('Avatar updated successfully');
           setIsLoading(false);
           // Navigate only after successful update
-          //router.push('/Home');
+          router.push('/Home');
         } else {
           throw new Error('Failed to update avatar');
         }

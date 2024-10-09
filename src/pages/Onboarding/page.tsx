@@ -127,7 +127,7 @@ const SignUp = () => {
   useEffect(() => {
     // Check if the user is already connected
     if (connected && userId && !isRegistering) {
-      router.push('/Home');
+      //router.push('/Home');
     }
   }, [connected, userId, router, isRegistering]);
   
