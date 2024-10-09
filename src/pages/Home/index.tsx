@@ -134,29 +134,39 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
   }, [user]);
   
 
-  const fetchUserData =  async () => {
+  const fetchUserData = async () => {
     try {
       const token = userId;
-      const storedData = await getUserData(userId || '');
-      if (storedData && storedData.id === userId) {
-        setUser(storedData);
-      } else {
-        const response = await fetch('/api/user', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (!response.ok) {
-          throw new Error('Failed to fetch user data');
-        }
-        const data = await response.json();
-        setUser(data.user);
-        await saveUserData({ id: userId, ...data.user });
+      if (!token) {
+        throw new Error('User ID not found.');
       }
+  
+      // Fetch user data from the API directly
+      const response = await fetch('/api/user', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to fetch user data');
+      }
+  
+      const data = await response.json();
+      setUser(data.user); // Set user data in the state
+  
+      // Optionally save user data locally for later use if needed
+      await saveUserData({ id: userId, ...data.user });
+  
+      // Fetch user points if needed
       fetchUserPoints(token);
+  
     } catch (error) {
+      console.error('Error fetching user data:', error);
+      //setErrorMessage('Error fetching user data. Please try again.');
     }
   };
+  
   
   
 
