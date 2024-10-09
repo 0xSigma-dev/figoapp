@@ -109,6 +109,7 @@ const SignUp = () => {
   const [usernameErrors, setUsernameErrors] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isPwaModalOpen, setIsPwaModalOpen] = useState(true);
+  const [isRegistering, setIsRegistering] = useState(false);
   const wallet = useWallet();
   const { connect, connected, publicKey } = useWallet();
   const router = useRouter();
@@ -118,12 +119,6 @@ const SignUp = () => {
   const userId = Cookies.get('userId');
   const { isInstallable, promptInstall } = useInstallPrompt();
 
-    
-  useEffect(() => {
-    setTimeout(() => {
-      setIsPwaModalOpen(true);
-    }, 500); // Show modal after 500ms
-  }, []);
   
   useEffect(() => {
     AOS.init({ duration: 1200 });
@@ -131,10 +126,10 @@ const SignUp = () => {
 
   useEffect(() => {
     // Check if the user is already connected
-    if (connected && userId ) {
+    if (connected && userId && !isRegistering) {
       router.push('/Home');
     }
-  }, [connected, userId, router]);
+  }, [connected, userId, router, isRegistering]);
   
 
   const checkUserByPublicKey = async () => {
@@ -155,7 +150,7 @@ const SignUp = () => {
             throw error;
         }
 
-        if (data && data.length > 0) {
+        if (data && data.length > 0 ) {
             await loginUser();
         } else {
             setErrorMessage('No Account Found. Create a new account');
@@ -188,8 +183,10 @@ useEffect(() => {
 
   const loginUser = async () => {
     //console.log('logging in')
-    setIsLoading(true);
+    
     if (!wallet.publicKey) return;
+
+    setIsLoading(true);
 
     try {
       const response = await fetch('/api/login', {
@@ -201,14 +198,11 @@ useEffect(() => {
       });
       const data = await response.json();
 
-      //console.log('data', data)
-
-      if (response.ok) {
+      if (response.ok && !isRegistering) {
         setSuccessMessage("Welcome Back");
         Cookies.set('userId', data.user.public.id);
         Cookies.set('token', data.accessToken);
         router.push('/Home');
-        setIsLoading(false);
       } else {
         setIsModalOpen(true);
       }
@@ -270,12 +264,15 @@ useEffect(() => {
 
 
   const registerUser = async (displayName: string, username: string, bio: string) => {
-    router.prefetch('/Onboarding/Avatar/page');
-    setIsLoading(true);
+    
+    
     if (!wallet.publicKey) {
       setErrorMessage('Wallet not connected');
       return;
     }
+
+    setIsLoading(true);
+    setIsRegistering(true);
   
     const requestOptions = {
       method: 'POST',
@@ -287,7 +284,7 @@ useEffect(() => {
         username,
         publicKey: wallet.publicKey.toBase58(),
         referralId: referralId || '',
-        bio: bio || '' // Include the referralId here
+        bio: bio || ''
       })
     };
   
@@ -297,8 +294,7 @@ useEffect(() => {
       if (response.ok) {
         Cookies.set('userId', data.uniqueId);
         setSuccessMessage("Welcome To The Purple Family");
-        router.push('/Onboarding/Avatar/page');
-        setIsLoading(false);
+        router.push('/Onboarding/Avatar');
       } else {
         setErrorMessage(data.message);
       }
@@ -309,6 +305,7 @@ useEffect(() => {
         setErrorMessage('An unexpected error occurred.');
       }
     }
+    setIsRegistering(false);
     setIsLoading(false);
   };
   
