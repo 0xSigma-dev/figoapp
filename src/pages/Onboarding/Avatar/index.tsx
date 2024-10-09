@@ -80,7 +80,7 @@ const AvatarSelection: React.FC = () => {
           setSuccessMessage('Avatar updated successfully');
           setIsLoading(false);
           // Navigate only after successful update
-          router.push('/Home');
+          //router.push('/Home');
         } else {
           throw new Error('Failed to update avatar');
         }
@@ -126,12 +126,17 @@ const AvatarSelection: React.FC = () => {
       <IsLoading loading={isLoading} />
 
       <div className="fixed bottom-0 left-0 right-0 flex justify-center p-4 z-10">
-        <button
-          onClick={handleContinue}
-          className="px-6 py-3 bg-purple-600 text-white rounded-full hover:bg-purple-700"
-        >
-          Continue
-        </button>
+      <button
+  onClick={handleContinue}
+  className={`px-6 py-3 rounded-full text-white ${
+    selectedAvatar
+      ? 'bg-purple-600 hover:bg-purple-700 cursor-pointer'
+      : 'bg-gray-400 cursor-not-allowed'
+  }`}
+  disabled={!selectedAvatar}
+>
+  Continue
+</button>
       </div>
       <Suspense fallback={<div>Loading...</div>}>
       <ErrorModal message={errorMessage} onClose={() => setErrorMessage(null)} />
