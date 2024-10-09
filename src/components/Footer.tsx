@@ -14,7 +14,7 @@ const Footer: React.FC<FooterProps> = ({ theme }) => {
   const router = useRouter();
 
   const icons = [
-    { icon: faComments, link: '/Home/page', label: "Chats" },
+    { icon: faComments, link: '/Home', label: "Chats" },
     //{ icon: faCameraRetro, link: '/Home/Status' },
     { icon: faTasks, link: '/Tasks', label: "Tasks" },
     { icon: faSackDollar, link: '/Bets', label: "Bets" }

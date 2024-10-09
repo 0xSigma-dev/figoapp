@@ -51,7 +51,7 @@ const Loader: React.FC = () => {
 
     //if (userIdFromCookie || userIdFromLocalStorage) {
       // UserId found, navigate to the Home page
-    //  router.push('/Home/page');
+    //  router.push('/Home');
     //  return;
     //}
 

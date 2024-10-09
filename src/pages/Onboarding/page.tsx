@@ -127,13 +127,12 @@ const SignUp = () => {
   
   useEffect(() => {
     AOS.init({ duration: 1200 });
-    router.prefetch('/Home/page')
   }, [router]);
 
   useEffect(() => {
     // Check if the user is already connected
     if (connected && userId ) {
-      router.push('/Home/page');
+      router.push('/Home');
     }
   }, [connected, userId, router]);
   
@@ -208,7 +207,7 @@ useEffect(() => {
         setSuccessMessage("Welcome Back");
         Cookies.set('userId', data.user.public.id);
         Cookies.set('token', data.accessToken);
-        router.push('/Home/page');
+        router.push('/Home');
         setIsLoading(false);
       } else {
         setIsModalOpen(true);

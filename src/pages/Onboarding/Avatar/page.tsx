@@ -49,13 +49,26 @@ const AvatarSelection: React.FC = () => {
 
   const handleAvatarSelect = (avatarId: number) => {
     setSelectedAvatar(avatarId);
+    setErrorMessage(null); // Clear error when avatar is selected
   };
 
 
   const handleContinue = async () => {
-    router.prefetch('../../Home/page');
+   
+
+    if (!selectedAvatar) {
+      setErrorMessage('Please select an avatar!');
+      return;
+    }
+
+    if (!userId) {
+      setErrorMessage('User ID not found. Please log in again.');
+      return;
+    }
+
+
     setIsLoading(true);
-    if (selectedAvatar !== null && userId !== null) {
+
       try {
         const response = await fetch('/api/updateAvatar', {
           method: 'POST',
@@ -63,21 +76,19 @@ const AvatarSelection: React.FC = () => {
           body: JSON.stringify({ userId, avatarId: selectedAvatar }),
         });
 
-        if (response.ok) { 
-          router.push('../../Home/page');
+        if (response.ok) {
           setSuccessMessage('Avatar updated successfully');
           setIsLoading(false);
+          // Navigate only after successful update
+          router.push('/Home');
         } else {
-          setErrorMessage('Failed to update avatar');
+          throw new Error('Failed to update avatar');
         }
       } catch (error) {
-        setErrorMessage('Error updating avatar');
+        setErrorMessage('Error updating avatar. Please try again.');
+        setIsLoading(false);
       }
-    } else {
-      setErrorMessage('Please select an avatar!');
-    }
-    setIsLoading(false);
-  };
+    };
 
   return (
     <WalletGuard>

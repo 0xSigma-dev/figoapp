@@ -88,9 +88,9 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ isOpen, onClose, on
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-        <h2 className="text-2xl mb-4">Your Details</h2>
+    <div className="fixed bottom-0 w-full inset-0 flex items-center justify-center bg-black z-50 overflow-x-hidden">
+      <div className="bg-white dark:bg-black border-t border-teal-400 p-6 rounded-lg shadow-lg">
+        <h2 className="text-2xl mb-4">Enter Your Details</h2>
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Display Name</label>
           <input
@@ -128,7 +128,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({ isOpen, onClose, on
 
         <div className="flex justify-end">
           <button onClick={onClose} className="mr-2 bg-gray-500 text-white py-2 px-4 rounded">Cancel</button>
-          <button onClick={handleSave} disabled={isSaveButtonDisabled} className={`bg-blue-500 text-white py-2 px-4 rounded ${isSaveButtonDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}>Save</button>
+          <button onClick={handleSave} disabled={isSaveButtonDisabled} className={`bg-purple-500 text-white py-2 px-4 rounded ${isSaveButtonDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}>Create Account</button>
         </div>
       </div>
     </div>

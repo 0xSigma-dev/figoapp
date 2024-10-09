@@ -110,7 +110,7 @@ const ReferralPage = () => {
   };
   
   const handleClose = () => {
-    router.push('../../Home/page');  // Redirect to the homepage or another route
+    router.push('/Home');  // Redirect to the homepage or another route
   };
 
   const handleShare = () => {
