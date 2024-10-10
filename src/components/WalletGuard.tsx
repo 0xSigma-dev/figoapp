@@ -7,7 +7,6 @@ const WalletGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const router = useRouter();
 
   useEffect(() => {
-    router.prefetch('/')
     // If the wallet is not connected, redirect to the onboarding page
     if (!connected) {
       router.push('/');

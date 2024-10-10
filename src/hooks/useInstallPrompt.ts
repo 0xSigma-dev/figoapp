@@ -26,9 +26,9 @@ const useInstallPrompt = () => {
     deferredPrompt.prompt(); // Show the install prompt
     deferredPrompt.userChoice.then((choiceResult: any) => {
       if (choiceResult.outcome === 'accepted') {
-        console.log('User accepted the install prompt');
+        //console.log('User accepted the install prompt');
       } else {
-        console.log('User dismissed the install prompt');
+        //console.log('User dismissed the install prompt');
       }
       setDeferredPrompt(null); // Reset the prompt
       setIsInstallable(false); // Hide the install button

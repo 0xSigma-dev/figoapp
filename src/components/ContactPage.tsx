@@ -7,9 +7,10 @@ import { useRouter } from 'next/router';
 import React, { useEffect, useRef, useState} from 'react';
 import SearchIcon from './SearchIcon';
 import UserSearch from './UserSearch';
-import { syncContactsFromNavigator, getAllContacts } from '../utils/indexedDB';
+import {  getAllContacts } from '../utils/indexedDB';
 import Link from "next/link";
 import ContactSkeleton from './Skeleton/ContactSkeleton';
+import Cookies from 'js-cookie';
 
 interface ContactPageProps {
   theme: 'light' | 'dark';
@@ -38,11 +39,12 @@ const ContactPage: React.FC<ContactPageProps> = ({ theme }) => {
   const [currentChatFriend, setCurrentChatFriend] = useState<string | null>(null);
   const [showContactPage, setShowContactPage] = useState(true);
   const [contacts, setContacts] = useState<any[]>([]);
+  const userId = Cookies.get('userId')
 
 
   const fetchContacts = async () => {
     setLoading(true);
-    const dbContacts = await getAllContacts();
+    const dbContacts = await getAllContacts(userId);
     setContacts(dbContacts);
     setLoading(false);
   };
@@ -50,7 +52,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ theme }) => {
 
   useEffect(() => {
     const fetchContacts = async () => {
-      const dbContacts = await getAllContacts();
+      const dbContacts = await getAllContacts(userId);
       setContacts(dbContacts);
     };
 

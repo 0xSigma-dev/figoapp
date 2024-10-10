@@ -4,27 +4,25 @@ import { useSwipeable } from 'react-swipeable';
 
 interface Channel {
   id: any;
-  friendId: string;
-  friendName: string;
+  friendId: any;
+  friendDisplayName: string;
   friendAvatar: string;
 }
 
-interface Message {
-  text?: any | null;
-  timestamp?: string;
-}
 
 interface ChannelItemProps {
   channel: Channel;
-  latestMessage?: Message | undefined;
+  latestMessage?: any;
+  messageCount?:any;
   formattedTime?: string;
   onDelete: (id: string) => void;
-  onClick: (friendId: string, channelId: string) => void;
+  onClick: (friend_id: any, channel_id: any) => void;
   renderFriendAvatar: (avatarId: string) => JSX.Element;
 }
 const ChannelItem: React.FC<ChannelItemProps> = ({
   channel,
   latestMessage,
+  messageCount,
   formattedTime,
   onDelete,
   onClick,
@@ -51,14 +49,23 @@ const ChannelItem: React.FC<ChannelItemProps> = ({
     >
       {renderFriendAvatar(channel.friendAvatar)}
       <div className="flex-1 ml-4">
-        <div className="font-bold text-xl text-black dark:text-white">{channel.friendName}</div>
+        <div className="font-bold text-xl text-black dark:text-white">{channel.friendDisplayName}</div>
         <div className="text-base text-black dark:text-gray-300">
-          {latestMessage?.text?.length > 40
-            ? `${latestMessage?.text.substring(0, 26)}...`
-            : latestMessage?.text || 'Say Hi'}
+          {latestMessage?.content?.length > 40
+            ? `${latestMessage?.content?.substring(0, 26)}...`
+            : latestMessage?.content || 'Say Hi'}
         </div>
       </div>
-      {formattedTime && <div className="text-sm text-gray-500 dark:text-gray-400 ml-auto">{formattedTime}</div>}
+      <div className="flex flex-col items-center ml-auto">
+        {formattedTime && (
+          <div className="text-sm text-gray-500 dark:text-gray-400">{formattedTime}</div>
+        )}
+        {messageCount && (
+          <div className="text-xs bg-purple-500 text-white rounded-full w-6 h-6 flex items-center justify-center mt-1">
+            {messageCount}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

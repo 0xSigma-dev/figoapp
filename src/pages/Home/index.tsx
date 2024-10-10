@@ -13,22 +13,31 @@ import { useUser } from '../../context/UserContext';
 import Cookies from 'js-cookie';
 import WalletGuard from '../../components/WalletGuard';
 import ContactPage from '@/components/ContactPage';
-import { saveUserData, getUserData, getAllChannels,  getLatestMessagesForAllChannels, saveChannel, getDBInstance, saveMessage, updateUserDataFields, deleteChannel } from '../../utils/indexedDB';
+import { saveUserData, getAllChannels, subscribeToNewMessages , countMessagesByChannelAndSender, updateUserDataFields, deleteChannel } from '../../utils/indexedDB';
 import PointsDisplay from '../../components/PointsDisplay';
 import AvatarComponent from '../../components/AvatarComponent';
 import UserDetailsCard from '../../components/UserDetailsCard';
 import { supabase } from '@/lib/supabaseClient';
 import Confetti from 'react-confetti';
-import { useAbly } from '@/context/AblyContext';
-import { subscribeToChannel, unsubscribeFromChannel } from '@/utils/ablyService';
-import { format } from 'date-fns'; 
 import ChannelItem from '@/components/ChannelItem';
 import { useUserStatus } from '@/context/UserStatusContext';
+import { format, isBefore, subDays } from 'date-fns';
+
 
 
 
 interface HomePageProps {
   theme: 'light' | 'dark';
+}
+
+interface Channel {
+  id: string;
+  // add any other properties that a channel might have
+}
+
+interface LatestMessage {
+  
+  content: string; // Or Date, depending on how you handle it
 }
 
 
@@ -46,14 +55,15 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
   const [friends, setFriends] = useState([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [clickedConversationId, setClickedConversationId] = useState<string | null>(null);
-  const [latestMessages, setLatestMessages] = useState<{ [key: string]: any }>({});
   const [channels, setChannels] = useState<any[]>([]);
+  const [latestMessages, setLatestMessages] = useState<{ [key: string]: any }>({});
   const [pendingPoints, setPendingPoints] = useState<any>(0);
   const [showConfetti, setShowConfetti] = useState<boolean>(false);
-  const { ablyClient } = useAbly();
   const { setUserId } = useUserStatus();
   const userId = Cookies.get('userId');
   const [isClaiming, setIsClaiming] = useState(false);
+  const [messageCounts, setMessageCounts] = useState<{ [key: string]: number }>({});
+
 
   useEffect(() => {
      // Get userId from cookies or wherever you store it
@@ -62,16 +72,7 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
     }
   }, [setUserId]);
 
-  useEffect(() => {
-    const initializeDB = async () => {
-      //const userId = Cookies.get('userId');
-      if (userId) {
-        await getDBInstance();
-      }
-    };
-  
-    initializeDB();
-  }, []);
+ 
 
   const startConfetti = () => {
     setShowConfetti(true);
@@ -162,7 +163,7 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
       fetchUserPoints(token);
   
     } catch (error) {
-      console.error('Error fetching user data:', error);
+      //console.error('Error fetching user data:', error);
       //setErrorMessage('Error fetching user data. Please try again.');
     }
   };
@@ -179,12 +180,7 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
   
   
 
-  const handleNavigate2 = (friendId: string, conversationId: string) => {
-    setActiveConversationId(conversationId); // Set active conversation
-    setTimeout(() => {
-      router.push(`/Chat/${friendId}`);
-    }, 10);
-  };
+  
 
 
   const handleCloseMenus = () => {
@@ -268,99 +264,39 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
     };
 
 
-  useEffect(() => {
-    const fetchChannelsAndMessages = async () => {
-      try {
-        const channelsData = await getAllChannels();
-        const latestMessagesData = await getLatestMessagesForAllChannels();
-
-        const validMessages = latestMessagesData.filter((message) => message !== null);
-        const messagesByChannel = validMessages.reduce((acc, message) => {
-          if (message?.channelId) {
-            acc[message.channelId] = message;
-          }
-          return acc;
-        }, {});
-
-        const filteredChannels = channelsData.filter(channel => messagesByChannel[channel.id]);
-
-        setChannels(filteredChannels);
-        setLatestMessages(messagesByChannel);
-      } catch (error) {
-        
-      }
-    };
-
-    fetchChannelsAndMessages();
-    const interval = setInterval(fetchChannelsAndMessages, 1000);
-    return () => clearInterval(interval);
-  }, []);
+    
+    
   
-
-  const checkIfChannelExists = async (channelName: string): Promise<boolean> => {
-    try {
-      const channels = await getAllChannels();
-      return channels.some(channel => channel.id === channelName);
-    } catch (error) {
-      return false;
-    }
-  };
-
-  const fetchUserChannels = async (userId: any) => {
-    if (!ablyClient) return;
-    try {
-      const { data, error } = await supabase
-        .from('channels')
-        .select('*')
-        .ilike('name', `%${userId}%`); 
-      if (error) {
-        return [];
+    // Function to format the timestamp
+    const formatTimestamp = (timestamp: string) => {
+      const date = new Date(timestamp);
+      const now = new Date();
+      const timeDiff = now.getTime() - date.getTime(); // Difference in milliseconds
+  
+      const seconds = Math.floor(timeDiff / 1000);
+      const minutes = Math.floor(seconds / 60);
+      const hours = Math.floor(minutes / 60);
+      const days = Math.floor(hours / 24);
+      const months = Math.floor(days / 30);
+  
+      if (days >= 30) {
+          return `${months} month${months > 1 ? 's' : ''} ago`;
+      } else if (days >= 2) {
+          return `${days} day${days > 1 ? 's' : ''} ago`;
+      } else if (days === 1) {
+          return 'yesterday';
+      } else if (hours >= 1) {
+          return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+      } else if (minutes >= 1) {
+          return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+      } else {
+          return 'just now';
       }
-      if (data) {
-        for (const channel of data) {
-          const channelName = channel.name;
-          subscribeToChannel(ablyClient, channelName, async (message: any) => {
-            await saveMessage(message.data, message.data.id, message.data.status, message.data.channelName);
-          });
-          const exists = await checkIfChannelExists(channelName);
-          if (!exists) {
-            const isFriend = channel.friend_id !== userId;
-            const newChannel = {
-              id: channelName,
-              name: channelName,
-              friendId: isFriend ? channel.friend_id : channel.sender_id,
-              friendAvatar: isFriend ? channel.friend_avatar : channel.sender_avatar,
-              friendName: isFriend ? channel.friend_name : channel.sender_name,
-            };
-            await saveChannel(newChannel);
-          }
-        }
-      }
-      return data;
-    } catch (error) {
-      return [];
-    }
   };
   
+  
 
-  useEffect(() => {
-    if (userId) {
-      fetchUserChannels(userId);
-    }
-  }, [userId, ablyClient, fetchUserChannels]);
 
-  const subscribeToFigoChannel = () => {
-    if (ablyClient) {
-      subscribeToChannel(ablyClient, 'Figo', (message: any) => {
-      });
-    }
-  };
-
-  useEffect(() => {
-    if (userId) {
-      subscribeToFigoChannel();
-    }
-  }, [userId]);
 
   const handleDeleteConversation = async (channelId: string) => {
     try {
@@ -370,6 +306,60 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
       
     }
   };
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const fetchChannelsAndMessages = async () => {
+      const fetchedChannels = await getAllChannels(userId);
+      setChannels(fetchedChannels);
+  
+      const messagesMap: { [key: string]: LatestMessage } = {};
+  
+      // Fetch message counts for each channel
+      const counts = await Promise.all(
+        fetchedChannels.map(async (channel: any) => {
+          const count = await countMessagesByChannelAndSender(channel.channel_id, userId);
+        
+          messagesMap[channel.channel_id] = {
+            content: channel.content, // Assuming messages are sorted by created_at
+          };
+          return { channelId: channel.channel_id, count };
+        })
+      );
+  
+      // Set the message counts state
+      const countsObject: { [key: string]: number } = {};
+      counts.forEach(({ channelId, count }) => {
+        countsObject[channelId] = count;
+      });
+      setMessageCounts(countsObject);
+  
+      // Update the latestMessages state
+      setLatestMessages(messagesMap);
+    };
+  
+    fetchChannelsAndMessages();
+    const intervalId = setInterval(fetchChannelsAndMessages, 500);
+    const unsubscribe = subscribeToNewMessages(userId, (updatedChannels) => {
+      setChannels(updatedChannels);
+    });
+  
+    return () => {
+      clearInterval(intervalId);
+      unsubscribe();
+    };
+  }, [userId]);
+  
+
+  const handleNavigate2 = (friendId: string, conversationId: string) => {
+    setActiveConversationId(conversationId); // Set active conversation
+    setTimeout(() => {
+      router.push(`/Chat/${friendId}`);
+    }, 10);
+  };
+
+  
 
   return (
     <WalletGuard>
@@ -398,16 +388,18 @@ const HomePage: React.FC<HomePageProps> = ({ theme }) => {
         {channels.length > 0 ? (
           <div className="w-full max-w-4xl p-4">
             {channels.map((channel) => {
-              const latestMessage = latestMessages[channel.id];
+              const latestMessage = latestMessages[channel.channel_id];
+              const messageCount = messageCounts[channel.channel_id];
               const formattedTime = latestMessage
-                ? format(new Date(latestMessage.timestamp), 'hh:mm a') // Format the timestamp (12-hour time)
-                : '';
+          ? formatTimestamp(channel.created_at) // Use the updated formatTimestamp function
+          : '';
 
                 return (
                   <ChannelItem
-                    key={channel.id}
+                    key={channel.channel_id}
                     channel={channel}
                     latestMessage={latestMessage}
+                    messageCount={messageCount}
                     formattedTime={formattedTime}
                     onDelete={handleDeleteConversation}
                     onClick={handleNavigate2}

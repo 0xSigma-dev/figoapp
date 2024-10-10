@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimesCircle, faArrowDown, faArrowUp } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from 'next/router';
 import BetSlipModal from '@/components/BetSlipModal';
+import Image from 'next/image';
 
 const ErrorModal = lazy(() => import('@/components/ErrorModal'));
 const SuccessModal = lazy(() => import('@/components/SuccessModal'));
@@ -234,10 +235,12 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
                 >
                   <div className="flex items-center space-x-2 w-2/3">
                     <div className="flex items-center space-x-2">
-                      <img
+                      <Image
                         src={match.token1.logo}
                         alt={match.token1.symbol}
-                        className="w-6 h-6"
+                        width={26}
+                        height={26}
+
                       />
                       <span className="font-bold text-xs truncate">
                         {match.token1.symbol}
@@ -245,10 +248,11 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
                     </div>
                     <div className="text-xxs mx-4">VS</div>
                     <div className="flex items-center space-x-2">
-                      <img
+                      <Image
                         src={match.token2.logo}
                         alt={match.token2.symbol}
-                        className="w-6 h-6"
+                        width={26}
+                        height={26}
                       />
                       <span className="font-bold text-xs truncate">
                         {match.token2.symbol}

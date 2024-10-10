@@ -1,75 +1,60 @@
 import { useEffect, useState } from "react";
-import * as Ably from "ably";
-import { updateMessagesToRead } from '@/utils/indexedDB';
+import { supabase } from '@/lib/supabaseClient';
 
-const usePresentStatus = (
-  channel: Ably.RealtimeChannel | null,
-  userId: any,
-  friendId: any,
-) => {
+const usePresentStatus = (friendId: any) => {
   const [isFriendOnline, setIsFriendOnline] = useState(false);
 
-  // Enter presence for the current user
   useEffect(() => {
-    if (!channel) return;
+    if (!friendId) return;
 
-    //console.log('channel', channel.name)
-    channel.presence.enter({ userId }).catch((err) => {
-      //console.error("Error entering presence:", err);
-    });
+    // Fetch initial status of the friend
+    const fetchFriendStatus = async () => {
+      const { data, error } = await supabase
+        .from('users')
+        .select('status')
+        .eq('id', friendId)
+        .single();
 
-    return () => {
-      channel.presence.leave({ userId }).catch((err) => {
-        //console.error("Error leaving presence:", err);
-      });
-    };
-  }, [channel, userId]);
-
-  // Check if the friend is currently online
-  useEffect(() => {
-    if (!channel) return;
-
-    // Get the current members present in the channel
-    const checkIfFriendIsOnline = async () => {
-      try {
-        const members = await channel.presence.get();
-        const isOnline = members.some((member) => member.clientId === friendId);
-        setIsFriendOnline(isOnline);
-        
-        // If the friend is online, update messages to 'read'
-        if (isOnline) {
-          await updateMessagesToRead(channel.name);
-        }
-      } catch (error) {
-        //console.error("Error fetching presence:", error);
+      if (error) {
+        //console.error("Error fetching friend status:", error);
+      } else if (data) {
+        setIsFriendOnline(data.status); // Set initial status of the friend
       }
     };
 
-    // Call the function to check if the friend is online
-    checkIfFriendIsOnline();
+    // Fetch the friend's initial status
+    fetchFriendStatus();
 
-    const intervalId = setInterval(checkIfFriendIsOnline, 5000);
-
-    // Subscribe to presence updates
-    const handlePresenceUpdate = (presenceMessage: Ably.PresenceMessage) => {
-      if (presenceMessage.clientId === friendId) {
-        if (presenceMessage.action === 'enter' || presenceMessage.action === 'present') {
-          setIsFriendOnline(true); // Friend has joined
-          updateMessagesToRead(channel.name);
-        } else if (presenceMessage.action === 'leave' || presenceMessage.action === 'absent') {
-          setIsFriendOnline(false); // Friend has left
+    // Subscribe to real-time updates for the 'users' table
+    const channel = supabase
+      .channel('friend-status-update')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public', // Adjust this if your schema is different
+          table: 'users', // The table you want to subscribe to
+          filter: `id=eq.${friendId}`, // Filter for the specific friend's ID
+        },
+        (payload) => {
+          const updatedStatus = payload.new.status;
+          setIsFriendOnline(updatedStatus); // Update online status when the friend's status changes
         }
-      }
-    };
+      )
+      .subscribe();
 
-    channel.presence.subscribe(handlePresenceUpdate);
-
+    // Cleanup subscription on unmount
     return () => {
-      channel.presence.unsubscribe(handlePresenceUpdate);
+      channel.unsubscribe(); // Unsubscribe using the channel object's method
     };
-  }, [channel, friendId]);
+  }, [friendId]);
 
-  return isFriendOnline; // Return the online status of the friend
+  return isFriendOnline;
 };
 
 export default usePresentStatus;
+
+
+
+
+

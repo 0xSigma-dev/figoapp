@@ -3,18 +3,18 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck, faCheckDouble } from '@fortawesome/free-solid-svg-icons';
 
 interface MessageItemProps {
-  text: string;
-  sender: string;
-  timestamp: string;
+  content: string;
+  sender_id: string;
+  created_at: string;
   isCurrentUser: boolean;
   status: 'sent' | 'delivered' | 'read'; // Explicit status type
 }
 
 // Helper function to split the message into lines of 35 characters
-const splitTextIntoLines = (text: string | undefined, maxCharsPerLine: number) => {
-  if (!text) return [];
+const splitTextIntoLines = (content: string | undefined, maxCharsPerLine: number) => {
+  if (!content) return [];
 
-  const words = text.split(' ');
+  const words = content.split(' ');
   const lines: string[] = [];
   let currentLine = '';
 
@@ -34,9 +34,9 @@ const splitTextIntoLines = (text: string | undefined, maxCharsPerLine: number) =
   return lines;
 };
 
-const MessageItem: React.FC<MessageItemProps> = ({ text, sender, timestamp, isCurrentUser, status }) => {
+const MessageItem: React.FC<MessageItemProps> = ({ content, sender_id, created_at, isCurrentUser, status }) => {
   const maxCharsPerLine = 35;
-  const lines = splitTextIntoLines(text, maxCharsPerLine);
+  const lines = splitTextIntoLines(content, maxCharsPerLine);
 
   const renderStatusIcon = () => {
     switch (status) {
@@ -52,7 +52,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ text, sender, timestamp, isCu
   };
 
   // Calculate if the message is older than 24 hours
-  const messageDate = new Date(timestamp);
+  const messageDate = new Date(created_at);
   const currentTime = new Date();
   const timeDifference = currentTime.getTime() - messageDate.getTime();
   const isOlderThan24Hours = timeDifference > 24 * 60 * 60 * 1000;
@@ -72,7 +72,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ text, sender, timestamp, isCu
           <span className="mr-1">
             {isOlderThan24Hours
               ? messageDate.toLocaleDateString() // Display date if older than 24 hours
-              : new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              : new Date(created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
           {isCurrentUser && (
             <span className="text-xs text-gray-500">

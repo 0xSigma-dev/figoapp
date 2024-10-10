@@ -6,7 +6,6 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../styles/globals.css'; // Ensure this imports your CSS file with theme styles
 import { UserProvider } from '../context/UserContext'; // Adjust the import path as necessary
-import { AblyProvider } from '../context/AblyContext';
 import Head from "next/head";
 import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
@@ -104,12 +103,10 @@ function MyApp({ Component, pageProps }: AppProps) {
       <AppWalletProvider>
         <UserProvider>
         <UserStatusProvider>
-          <AblyProvider>
           <BetSlipProvider>
              <Component {...pageProps} />
              <ToastContainer />
           </BetSlipProvider>
-          </AblyProvider>
         </UserStatusProvider>
         </UserProvider> 
       </AppWalletProvider> 

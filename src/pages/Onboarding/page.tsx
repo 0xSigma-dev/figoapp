@@ -332,7 +332,7 @@ useEffect(() => {
 
       <div className="text-center mt-24" data-aos="fade-down">
         <h1 className={`text-primary font-bold text-4xl logo ${gajrajOne.className}`}>Figo</h1>
-        <p className="mt-2 text-lg text-black dark:text-white whitespace-nowrap slogan">Fly High, Connect Fast</p>
+        <p className="mt-2 text-lg text-black dark:text-white whitespace-nowrap slogan">Predict, Win and Connect Fast</p>
       </div>
       <div className='mb-8'>
       <Lottie

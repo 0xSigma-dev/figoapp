@@ -1,4 +1,5 @@
 import Cookies from 'js-cookie';
+import { supabase } from '@/lib/supabaseClient';
 
 const dbVersion = 10; // Increment this version if you need to update the schema
 let dbInstance: IDBDatabase | null = null;
@@ -14,6 +15,25 @@ const getDbName = (userId: any): string => {
   }
   return `AppDatabase_${userId}`;
 };
+
+
+interface Message {
+  id: string; // or UUID type
+  sender_id: string; // or UUID type
+  channel_id: string; // or UUID type
+  friend_id: string; // or UUID type
+  content: string;
+  status: string;
+  created_at: string; // or Date type
+}
+
+interface ChannelDetails {
+  id: string; // or UUID type
+  friendDisplayName: string;
+  friendAvatar: string;
+  // Include other properties if needed
+}
+
 
 
 export const initDB = (userId: string): Promise<IDBDatabase> => {
@@ -90,16 +110,40 @@ export const saveContact = async (contact: any): Promise<void> => {
   });
 };
 
-export const getAllContacts = async (): Promise<any[]> => {
-  const db = await getDBInstance();
-  const transaction = db.transaction('contacts', 'readonly');
-  const store = transaction.objectStore('contacts');
+export const getAllContacts = async (userId: any): Promise<any[]> => {
+  try {
+    // Fetch the current user to get the friends array
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('friends')
+      .eq('id', userId)
+      .single();
 
-  return new Promise((resolve, reject) => {
-    const request = store.getAll();
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(`Failed to retrieve contacts: ${request.error}`);
-  });
+    if (userError) {
+      throw new Error(`Failed to retrieve user data: ${userError.message}`);
+    }
+
+    const friends = user?.friends || [];
+
+    if (friends.length === 0) {
+      return [];
+    }
+
+    // Fetch details of all friends in the friends array
+    const { data: contacts, error: contactsError } = await supabase
+      .from('users')
+      .select('id, username, displayName, bio, avatar')
+      .in('username', friends); // Use the 'username' or 'id' depending on your friends array
+
+    if (contactsError) {
+      throw new Error(`Failed to retrieve contacts: ${contactsError.message}`);
+    }
+
+    return contacts;
+  } catch (error) {
+    //console.error('Error fetching contacts:', error);
+    return [];
+  }
 };
 
 
@@ -116,17 +160,25 @@ export const saveUserData = async (userData: any): Promise<void> => {
 };
 
 
-  export const getUserData = async (userId: any): Promise<any | null> => {
-    const db = await getDBInstance();
-    const transaction = db.transaction('user', 'readonly');
-    const store = transaction.objectStore('user');
-  
-    return new Promise((resolve, reject) => {
-      const request = store.get(userId);
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(`Failed to retrieve user data: ${request.error}`);
-    });
-  };
+export const getUserData = async (userId: any): Promise<any | null> => {
+  try {
+    // Fetch user data from Supabase
+    const { data, error } = await supabase
+      .from('users')
+      .select('*') // or specify the fields you need
+      .eq('id', userId)
+      .single(); // Ensures you get a single user record
+
+    if (error) {
+      throw new Error(`Failed to retrieve user data: ${error.message}`);
+    }
+
+    return data; // Return the fetched user data
+  } catch (error) {
+    //console.error(error);
+    return null; // Return null in case of error
+  }
+};
 
   export async function getContactById(id: string): Promise<any | null> {
     const db = await getDBInstance();
@@ -145,36 +197,19 @@ export const saveUserData = async (userData: any): Promise<void> => {
   }
 
   export const updateUserDataFields = async (userId: string, fieldsToUpdate: Partial<any>): Promise<void> => {
-    const db = await getDBInstance();
-    const transaction = db.transaction('user', 'readwrite');
-    const store = transaction.objectStore('user');
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update(fieldsToUpdate) // Update specified fields
+        .eq('id', userId); // Match the user by ID
   
-    return new Promise<void>((resolve, reject) => {
-      const getRequest = store.get(userId);
-  
-      getRequest.onsuccess = () => {
-        const currentData = getRequest.result;
-        if (!currentData) {
-          reject('User data not found');
-          return;
-        }
-  
-        const updatedData = { ...currentData, ...fieldsToUpdate };
-        const updateRequest = store.put(updatedData);
-  
-        updateRequest.onsuccess = () => {
-          resolve();
-        };
-  
-        updateRequest.onerror = () => {
-          reject(`Failed to update user data: ${updateRequest.error}`);
-        };
-      };
-  
-      getRequest.onerror = () => {
-        reject(`Failed to retrieve user data: ${getRequest.error}`);
-      };
-    });
+      if (error) {
+        throw new Error(`Failed to update user data: ${error.message}`);
+      }
+    } catch (error: any) {
+      //console.error(error);
+      throw new Error(`Error updating user data: ${error.message}`);
+    }
   };
 
 export const deleteUserData = async (userId: string): Promise<void> => {
@@ -201,39 +236,7 @@ export const deleteContact = async (contactId: string): Promise<void> => {
     });
   };
 
-export const syncContactsFromNavigator = async () => {
-  const contactsApi = (navigator as any).contacts;
-  if (!contactsApi || !contactsApi.select) {
-    return [];
-  }
 
-  try {
-    const props = ['name', 'email'];
-    const opts = { multiple: true };
-    const contacts = await contactsApi.select(props, opts);
-    const filteredContacts = contacts.filter((contact: any) =>
-      contact.email.some((email: any) => isLongEmail(email.address))
-    );
-
-    const db = await getDBInstance();
-    const transaction = db.transaction('contacts', 'readwrite');
-    const store = transaction.objectStore('contacts');
-
-    const allIndexedDBContacts = await getAllContacts();
-
-    const newContacts = filteredContacts.filter((
-      contact: any) => !allIndexedDBContacts.some(dbContact => dbContact.id === contact.id)
-    );
-
-    for (const contact of newContacts) {
-      await saveContact(contact);
-    }
-
-    return await getAllContacts();
-  } catch (error) {
-    return [];
-  }
-};
 
 export const saveChannel = async (channel: { id: any, name: any, friendId: any, friendAvatar: any, friendName: string }): Promise<void> => {
   const db = await getDBInstance();
@@ -247,131 +250,178 @@ export const saveChannel = async (channel: { id: any, name: any, friendId: any, 
   });
 };
 
-export const getAllChannels = async (): Promise<any[]> => {
-  const db = await getDBInstance();
-  const transaction = db.transaction('channels', 'readonly');
-  const store = transaction.objectStore('channels');
+export const getAllChannels = async (userId: string): Promise<ChannelDetails[]> => {
+  try {
+    // Fetch the latest message for each channel where the user is either the sender or the friend
+    const { data: latestMessages, error: messageError } = await supabase
+      .from('messages') 
+      .select(`
+        *,
+        channel_id,
+        created_at
+      `)
+      .or(`sender_id.eq.${userId},friend_id.eq.${userId}`)
+      .order('created_at', { ascending: false });
 
-  return new Promise((resolve, reject) => {
-    const request = store.getAll();
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(`Failed to retrieve channels: ${request.error}`);
-  });
-};
+    if (messageError) throw messageError;
 
-export const saveMessage = async (message: any, id: any, status: any, channelId: any): Promise<void> => {
-  const db = await getDBInstance();
-  const transaction = db.transaction('messages', 'readwrite');
-  const store = transaction.objectStore('messages');
-  return new Promise<void>((resolve, reject) => {
-    const messageWithId = { ...message, id,  status, channelId, timestamp: new Date().toISOString() };
-   
-    const request = store.put(messageWithId);
+    // Assert that latestMessages is an array of Message
+    const messages = latestMessages as Message[]; // Ensure that TypeScript knows it's an array of Message
 
-    request.onsuccess = () => {
-     
-      resolve();
-    };
-
-    request.onerror = () => {
-      reject(`Failed to save message: ${request.error}`);
-    };
-  });
-};
-
-export const loadMessages = async (channelId: any, status?: string): Promise<any[]> => {
-  const db = await getDBInstance();
-  const transaction = db.transaction('messages', 'readonly');
-  const store = transaction.objectStore('messages');
-
-  return new Promise<any[]>((resolve, reject) => {
-    const index = store.index('timestampDesc'); // Using timestamp index to get messages in descending order
-
-    const messages: any[] = [];
-    const range = status ? IDBKeyRange.only(status) : null; // Optional status filter
-
-    const request = index.openCursor(range);
-
-    request.onsuccess = (event) => {
-      const cursor = (event.target as IDBRequest).result;
-      if (cursor) {
-        if (cursor.value.channelId === channelId) {
-          messages.push(cursor.value);
-        }
-        cursor.continue();
-      } else {
-        resolve(messages.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()));
+    // Group the messages by channel_id and keep only the latest one for each channel
+    const uniqueChannels = messages.reduce<{ [key: string]: Message }>((acc, message) => {
+      if (!acc[message.channel_id]) {
+        acc[message.channel_id] = message; // Store the first message for this channel
+      } else if (message.created_at > acc[message.channel_id].created_at) {
+        acc[message.channel_id] = message; // Replace with the latest message
       }
-    };
+      return acc;
+    }, {});
 
-    request.onerror = () => reject(`Failed to retrieve messages: ${request.error}`);
-  });
-};
+    // Convert the uniqueChannels object back to an array
+    const channels = Object.values(uniqueChannels);
 
+    // Get friend details (avatar and displayName) for each channel
+    const channelsWithDetails = await Promise.all(
+      channels.map(async (channel) => {
+        const friendId = channel.sender_id === userId ? channel.friend_id : channel.sender_id;
 
-export const getLatestMessageForChannel = async (channelId: any): Promise<any | null> => {
-  const db = await getDBInstance();
-  const transaction = db.transaction('messages', 'readonly');
-  const store = transaction.objectStore('messages');
-  const index = store.index('timestampDesc'); 
+        // Check if the friend's details exist in the user's friends list
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('friends')
+          .eq('id', userId)
+          .single();
 
-  return new Promise<any | null>((resolve, reject) => {
-    const request = index.openCursor(null, 'prev'); 
-    request.onsuccess = (event) => {
-      const cursor = (event.target as IDBRequest).result;
-      if (cursor) {
-        if (cursor.value.channelId === channelId) {
-          resolve(cursor.value);
+        if (userError) throw userError;
+
+        let friendDetails;
+
+        if (userData.friends.includes(friendId)) {
+          // Get friend's details from friends list
+          friendDetails = userData.friends.find((friend: any) => friend.id === friendId);
         } else {
-          cursor.continue();
+          // Otherwise, fetch the friend's details from the users table
+          const { data: friendData, error: friendError } = await supabase
+            .from('users')
+            .select('displayName, avatar')
+            .eq('id', friendId)
+            .single();
+
+          if (friendError) throw friendError;
+
+          friendDetails = friendData;
         }
-      } else {
-        resolve(null);
-      }
-    };
 
-    request.onerror = () => {
-      reject(`Failed to retrieve the latest message: ${request.error}`);
-    };
-  });
-};
+        // Attach friend's displayName and avatar to the channel object
+        return {
+          ...channel,
+          friendDisplayName: friendDetails.displayName,
+          friendAvatar: friendDetails.avatar,
+          friendId,
+        };
+      })
+    );
 
-export const getLatestMessagesForAllChannels = async (): Promise<any[]> => {
-  const channels = await getAllChannels();
-  const latestMessagesPromises = channels.map(channel => getLatestMessageForChannel(channel.id));
-  return Promise.all(latestMessagesPromises);
-};
-
-const closeAllConnections = async () => {
-  for (const db of openConnections) {
-    db.close();
+    return channelsWithDetails;
+  } catch (error) {
+   // console.error('Error fetching channels:', error);
+    return [];
   }
-  openConnections.clear();
 };
 
-export const deleteDatabase = async (userId: string): Promise<void> => {
-  if (!userId) {
-    throw new Error('User ID is not set.');
+export const countMessagesByChannelAndSender = async (channel_id: any, userId: any) => {
+  try {
+    //console.log('Counting messages for channel:', channel_id, 'and user:', userId);
+
+    const { data, error } = await supabase
+      .from('messages')
+      .select('id', { count: 'exact' })
+      .eq('channel_id', channel_id)
+      .neq('sender_id', userId)
+      .in('status', ['sent', 'delivered']);
+
+    if (error) {
+      //console.error('Error fetching messages:', error.message);
+      return 0;
+    }
+
+    //console.log('Fetched messages:', data);
+    return data.length; // Return the count of messages
+  } catch (error) {
+    //console.error('Caught error:', error);
+    return 0;
   }
-
-  await closeAllConnections();
-
-  const dbName = getDbName(userId);
-  const request = indexedDB.deleteDatabase(dbName);
-
-  return new Promise<void>((resolve, reject) => {
-    request.onsuccess = () => {
-      if (dbInstance) {
-        openConnections.delete(dbInstance);
-        dbInstance = null;
-      }
-      resolve();
-    };
-
-    request.onerror = () => reject(`Failed to delete database: ${request.error}`);
-    request.onblocked = () => reject('Database deletion blocked due to active connections.');
-  });
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+export const getLatestMessageForChannel = async (channelId: string): Promise<any | null> => {
+  try {
+    const { data: latestMessage, error } = await supabase
+      .from('messages')
+      .select('*')
+      .eq('channel_id', channelId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error) throw error;
+
+    return latestMessage;
+  } catch (error) {
+    //console.error('Error fetching latest message:', error);
+    return null;
+  }
+};
+
+export const getLatestMessagesForAllChannels = async (userId: string): Promise<any[]> => {
+  const channels = await getAllChannels(userId);
+  const latestMessagesPromises = channels.map((channel) => getLatestMessageForChannel(channel.id));
+  const latestMessages = await Promise.all(latestMessagesPromises);
+
+  return latestMessages;
+};
+
+
+export const subscribeToNewMessages = (userId: string, onNewMessage: (message: any) => void) => {
+  // Create a Supabase channel for real-time message updates
+  const channel = supabase
+    .channel('new-message-updates')
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public', // Your schema (default is 'public')
+        table: 'messages', // The table to listen for changes
+        filter: `sender_id=eq.${userId},friend_id=eq.${userId}`, // Listen for relevant messages for the user
+      },
+      async (payload) => {
+        const newMessage = payload.new;
+
+        // Fetch the updated channel data with friend's displayName and avatar
+        const updatedChannel = await getAllChannels(userId);
+        onNewMessage(updatedChannel);
+      }
+    )
+    .subscribe();
+
+  // Cleanup function to unsubscribe on component unmount or similar cases
+  return () => {
+    channel.unsubscribe();
+  };
+};
+
 
 
 export const deleteChannel = async (channelId: string): Promise<void> => {

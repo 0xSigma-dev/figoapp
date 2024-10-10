@@ -45,7 +45,7 @@ const TaskDashboard = () => {
         alert('Error saving task');
       }
     } catch (error) {
-      console.error('Error:', error);
+      //console.error('Error:', error);
       alert('Error saving task');
     }
   };

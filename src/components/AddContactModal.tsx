@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
-import { saveContact, getUserData } from '../utils/indexedDB'; // Import the IndexedDB functions
+import { supabase } from '@/lib/supabaseClient'; // Make sure to import your Supabase client
 import { useRouter } from 'next/router';
 
 interface AddContactModalProps {
   isOpen: boolean;
-  userDetails: { displayName?: string; publicKey: string; id: string; avatar: string; bio: string; }; // Define userDetails structure
+  userDetails: { displayName?: string; publicKey: string; id: string; avatar: string; bio: string; };
   onClose: () => void;
   onContactAdded: () => void;
 }
@@ -16,10 +16,9 @@ const AddContactModal: React.FC<AddContactModalProps> = ({ userDetails, onClose,
   const [bio, setBio] = useState<string>('');
   const [avatar, setAvatar] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [message, setMessage] = useState<string>(''); // State to hold success or error message
-  const [messageType, setMessageType] = useState<'success' | 'error' | ''>(''); // State to determine the type of message
+  const [message, setMessage] = useState<string>('');
+  const [messageType, setMessageType] = useState<'success' | 'error' | ''>('');
   const userId = Cookies.get('userId');
-  const router = useRouter();
 
   useEffect(() => {
     if (userDetails) {
@@ -27,37 +26,70 @@ const AddContactModal: React.FC<AddContactModalProps> = ({ userDetails, onClose,
       setAvatar(userDetails.avatar || '');
       setPublicKey(userDetails.publicKey || '');
       setBio(userDetails.bio || '');
-      setIsLoading(false); // Only set loading to false when userDetails are set
+      setIsLoading(false);
     }
   }, [userDetails]);
 
   const handleSaveContact = async () => {
-    const contact = {
-      displayName,
-      email: userDetails.publicKey, // Assuming publicKey as email in this context
-      id: userDetails.id,
-      avatar: userDetails.avatar,
-      bio: userDetails.bio
-    };
-
     if (!userId) {
+      setMessageType('error');
+      setMessage('User ID is missing.');
       return;
     }
 
-    try {
-      // Save to IndexedDB
-      await saveContact(contact);
-      setMessageType('success');
-      setMessage('Contact saved successfully.');
-      
+    // Construct the new contact object
+    const newContact = {
+      displayName,
+      publicKey: userDetails.publicKey,
+      id: userDetails.id,
+      avatar: userDetails.avatar,
+      bio: userDetails.bio,
+    };
 
+    try {
+      // Fetch current friends array from the database
+      const { data: userData, error: fetchError } = await supabase
+        .from('users')
+        .select('friends')
+        .eq('id', userId)
+        .single();
+
+      if (fetchError) {
+        throw new Error('Failed to fetch user data: ' + fetchError.message);
+      }
+
+      // Check if the user already has friends
+      const currentFriends = userData?.friends || [];
+      
+      // Check if the new contact already exists in the friends array
+      const friendExists = currentFriends.some((friend: any) => friend.id === newContact.id);
+      if (friendExists) {
+        setMessageType('error');
+        setMessage('Contact already exists in your friends list.');
+        return;
+      }
+
+      // Add the new contact to the current friends array
+      const updatedFriends = [...currentFriends, newContact];
+
+      // Update the friends array in the database
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({ friends: updatedFriends })
+        .eq('id', userId);
+
+      if (updateError) {
+        throw new Error('Failed to update friends: ' + updateError.message);
+      }
+
+      setMessageType('success');
+      setMessage('Contact added successfully.');
       onContactAdded();
       onClose();
 
-    } catch (error) {
-      //console.error('Failed to save contact:', error);
+    } catch (error: any) {
       setMessageType('error');
-      setMessage('Failed to save contact. Please try again.');
+      setMessage(error.message || 'Failed to save contact. Please try again.');
     }
   };
 
@@ -112,6 +144,7 @@ const AddContactModal: React.FC<AddContactModalProps> = ({ userDetails, onClose,
 };
 
 export default AddContactModal;
+
 
 
 

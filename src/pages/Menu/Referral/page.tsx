@@ -51,7 +51,7 @@ const ReferralPage = () => {
         }
 
         const apiData = await response.json();
-        console.log('apiData', apiData); // Make sure you see this in the console
+        //console.log('apiData', apiData); // Make sure you see this in the console
 
         startTransition(() => {
           setReferralCode(apiData?.user.referralLink || "ABC123");
@@ -60,7 +60,7 @@ const ReferralPage = () => {
         });
       }
     } catch (error) {
-      console.error('Error fetching data:', error);
+      //console.error('Error fetching data:', error);
       setErrorMessage('Failed to fetch user data. Please try again later.');
     } finally {
       startTransition(() => {
@@ -118,7 +118,7 @@ const ReferralPage = () => {
       navigator.share({
         title: 'Join me on Figo Today!',
         text: `Join me on Figo Chat and Earn App today. Figo is changing the Social Media Industry. Don't miss. You earn 3000 points immediately you Signup with my referral link: ${referralCode}`,
-      }).catch(error => console.log('Error sharing', error));
+      }).catch(error => console.log('Error sharing'));
     } else {
       setErrorMessage('Sharing is not supported in this browser.');
     }

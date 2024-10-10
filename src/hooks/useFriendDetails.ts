@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { getContactById } from '@/utils/indexedDB';
+import { supabase } from '@/lib/supabaseClient'; // Adjust the import based on your Supabase setup
+import Cookies from 'js-cookie';
 
 const useFriendDetails = (friendId: any) => {
-  const [avatar, setAvatar] = useState<any>(null);
-  const [displayName, setDisplayName] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState(null);
+  const [displayName, setDisplayName] = useState(null);
   const [isUserDetailsFetched, setIsUserDetailsFetched] = useState(false);
 
   useEffect(() => {
@@ -11,38 +12,51 @@ const useFriendDetails = (friendId: any) => {
       try {
         if (!friendId) return;
 
-        // First, check if the contact is in the local IndexedDB
-        const contact = await getContactById(friendId);
-        if (contact) {
-          // If the contact is found locally, set the avatar and display name
-          setAvatar(contact.avatar);
-          setDisplayName(contact.displayName);
-        } else {
-          // If not found in local storage, fetch the friend details from the API
-          const response = await fetch(`/api/user/`, {
-            headers: {
-              Authorization: `Bearer ${friendId}`, // Use friendId as the token here
-            },
-          });
+        // Get the current user's ID from cookies
+        const userId = Cookies.get('userId');
+        if (!userId) return;
 
-          if (!response.ok) {
-            throw new Error('Failed to fetch friend details');
+        // Fetch the current user from Supabase
+        const { data: user, error: userError } = await supabase
+          .from('users')
+          .select('friends')
+          .eq('id', userId)
+          .single();
+
+        if (userError || !user) {
+          throw new Error('Failed to fetch user data');
+        }
+
+        // Check if the friendId is in the friends array
+        const friendData = user.friends.find((friend: any) => friend.id === friendId);
+
+        if (friendData) {
+          // If friend data exists in the friends array, use it
+          setAvatar(friendData.avatar);
+          setDisplayName(friendData.displayName);
+        } else {
+          // Friend not found in the user's friends array, fetch directly from the friend user's profile
+          const { data: friendProfile, error: friendError } = await supabase
+            .from('users')
+            .select('avatar, displayName')
+            .eq('id', friendId)
+            .single();
+
+          if (friendError || !friendProfile) {
+            throw new Error('Friend data not found');
           }
 
-          // Parse the response
-          const data = await response.json();
-          setAvatar(data.user.avatar);
-          setDisplayName(data.user.displayName);
+          // Set the fetched friend data
+          setAvatar(friendProfile.avatar);
+          setDisplayName(friendProfile.displayName);
         }
       } catch (error) {
-        
+        //console.error('Error fetching friend details:', error);
       } finally {
-        // Mark that the user details have been fetched
         setIsUserDetailsFetched(true);
       }
     };
 
-    // Call the function to fetch the friend details
     fetchFriendDetails();
   }, [friendId]);
 
@@ -51,4 +65,6 @@ const useFriendDetails = (friendId: any) => {
 };
 
 export default useFriendDetails;
+
+
 

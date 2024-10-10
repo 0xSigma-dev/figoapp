@@ -44,7 +44,7 @@ const PlaceholderComponent = forwardRef<HTMLDivElement, PlaceholderComponentProp
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error("Error fetching level details:", error);
+      //console.error("Error fetching level details:", error);
       return null;
     }
   };

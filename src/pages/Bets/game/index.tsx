@@ -116,7 +116,7 @@ const GamePage: React.FC<GameProps> = ({ theme }) => {
   const fetchOdds = useCallback(async () => {
 
     if (!matchId) {
-      console.error('matchId is not defined');
+      //console.error('matchId is not defined');
       return;
     }
 
@@ -139,15 +139,15 @@ const GamePage: React.FC<GameProps> = ({ theme }) => {
       }
 
       const data = await response.json();
-      console.log('data', data)
+      //console.log('data', data)
       setOdds(data);
       setLoading(false);
     } catch (error) {
-      console.error('error', error);
+      //console.error('error', error);
       setErrorMessage('Failed to load odds. Please try again later.');
       setLoading(false);
     }
-  }, [matchId, userId, duration, matchAction]);
+  }, [matchId, userId, duration, matchAction, apiUrl]);
 
   useEffect(() => {
     if (duration && matchId && matchAction){

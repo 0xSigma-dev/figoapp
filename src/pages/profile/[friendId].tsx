@@ -15,7 +15,6 @@ import { getContactById, getUserData, saveUserData, updateUserDataFields } from 
 import SkeletonProfile from '../../components/Skeleton/SkeletonProfile';
 import AvatarComponent from "@/components/AvatarComponent";
 import WalletGuard from "@/components/WalletGuard";
-import { useAbly } from '@/context/AblyContext';
 import Image from 'next/image';
 
 
@@ -38,27 +37,20 @@ const ProfilePage: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showAddContactModal, setShowAddContactModal] = useState<boolean>(false);
   const [contactExists, setContactExists] = useState(false);
-  const { ablyClient } = useAbly();
-
-  useEffect(() => {
-    if (!ablyClient) {
-      // Handle case where Ably client is not available
-      console.error('Ably client not initialized');
-    }
-  }, [ablyClient]);
+  
 
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
         if (typeof window !== 'undefined') {
           const token = isCurrentUser && userId ? userId : friendId; // Use userId if current user, otherwise use friendId
-          console.log('token', token);
+          //console.log('token', token);
   
           if (isCurrentUser && userId) {
             // If it's the current user, fetch user data from IndexedDB
-            console.log('userId', userId);
+            //console.log('userId', userId);
             const storedUser = await getUserData(userId);
-            console.log('stored', storedUser);
+            //console.log('stored', storedUser);
             if (storedUser) {
               setUserDetails(storedUser);
             }
@@ -98,7 +90,7 @@ const ProfilePage: React.FC = () => {
           }
         }
       } catch (error) {
-        console.error('Error fetching user details:', error);
+        //console.error('Error fetching user details:', error);
       } finally {
         setLoading(false);
       }
@@ -112,13 +104,13 @@ const ProfilePage: React.FC = () => {
     try {
       if (typeof window !== 'undefined') {
         const token = isCurrentUser && userId ? userId : friendId; // Use userId if current user, otherwise use friendId
-        console.log('token', token);
+        //console.log('token', token);
 
         if (isCurrentUser && userId) {
           // If it's the current user, fetch user data from IndexedDB
-          console.log('userId', userId);
+          //console.log('userId', userId);
           const storedUser = await getUserData(userId);
-          console.log('stored', storedUser);
+          //console.log('stored', storedUser);
           if (storedUser) {
             setUserDetails(storedUser);
           }
@@ -158,7 +150,7 @@ const ProfilePage: React.FC = () => {
         }
       }
     } catch (error) {
-      console.error('Error fetching user details:', error);
+      //console.error('Error fetching user details:', error);
     } finally {
       setLoading(false);
     }

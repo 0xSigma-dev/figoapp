@@ -30,7 +30,7 @@ const BetSlipModal: React.FC<BetSlipModalProps> = ({ onClose }) => {
   return (
     <div className="fixed bottom-0 mb-2 w-full p-4 bg-black shadow-lg rounded-lg border-t z-50 overflow-x-hidden">
       {/* Close button */}
-      <button className="absolute top-4 right-4 px-2 p-4 text-red-500" onClick={onClose}>
+      <button className="absolute top-4 right-4 px-2 mr-2 text-red-500" onClick={onClose}>
         <FontAwesomeIcon icon={faTimesCircle} size="2x" />
       </button>
   

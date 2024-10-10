@@ -7,10 +7,7 @@ import ChatInput from '@/components/Chat/ChatInput';
 import ChatSkeleton from '@/components/Skeleton/ChatSkeleton';
 import WallpaperManager from '@/components/WallpaperManager';
 import MessageItem from '@/components/Chat/MessageItem'; 
-import { useAbly } from '@/context/AblyContext';
-import useChatChannel from '@/hooks/useChatChannel';
 import useEnergyManagement from '@/hooks/useEnergyManagement';
-import useFetchUserData from '@/hooks/useFetchUserData';
 import useFriendDetails from '@/hooks/useFriendDetails';
 import useTypingStatus from "@/hooks/useTypingStatus";
 import { supabase } from '@/lib/supabaseClient';
@@ -24,19 +21,23 @@ import usePresentStatus from "@/hooks/usePresentStatus";
 import WaveSurfer from 'wavesurfer.js';
 import useSendMessage from '@/hooks/useSendMessage';
 
-
+const generateChannelId = (userId: any, friendId: any) => {
+  
+  const sortedIds = [userId, friendId].sort();
+  
+  return sortedIds.join('-');
+};
 
 const Chat: React.FC = () => {
     const router = useRouter();
     const { friendId } = router.query;
     const friendIdStr = Array.isArray(friendId) ? friendId[0] : friendId;
-    const { ablyClient } = useAbly();
     const [messageInput, setMessageInput] = useState<string>('');
     const userId = Cookies.get('userId'); // Replace with actual user ID
+    const channelId = generateChannelId(userId, friendIdStr);
     const [isRecording, setIsRecording] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
     const isCurrentUser = String(friendId) === String(userId);
-    const { senderAvatar, senderName, loading: userLoading } = useFetchUserData(userId);
     const [isWallpaperModalOpen, setIsWallpaperModalOpen] = useState(false);
     const [viewportHeight, setViewportHeight] = useState(0);
     const [backgroundImage, setBackgroundImage] = useState('/img/wallpaper1.jpg');
@@ -46,17 +47,18 @@ const Chat: React.FC = () => {
     const [showMenu, setShowMenu] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement | null>(null); 
-    const messagesEndRef = useRef<HTMLDivElement>(null);
     const { avatar, displayName, isUserDetailsFetched } = useFriendDetails(friendId);
     const [messagesFetched, setMessagesFetched] = useState(false);
-    const { messages, channelRef, channelName, fetchMessages, setMessages } = useChatChannel(userId, friendId, ablyClient, avatar, displayName, senderName, senderAvatar, isUserDetailsFetched, messagesFetched);
-    const { onType, whoIsCurrentlyTyping: typingUsers, markMessageAsRead } = useTypingStatus(channelRef.current, userId);
+    const { onType, whoIsCurrentlyTyping: typingUsers } = useTypingStatus(channelId, userId);
     const { currentEnergy, totalEnergy, setCurrentEnergy, resetRefillTimer, startRefill } = useEnergyManagement(userId);
-    const isFriendOnline = usePresentStatus(channelRef.current, userId, friendId);
-    const { sendMessage, floatingPoints } = useSendMessage(channelRef, userId, currentEnergy, setCurrentEnergy, resetRefillTimer, setMessages);
+    const isFriendOnline = usePresentStatus(friendId);
+    const [messages, setMessages] = useState<any[]>([]); // Assuming messages are objects
+    const { sendMessage, floatingPoints } = useSendMessage(channelId,  userId, friendId, currentEnergy, setCurrentEnergy, resetRefillTimer, setMessages);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const [isLastMessageVisible, setIsLastMessageVisible] = useState(false);
     
 
-   
+    
 
     useEffect(() => {
       if (typeof window !== 'undefined') { // Ensure this code only runs on the client
@@ -87,82 +89,132 @@ const Chat: React.FC = () => {
 
     
     useEffect(() => {
-      if (isUserDetailsFetched && channelRef.current) {
-        fetchMessages(); // Fetch messages when friend details are fetched
-        setMessagesFetched(true); // Set flag to true after fetching messages
-      }
-    }, [isUserDetailsFetched, channelRef.current]);
-    
-    
-    const handleSendMessage = async () => {
-      if (messageInput.trim()) {
-        await sendMessage(messageInput, onType, setMessageInput, inputRef, channelName);
-      }
-    };
-    
-    
-    const fetchUserChannels = async (userId: string) => {
-      try {
+      const fetchMessages = async () => {
         const { data, error } = await supabase
-          .from('channels')
+          .from('messages')
           .select('*')
-          .ilike('name', `%${userId}%`);
-    
-        if (error) {
-          return [];
+          .eq('channel_id', channelId);
+  
+        if (data) {
+          setMessages(data);
         }
-        return data;
-      } catch (error) {
-        return [];
-      }
-    };
   
-    useEffect(() => {
-      if (userId) {
-        fetchUserChannels(userId).then(channels => {
-        });
-      }
-    }, [userId]);
-
-    channelRef.current?.subscribe('audio', (message) => {
-      const audioBase64 = message.data.audio;
-      const audioBlob = dataURItoBlob(audioBase64);
-      const url = URL.createObjectURL(audioBlob);
-      
-      // Play or visualize audio
-      const audio = new Audio(url);
-      audio.play();
-    });
-    
-    const dataURItoBlob = (dataURI: string) => {
-      const byteString = atob(dataURI.split(',')[1]);
-      const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
-      const ab = new ArrayBuffer(byteString.length);
-      const ia = new Uint8Array(ab);
-      for (let i = 0; i < byteString.length; i++) {
-        ia[i] = byteString.charCodeAt(i);
-      }
-      return new Blob([ab], { type: mimeString });
-    };
-    
-
-
-
-  
-
-
-  const sendRecording = (blob: Blob) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-          const base64Audio = reader.result as string;
-          channelRef.current?.publish('audio', { audio: base64Audio });
+        if (error) {
+          //console.error('Error fetching messages:', error);
+        }
       };
-      reader.readAsDataURL(blob);
-  };
+  
+      if (friendId) {
+        fetchMessages();
+      }
+    }, [friendId]);
 
 
+    useEffect(() => {
+      const channel = supabase
+        .channel(`realtime-messages-${channelId}`)
+        
+        // Listen for new messages (INSERT)
+        .on(
+          'postgres_changes', 
+          {
+            event: 'INSERT', 
+            schema: 'public', 
+            table: 'messages', 
+            filter: `channel_id=eq.${channelId}`
+          }, 
+          (payload) => {
+            const newMessage = payload.new;
+            //console.log('New message:', newMessage);
     
-
+            if (isFriendOnline && newMessage.sender_id === userId && newMessage.status === 'sent') {
+              supabase
+                .from('messages')
+                .update({ status: 'delivered' })
+                .eq('id', newMessage.id)
+            }
+    
+            // Add the new message to the local state
+            setMessages((prevMessages: any) => [...prevMessages, newMessage]);
+          }
+        )
+        
+        // Listen for message updates (UPDATE)
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE', 
+            schema: 'public', 
+            table: 'messages', 
+            filter: `channel_id=eq.${channelId}`
+          },
+          (payload) => {
+            const updatedMessage = payload.new;
+            //console.log('Updated message:', updatedMessage);
+    
+            // Update the local message state
+            setMessages((prevMessages: any) =>
+              prevMessages.map((msg: any) => 
+                msg.id === updatedMessage.id ? updatedMessage : msg
+              )
+            );
+          }
+        )
+    
+        .subscribe();
+    
+      // Cleanup on unmount
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }, [channelId, setMessages]);
+    
+    
+    useEffect(() => {
+      const observer = new IntersectionObserver(
+        async ([entry]) => {
+          setIsLastMessageVisible(entry.isIntersecting);
+          
+          // Check if the last message is visible and if the sender is not the current user
+          if (entry.isIntersecting && messages.length > 0) {
+            const lastMessage = messages[messages.length - 1];
+    
+            if (lastMessage.sender_id !== userId && lastMessage.status !== 'seen') {
+              try {
+                // Update message status to 'seen' in Supabase
+                const { error } = await supabase
+                  .from('messages')
+                  .update({ status: 'seen' })
+                  .eq('id', lastMessage.id);
+    
+                if (error) {
+                  //console.error('Error updating message status:', error);
+                } else {
+                  //console.log('Message marked as seen');
+                }
+              } catch (err) {
+                //console.error('Error:', err);
+              }
+            }
+          }
+        },
+        {
+          root: document.querySelector('#messages'), // The scrollable message container
+          threshold: 0.1, // Trigger when at least 10% of the message is visible
+        }
+      );
+    
+      if (messagesEndRef.current) {
+        observer.observe(messagesEndRef.current);
+      }
+    
+      // Cleanup observer on component unmount
+      return () => {
+        if (messagesEndRef.current) {
+          observer.unobserve(messagesEndRef.current);
+        }
+      };
+    }, [messages, userId]);
 
       const handleMenuClick = () => {
         setShowMenu(!showMenu);
@@ -199,7 +251,7 @@ const Chat: React.FC = () => {
     useEffect(() => {
      
       if (isFriendOnline) {
-        setFriendStatus("Present");
+        setFriendStatus("Online");
         setStatusColor("text-green-500");
       } else {
         setFriendStatus("Away");
@@ -226,6 +278,9 @@ const Chat: React.FC = () => {
   function handlerecord(): void {
     throw new Error('Function not implemented.');
   }
+
+  
+  
 
 
   
@@ -333,13 +388,13 @@ const Chat: React.FC = () => {
                 </div>
               </div>
             ) :  (
-              messages.map((msg, index) => (
+              messages.map((msg: any, index: any) => (
                 <MessageItem
                   key={index}
-                  text={msg.text}
-                  sender={msg.sender}
-                  timestamp={msg.timestamp}
-                  isCurrentUser={msg.sender === userId}
+                  content={msg.content}
+                  sender_id={msg.sender_id}
+                  created_at={msg.created_at}
+                  isCurrentUser={msg.sender_id === userId}
                   status={msg.status || 'unknown'}
                 />
               ))
@@ -355,11 +410,11 @@ const Chat: React.FC = () => {
                   message={messageInput}
                   ref={inputRef}
                   isRecording={isRecording}
-                  onSend={() => sendMessage(messageInput, onType, setMessageInput, inputRef, channelName)}
+                  onSend={() => sendMessage(messageInput, onType, setMessageInput, inputRef)}
                   onRecord={handlerecord}
                   onStopRecording={handlerecord}
                   setMessage={setMessageInput}
-                  onKeyDown={() => sendMessage(messageInput, onType, setMessageInput, inputRef, channelName)}
+                  onKeyDown={() => sendMessage(messageInput, onType, setMessageInput, inputRef)}
                   onType={onType}
                 />
               </div>
@@ -367,7 +422,7 @@ const Chat: React.FC = () => {
                 <ChatButton
                   isRecording={isRecording}
                   message={messageInput}
-                  onSend={() => sendMessage(messageInput, onType, setMessageInput, inputRef, channelName)}
+                  onSend={() => sendMessage(messageInput, onType, setMessageInput, inputRef,)}
                   onRecord={handlerecord}
                 />
               </div>

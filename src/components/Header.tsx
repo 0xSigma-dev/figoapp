@@ -10,7 +10,6 @@ import router from 'next/router';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
 import { Gajraj_One } from '@next/font/google';
-import { deleteDatabase } from '@/utils/indexedDB';
 import WarningModal from './WarningModal';
 const gajrajOne = Gajraj_One({
   weight: '400',
@@ -80,12 +79,6 @@ const Header: React.FC<HeaderProps> = ({ user, points }) => {
   const handleDisconnectWallet = async () => {
     try {
       const userId = Cookies.get('userId');
-      if (userId) {
-        await deleteDatabase(userId); // Pass userId to deleteDatabase
-        //console.log("All database content deleted successfully.");
-      } else {
-        //console.error('User ID is not available for database deletion.');
-      }
   
       await disconnect();
       Cookies.remove('userId');
