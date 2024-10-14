@@ -60,11 +60,12 @@ const ChannelItem: React.FC<ChannelItemProps> = ({
         {formattedTime && (
           <div className="text-sm text-gray-500 dark:text-gray-400">{formattedTime}</div>
         )}
-        {messageCount && (
-          <div className="text-xs bg-purple-500 text-white rounded-full w-6 h-6 flex items-center justify-center mt-1">
-            {messageCount}
-          </div>
-        )}
+       {messageCount > 0 && (
+  <div className="text-xs bg-purple-500 text-white rounded-full w-6 h-6 flex items-center justify-center mt-1">
+    {messageCount}
+  </div>
+)}
+
       </div>
     </div>
   );

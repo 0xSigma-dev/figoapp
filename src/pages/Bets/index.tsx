@@ -74,13 +74,13 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
 
   const fetchMatches = useCallback(async () => {
     try {
-      setLoading(true); // Ensure loading state is set before fetching
+      setLoading(true);
       const response = await fetch(`${apiUrl}/api/get-matches?userId=${userId}`);
       const data = await response.json();
       setMatches(data);
       setLoading(false); // Stop loading after fetching
     } catch (error) {
-      //console.error('Error fetching matches:', error);
+      console.error('Error fetching matches:', error);
       setErrorMessage('Failed to load matches. Please try again later.');
       setLoading(false); // Stop loading even if there's an error
     }
@@ -195,25 +195,37 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
 
 
   const handleBetClick = (matchId: string, token1: Token, token2: Token, action: 'BULL' | 'BEAR') => {
-    const updatedBets = { ...selectedBets, [matchId]: selectedBets[matchId] === action ? null : action };
-    setSelectedBets(updatedBets);
-  
-    // Save to cookies
-    Cookies.set('selectedBets', JSON.stringify(updatedBets));
-  
-    const params = {
-      token1Symbol: token1.symbol,
-      token1Logo: token1.logo,
-      token2Symbol: token2.symbol,
-      token2Logo: token2.logo,
-      action,
-    };
-  
-    // Navigate to the desired page with query parameters
-    router.push({
-      pathname: '/Bets/game', // Replace with your actual page path
-      query: params,
-    });
+    const currentBet = selectedBets[matchId];
+
+
+    if (currentBet === action) {
+      const updatedBets = { ...selectedBets, [matchId]: null };
+      setSelectedBets(updatedBets);
+      Cookies.set('matchId', matchId);
+      if (action === 'BULL' && currentBet === 'BEAR') {
+        alert('You have deselected Bull for this match. Removing all related bets from betslip.');
+      } else if (action === 'BEAR' && currentBet === 'BULL') {
+        alert('You have deselected Bear for this match. Removing all related bets from betslip.');
+      }
+    } else {
+      // Replace the current bet with the newly selected one
+      const updatedBets = { ...selectedBets, [matchId]: action };
+      setSelectedBets(updatedBets);
+      
+      const params = {
+        token1Symbol: token1.symbol,
+        token1Logo: token1.logo,
+        token2Symbol: token2.symbol,
+        token2Logo: token2.logo,
+        action,
+      };
+      
+      // Navigate to the desired page with query parameters
+      router.push({
+        pathname: '/Bets/game',
+        query: params,
+      });
+    }
   };
   
 
@@ -261,22 +273,25 @@ const BetList: React.FC<BetProps> = ({ theme }) => {
                   </div>
 
                   <div className="flex space-x-4">
-  <button
+                  <button
     onClick={(e) => {
       e.stopPropagation();
-      handleBetClick(match.id, match.token1, match.token2, 'BULL'); // Call handleBetClick for Bull action
+      handleBetClick(match.id, match.token1, match.token2, 'BULL');
     }}
-    className="flex items-center space-x-2 px-3 py-1 border border-green-500 text-green-500 bg-transparent rounded-lg hover:bg-green-500 hover:text-white transition"
+    className={`flex items-center space-x-2 px-3 py-1 border border-green-500 text-green-500 bg-transparent rounded-lg hover:bg-green-500 hover:text-white transition`}
+    
   >
     <FontAwesomeIcon icon={faArrowUp} />
     <span className="text-xs">BULL</span>
   </button>
+
   <button
     onClick={(e) => {
       e.stopPropagation();
-      handleBetClick(match.id, match.token1, match.token2, 'BEAR'); // Call handleBetClick for Bear action
+      handleBetClick(match.id, match.token1, match.token2, 'BEAR');
     }}
-    className="flex items-center space-x-2 px-3 py-1 border border-red-500 text-red-500 bg-transparent rounded-lg hover:bg-red-500 hover:text-white transition"
+    className={`flex items-center space-x-2 px-3 py-1 border border-red-500 text-red-500 bg-transparent rounded-lg hover:bg-red-500 hover:text-white transition`}
+    
   >
     <FontAwesomeIcon icon={faArrowDown} />
     <span className="text-xs">BEAR</span>

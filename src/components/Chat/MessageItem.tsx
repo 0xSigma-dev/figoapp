@@ -7,10 +7,9 @@ interface MessageItemProps {
   sender_id: string;
   created_at: string;
   isCurrentUser: boolean;
-  status: 'sent' | 'delivered' | 'read'; // Explicit status type
+  status: 'sent' | 'delivered' | 'seen'; // Explicit status type
 }
 
-// Helper function to split the message into lines of 35 characters
 const splitTextIntoLines = (content: string | undefined, maxCharsPerLine: number) => {
   if (!content) return [];
 
@@ -44,50 +43,60 @@ const MessageItem: React.FC<MessageItemProps> = ({ content, sender_id, created_a
         return <FontAwesomeIcon icon={faCheck} className="text-gray-500" />;
       case 'delivered':
         return <FontAwesomeIcon icon={faCheckDouble} className="text-gray-500" />;
-      case 'read':
+      case 'seen':
         return <FontAwesomeIcon icon={faCheckDouble} className="text-green-500" />;
       default:
         return null;
     }
   };
 
-  // Calculate if the message is older than 24 hours
   const messageDate = new Date(created_at);
   const currentTime = new Date();
   const timeDifference = currentTime.getTime() - messageDate.getTime();
   const isOlderThan24Hours = timeDifference > 24 * 60 * 60 * 1000;
 
   return (
-    <div className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'}  mb-2`}>
+    <div className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-2`}>
       <div
-        className={`p-2 rounded-lg text-xs font-serif ${isCurrentUser ? 'bg-purple-800 text-white' : 'bg-gray-800 text-white'} max-w-xs relative`}
-        style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}
+        className={`relative p-2 rounded-lg text-xs font-serif ${isCurrentUser ? 'bg-purple-800 text-white' : 'bg-gray-800 text-white'} max-w-xs`}
+        style={{
+          wordBreak: 'break-word',
+          whiteSpace: 'pre-wrap',
+          borderRadius: isCurrentUser ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
+          position: 'relative',
+        }}
       >
         {lines.map((line, index) => (
           <div key={index}>{line}</div>
         ))}
 
-        {/* Display status and timestamp */}
+        {/* Status and timestamp */}
         <div className="flex items-center justify-end text-xs font-serif text-gray-400 mt-1">
           <span className="mr-1">
             {isOlderThan24Hours
-              ? messageDate.toLocaleDateString() // Display date if older than 24 hours
+              ? messageDate.toLocaleDateString()
               : new Date(created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
           {isCurrentUser && (
-            <span className="text-xs text-gray-500">
-              {renderStatusIcon()}
-            </span>
+            <span className="text-xs text-gray-500">{renderStatusIcon()}</span>
           )}
         </div>
-        
+
+        {/* Message bubble tail */}
+        <div
+          className={`absolute bottom-0 h-3 w-3 bg-inherit transform rotate-45 ${isCurrentUser ? 'right-[-6px]' : 'left-[-6px]'}`}
+          style={{
+            borderBottomRightRadius: isCurrentUser ? '2px' : '0',
+            borderBottomLeftRadius: isCurrentUser ? '0' : '2px',
+          }}
+        />
       </div>
-     
     </div>
   );
 };
 
 export default MessageItem;
+
 
 
 
